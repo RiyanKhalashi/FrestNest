@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshNest — Transport Provider dashboard (prototype)</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/transporter.css">
+</head>
+<body class="tp">
+<!-- farm graphics (line art, reused with <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <g id="none"></g>
+  <symbol id="i-tomato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7" fill="#f6d9cf"/><path d="M12 7.5V4.5M12 7.5l-3-1.6M12 7.5l3-1.6"/></symbol>
+  <symbol id="i-potato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="12.5" rx="8.2" ry="6" transform="rotate(-18 12 12.5)" fill="#efe4c8"/><path d="M9 11h.01M13.5 10h.01M14.5 14.5h.01M10 15h.01" stroke-width="1.8"/></symbol>
+  <symbol id="i-cauliflower" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5c.6 5 3.8 7.5 7.5 7.5s6.900-2.500 7.500-7.500z" fill="#d9e8cd"/><path d="M6.500 12.500a3 3 0 0 1 2-5.200 3.600 3.600 0 0 1 7 0 3 3 0 0 1 2 5.200z" fill="#fbf8ee"/></symbol>
+  <symbol id="i-chili" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.500c2.200-.6 4 .4 4.300 2.600.5 4 3.500 7 8.200 7.900-6.500 2.500-13.500-1.500-13.500-8.500 0-.8.300-1.500 1-2z" fill="#d6e8c6"/><path d="M8.500 7.200c-.2-2 .8-3.400 2.800-3.700"/></symbol>
+  <symbol id="i-brinjal" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.500 8.500c4 2.200 4.800 7.800 1 10.600s-9.500.8-9.500-4.300c0-3.800 4-5.800 8.500-6.300z" fill="#e6dbee"/><path d="M11.500 9.600l3-1.100 2.200 2.300M15.200 8.300l1.800-3.800"/></symbol>
+  <symbol id="i-scene" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="418" cy="44" r="18" fill="#f1dc9c"/>
+    <path d="M150 104c60-34 130-36 200-12s130 10 210-10v68H150z" fill="#eef4e8"/>
+    <path d="M60 150c70-44 170-52 270-28s160 6 230-8v36z" fill="#dfebd5"/>
+    <g stroke="#9dbb93" stroke-width="1.200">
+      <path d="M150 150c50-26 110-38 180-34M230 150c40-18 90-26 150-22M310 150c36-12 76-17 124-13M392 150c28-8 60-11 96-8M470 150c22-5 46-7 72-5"/>
+    </g>
+    <g stroke="#4a7a50" stroke-width="1.400">
+      <path d="M256 128v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M342 132v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M424 137v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M500 141v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3"/>
+    </g>
+    <path d="M296 92v-20" stroke="#4a7a50" stroke-width="1.400"/><circle cx="296" cy="64" r="12" fill="#c6dcbb"/>
+    <path d="M360 96v-14l11-9 11 9v14z" fill="#fff" stroke="#4a7a50" stroke-width="1.300"/><path d="M369 96v-7h5v7" stroke="#4a7a50" stroke-width="1.300"/>
+    <path d="M196 44c5-5 9-5 13 0m6-10c4-4 7-4 10 0" stroke="#b9bcae" stroke-width="1.200"/>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(528 152) scale(1)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(546 152) scale(.8)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+  </symbol>
+  <symbol id="i-truck" viewBox="0 0 60 34" fill="none" stroke="#24452f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="34" height="20" rx="1.5" fill="#efe4c8"/><path d="M36 10h10l7 7v7H36z" fill="#fff"/><path d="M40 13h5l4 4h-9z" fill="#dfeaf0"/><circle cx="12" cy="26" r="4" fill="#fff"/><circle cx="45" cy="26" r="4" fill="#fff"/><path d="M8 11h14M8 16h20" stroke="#b9a77a"/></symbol>
+  <symbol id="i-van" viewBox="0 0 60 34" fill="none" stroke="#24452f" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h36v18H2z" fill="#e1ebf0"/><path d="M38 11h9l6 6v7H38z" fill="#fff"/><path d="M41 14h5l3.5 3.5H41z" fill="#dfeaf0"/><circle cx="12" cy="26" r="4" fill="#fff"/><circle cx="46" cy="26" r="4" fill="#fff"/><path d="M8 12v6M13 12v6M18 12v6M23 12v6M28 12v6" stroke="#3a6679"/></symbol>
+  <symbol id="i-road" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="440" cy="40" r="17" fill="#f3d9b8"/>
+    <path d="M120 100c70-30 150-30 220-10s140 8 220-12v72H120z" fill="#eef1e6"/>
+    <path d="M60 150c90-40 220-56 330-40s130 10 170 4v36z" fill="#e2e9d6"/>
+    <path d="M150 150c90-24 230-36 410-30" stroke="#5d6b5c" stroke-width="16" stroke-linecap="butt"/>
+    <path d="M160 147c90-22 220-33 400-28" stroke="#f4f1e6" stroke-width="1.6" stroke-dasharray="14 12"/>
+    <g transform="translate(330 98)"><rect x="0" y="0" width="44" height="22" rx="1.5" fill="#efe4c8" stroke="#24452f" stroke-width="1.4"/><path d="M44 7h12l8 8v7H44z" fill="#fff" stroke="#24452f" stroke-width="1.4" stroke-linejoin="round"/><circle cx="12" cy="24" r="4.5" fill="#fff" stroke="#24452f" stroke-width="1.4"/><circle cx="54" cy="24" r="4.5" fill="#fff" stroke="#24452f" stroke-width="1.4"/><path d="M7 8h20M7 14h28" stroke="#b9a77a" stroke-width="1.3"/></g>
+    <path d="M300 112h-26M296 118h-34" stroke="#c9b48a" stroke-width="1.3"/>
+    <g stroke="#4a7a50" stroke-width="1.4"><path d="M236 96v-22"/><circle cx="236" cy="66" r="12" fill="#c6dcbb"/><path d="M486 92v-18"/><circle cx="486" cy="66" r="10" fill="#c6dcbb"/></g>
+    <path d="M196 44c5-5 9-5 13 0m6-10c4-4 7-4 10 0" stroke="#b9bcae" stroke-width="1.2"/>
+    <g stroke="#a5532c" stroke-width="1.3"><path d="M520 120v-34"/><path d="M512 86h16v10h-16z" fill="#fbefe7"/></g>
+  </symbol>
+</svg>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 34 34" fill="none" stroke="#e9efe2" stroke-width="1.500" stroke-linecap="round" stroke-linejoin="round"><path d="M17 24V12"/><path d="M17 15c0-5.500 4-8 9-8 0 6-3.500 9.500-9 8z" fill="#4a7a50"/><path d="M17 19c0-4.500-3.200-6.500-7.500-6.500 0 4.800 3 7.500 7.500 6.500z" fill="#2f5a3d"/><path d="M6 23c3.500 6 18.500 6 22 0" stroke="#d98a5f"/></svg>
+      <div><b>FreshNest</b><span>Transport desk</span></div>
+    </div>
+    <nav class="nav">
+      <a href="#home" data-nav="home">Home <i>T1</i></a>
+      <a href="#deals" data-nav="deals"><span>Find deals <em>2</em></span> <i>T2</i></a>
+      <a href="#trips" data-nav="trips"><span>My trips <em>5</em></span> <i>T3</i></a>
+      <a href="#fleet" data-nav="fleet">My vehicles <i>T4</i></a>
+      <a href="#profile" data-nav="profile">Profile &amp; reviews <i>T5</i></a>
+    </nav>
+    <div class="season">
+      <svg viewBox="0 0 232 96" fill="none" stroke-linecap="round"><circle cx="182" cy="30" r="11" fill="#3b5a44"/><path d="M0 70c40-20 90-20 130-8s70 8 102-4v38H0z" fill="#22402e"/><path d="M0 92c60-14 150-18 232-12" stroke="#5d6b5c" stroke-width="10"/><path d="M6 91c60-13 140-16 220-11" stroke="#a9b39f" stroke-width="1" stroke-dasharray="8 8"/><path d="M30 40h60M50 48h70M20 56h40" stroke="#4d6a55" stroke-width="2"/></svg>
+      <p><b>Winter · Nov–Feb</b>Morning fog on highways. Add extra travel time to early pickups. Normal vehicles are safe and get a cost-saving tag.</p>
+    </div>
+  </aside>
+
+  <div>
+    <!-- ============ TOP BAR ============ -->
+    <header class="top">
+      <div class="roles">
+        <a href="farmer.html">Farmer</a>
+        <a href="dealer.html">Dealer</a>
+        <a class="on" href="transporter.html">Transporter</a>
+        <a href="admin.html">Admin</a>
+      </div>
+      <span class="proto-note">Prototype with sample data · today is Fri 13 Nov 2026, 10:50 AM</span>
+      <div class="sp"></div>
+      <label class="small muted" style="display:flex;gap:6px;align-items:center;cursor:pointer" title="Prototype only"><input type="checkbox" id="pendingToggle"> Preview: not verified yet</label>
+      <button class="bell" id="bell" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c2a21" stroke-width="1.8"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <b>4</b>
+      </button>
+      <div class="who">
+        <div class="avatar" style="background:var(--rust)">R</div>
+        <div>Bogura Logistics<small>Transport provider · Bogura</small></div>
+      </div>
+    </header>
+
+    <div class="drop hidden" id="drop">
+      <h4>Notifications</h4>
+      <ul>
+        <li class="new" data-tab="road">Deliver FN-1036 to Hasan Traders by about 2:00 PM. Ask the dealer for the delivery code.<small>7:12 AM · trip started</small></li>
+        <li class="new" data-deal="t-1050">New deal that fits your covered van: cauliflower 450 kg, Bogura to Rangpur, ventilated vehicle needed.<small>10:20 AM</small></li>
+        <li class="new" data-deal="t-em">Emergency in Sirajganj: a vehicle with 380 kg green chili broke down. Transport opens when the emergency sale ends.<small>9:58 AM</small></li>
+        <li class="new" data-tab="offers">Hasan Traders is choosing transport for FN-1047. Your offer is one of 3.<small>8:40 AM</small></li>
+        <li data-tab="offers">Your offer on FN-1040 was not chosen. The dealer picked another provider.<small>12 Nov</small></li>
+        <li data-nav-go="fleet">Admin verified the registration of covered van Bogura-Ma 11-2245.<small>10 Nov</small></li>
+      </ul>
+    </div>
+
+    <main>
+    <div class="note warn hidden" id="pendingBanner" style="margin-bottom:16px"><b>Your account is waiting for admin verification.</b> You can look at deals, but you cannot send offers or take trips until an admin checks your NID, driving license and vehicle registration papers. <a href="#profile">See verification status</a></div>
+
+    <!-- ============================================================
+         T1 — HOME
+    ============================================================ -->
+    <section data-view="home">
+      <div class="head hero">
+        <svg class="scene" viewBox="0 0 560 150"><use href="#i-road"/></svg>
+        <div><h1>Good morning, Rafiq</h1><p>Friday, 13 November 2026 · Bogura Logistics, Banani, Bogura · 3 vehicles</p><a class="btn rust" href="#deals" style="margin-top:14px">Find deals</a></div>
+        <span class="code">Screen T1</span>
+      </div>
+
+      <div class="stats">
+        <div><span>On the road now</span><b class="num">1</b><small>FN-1036 · arriving about 2:00 PM</small></div>
+        <div><span>Confirmed pickups</span><b class="num">1</b><small>tomorrow 5:30 AM · covered van</small></div>
+        <div><span>Offers waiting</span><b class="num">2</b><small>dealers are choosing</small></div>
+        <div><span>Your rating</span><b class="num">4.6</b><small>52 trips · 1 failure</small></div>
+      </div>
+
+      <div class="grid g-main">
+        <div class="grid">
+          <div class="panel">
+            <h3>Today and tomorrow <a class="small" href="#trips">Open My trips</a></h3>
+            <div class="pb">
+              <div class="waybill urgent">
+                <div class="wb-main">
+                  <div class="wb-top"><span class="wb-id">Trip FN-1036 · on the road</span><span class="tag rust">In transit</span></div>
+                  <div class="route">
+                    <div class="end"><b>Gaibandha</b><span>Selina Begum's farm</span></div>
+                    <div class="line"><i></i><span class="km">74 km</span><svg class="truck" style="left:68%"><use href="#i-truck"/></svg><i></i></div>
+                    <div class="end to"><b>Rajabazar, Bogura</b><span>Hasan Traders</span></div>
+                  </div>
+                  <div class="wb-meta"><span><b>Potato · 1,000 kg</b></span><span>Normal truck <span class="plate">Bogura-Ta 14-0932</span></span><span>Picked up 7:10 AM</span></div>
+                </div>
+                <div class="wb-stub"><div><small>Arrives about</small><div class="wb-time">2:00 PM</div></div><button class="btn sm rust" data-tab="road">Enter delivery code</button></div>
+              </div>
+              <div class="waybill">
+                <div class="wb-main">
+                  <div class="wb-top"><span class="wb-id">Trip FN-1045 · confirmed</span><span class="tag blue">Pickup tomorrow</span></div>
+                  <div class="route dash">
+                    <div class="end"><b>Sherpur, Bogura</b><span>Abdul Kader's farm</span></div>
+                    <div class="line"><i></i><span class="km">118 km</span><i></i></div>
+                    <div class="end to"><b>Rangpur</b><span>Rangpur Mart</span></div>
+                  </div>
+                  <div class="wb-meta"><span><b>Brinjal · 600 kg</b></span><span>Covered van <span class="plate">Bogura-Ma 11-2245</span></span><span>Fog likely: leave 20 min early</span></div>
+                </div>
+                <div class="wb-stub"><div><small>Sat 14 Nov</small><div class="wb-time">5:30 AM</div></div><button class="btn sm ghost" data-tab="confirmed">Open trip</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Needs your attention</h3>
+            <table class="ledger">
+              <tr><td><span class="tag rust">Deliver</span></td><td><b>FN-1036</b>: hand over the potatoes and enter Hasan Traders' delivery code<br><span class="muted small">The trip is completed only after the dealer confirms receipt.</span></td><td class="right"><button class="btn sm ghost" data-tab="road">Open</button></td></tr>
+              <tr><td><span class="tag gold">Waiting</span></td><td><b>FN-1047</b>: Hasan Traders is choosing between 3 offers<br><span class="muted small">You can still edit or withdraw. Window closes in <span class="num" data-cd="16200"></span>.</span></td><td class="right"><button class="btn sm ghost" data-tab="offers">Open</button></td></tr>
+              <tr><td><span class="tag green">New</span></td><td><b>Cauliflower, 450 kg</b>: Bogura to Rangpur, needs a ventilated vehicle<br><span class="muted small">Fits your covered van. Offer window closes in <span class="num" data-cd="30600"></span>.</span></td><td class="right"><button class="btn sm ghost" data-deal="t-1050">Send offer</button></td></tr>
+              <tr><td><span class="tag red">Emergency</span></td><td><b>Green chili, 380 kg in Sirajganj</b>: the vehicle cannot move<br><span class="muted small">A new transport stage opens after the emergency sale picks a dealer.</span></td><td class="right"><button class="btn sm ghost" data-deal="t-em">See</button></td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <h3>Season tip</h3>
+            <div class="pb">
+              <div class="note good"><b>Winter: normal vehicles are fine.</b><br>Your offers with a normal truck get a cost-saving tag that dealers can see. Plan extra time for fog before 9 AM.</div>
+              <p class="small muted" style="margin-top:10px">In summer and monsoon you get a weather warning when you offer a normal vehicle. It is advice only.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Your vehicles <a class="small" href="#fleet">Manage</a></h3>
+            <table class="ledger">
+              <tr><td><svg class="ic" style="width:34px;height:20px"><use href="#i-truck"/></svg></td><td><b>Truck 3 t</b> <span class="fac normal">Normal</span><br><span class="plate">Bogura-Ta 14-0932</span></td><td class="right"><span class="tag rust">On trip</span></td></tr>
+              <tr><td><svg class="ic" style="width:34px;height:20px"><use href="#i-truck"/></svg></td><td><b>Truck 3 t</b> <span class="fac normal">Normal</span><br><span class="plate">Bogura-Ta 14-1177</span></td><td class="right"><span class="tag green">Free</span></td></tr>
+              <tr><td><svg class="ic" style="width:34px;height:20px"><use href="#i-van"/></svg></td><td><b>Covered van 2 t</b> <span class="fac vent">Ventilated</span><br><span class="plate">Bogura-Ma 11-2245</span></td><td class="right"><span class="tag blue">Booked 14 Nov</span></td></tr>
+            </table>
+          </div>
+          <div class="panel">
+            <h3>November so far</h3>
+            <div class="pb">
+              <dl class="kv" style="grid-template-columns:1fr auto">
+                <dt>Trips completed</dt><dd class="num">6</dd>
+                <dt>Offers sent / chosen</dt><dd class="num">14 / 7</dd>
+                <dt>Kilometres driven</dt><dd class="num">1,240 km</dd>
+                <dt>Failures</dt><dd class="num">0</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         T2 — FIND DEALS
+    ============================================================ -->
+    <section data-view="deals" class="hidden">
+      <div class="head">
+        <div><h1>Find deals</h1><p>Primary deals that one of your vehicles can carry. Pick the pickup districts you want to work in.</p></div>
+        <span class="code">Screen T2</span>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="pb" style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:12px;align-items:end">
+          <div class="field" style="margin:0"><label>Pickup districts (farmer's district)</label>
+            <div class="checks" id="fDist" style="margin-top:4px">
+              <label><input type="checkbox" value="Bogura" checked> Bogura</label>
+              <label><input type="checkbox" value="Gaibandha" checked> Gaibandha</label>
+              <label><input type="checkbox" value="Joypurhat" checked> Joypurhat</label>
+              <label><input type="checkbox" value="Sirajganj" checked> Sirajganj</label>
+              <label><input type="checkbox" value="Rangpur"> Rangpur</label>
+            </div>
+          </div>
+          <div class="field" style="margin:0"><label>Pickup upazila</label><select id="fUpa"><option value="">All upazilas</option></select></div>
+          <div class="field" style="margin:0"><label>Vehicle needed</label><select id="fNeed"><option value="">Any I can carry</option><option value="normal">Normal</option><option value="vent">Ventilated</option></select></div>
+          <div class="field" style="margin:0"><label>Status</label><select id="fState"><option value="">All</option><option value="new">Not offered yet</option><option value="mine">My offer sent</option><option value="em">Emergency</option></select></div>
+          <label class="small muted" style="display:flex;gap:6px;align-items:center;cursor:pointer;padding-bottom:8px" title="Prototype only"><input type="checkbox" id="summerToggle"> Preview: May (summer)</label>
+        </div>
+        <div class="pb" style="padding-top:0"><p class="small muted">Matching uses facility and capacity: a deal appears only if one of your vehicles has the facility the product needs and can carry the full quantity. <b>2 deals are hidden</b> because they need a refrigerated vehicle.</p></div>
+      </div>
+
+      <div class="md">
+        <div class="panel list" id="dlList">
+          <h5><span id="dlCount">6</span> deals</h5>
+          <button class="item" data-m="t-1058" data-upa="Bogura Sadar" data-dist="Bogura" data-need="normal" data-state="new"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Lal shak · 120 kg</span> <span class="tag plain">Small · local</span></b><span>Bogura Sadar → Shajahanpur · pickup van fits</span></button>
+          <button class="item" data-m="t-1050" data-upa="Sherpur" data-dist="Bogura" data-need="vent" data-state="new"><b><span class="nm"><svg class="ic"><use href="#i-cauliflower"/></svg>Cauliflower · 450 kg</span> <span class="tag green">New</span></b><span>Bogura → Rangpur · ventilated</span></button>
+          <button class="item" data-m="t-1053" data-upa="Panchbibi" data-dist="Joypurhat" data-need="normal" data-state="new"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 900 kg</span> <span class="tag green">New</span></b><span>Joypurhat → Rangpur · normal</span></button>
+          <button class="item" data-m="t-1042" data-upa="Bogura Sadar" data-dist="Bogura" data-need="normal" data-state="mine"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 1,200 kg</span> <span class="tag gold">Your offer</span></b><span>Bogura → Dhaka · Karim Uddin</span></button>
+          <button class="item" data-m="t-1047" data-upa="Gobindaganj" data-dist="Gaibandha" data-need="normal" data-state="mine"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 600 kg</span> <span class="tag gold">Your offer</span></b><span>Gaibandha → Bogura · Hasan Traders</span></button>
+          <button class="item" data-m="t-em" data-upa="Shahjadpur" data-dist="Sirajganj" data-need="normal" data-state="em"><b><span class="nm"><svg class="ic"><use href="#i-chili"/></svg>Green chili · 380 kg</span> <span class="tag red">Emergency</span></b><span>Stuck vehicle, Sirajganj · opens later</span></button>
+          <p class="small muted hidden" id="dlEmpty" style="padding:12px">No deals match these filters. Try more pickup districts.</p>
+        </div>
+
+        <div class="panel">
+          <!-- FN-1050 cauliflower: new, ventilated -->
+          <div data-mdetail="t-1050">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-cauliflower"/></svg><div><h2>Cauliflower · 450 kg</h2><p class="muted">Deal FN-1050 · Abdul Kader (Bogura) sold to Rangpur Mart (Rangpur) · 2 offers so far</p></div></div>
+              <div class="right"><span class="tag green">Open for offers</span><div class="small muted" style="margin-top:6px">Window closes in <span class="num" data-cd="30600"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="route">
+                <div class="end"><b>Sherpur, Bogura</b><span>Abdul Kader's farm</span></div>
+                <div class="line"><i></i><span class="km">about 118 km</span><i></i></div>
+                <div class="end to"><b>Station Road, Rangpur</b><span>Rangpur Mart</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Vehicle needed</dt><dd><span class="fac vent">Ventilated</span> · cauliflower travels more than a day's shelf life away</dd>
+                <dt>Shelf life left</dt><dd>4 days (harvested 12 Nov)</dd>
+                <dt>Ready from</dt><dd>14 Nov, 12:00 PM</dd>
+                <dt>Your vehicles that fit</dt><dd>Covered van 2 t only (trucks are normal)</dd>
+              </dl>
+            </div>
+            <div class="sec" data-form="FN-1050" data-need="vent" data-qty="450" data-def="2026-11-14T13:00"></div>
+          </div>
+
+          <!-- FN-1053 potato: new, normal -->
+          <div data-mdetail="t-1058" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Lal shak · 120 kg</h2><p class="muted">Deal FN-1058 · Karim Uddin (Bogura Sadar) sold to Shajahanpur Bazar Store (Shajahanpur) · no offers yet</p></div></div>
+              <div class="right"><span class="tag plain">Small pickup · local only</span><div class="small muted" style="margin-top:6px">Window closes in <span class="num" data-cd="9000"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="route">
+                <div class="end"><b>Shakharia, Bogura Sadar</b><span>Karim Uddin's farm</span></div>
+                <div class="line"><i></i><span class="km">about 14 km</span><i></i></div>
+                <div class="end to"><b>Shajahanpur Bazar</b><span>Shajahanpur Bazar Store</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="note" style="margin-bottom:12px"><b>Why you see this:</b> small pickups (under 300 kg) are shown only to transporters based in the farmer's upazila or a neighbouring one. You are based in Bogura Sadar. This keeps short trips with local vans and keeps the price fair for the farmer.</div>
+              <dl class="kv">
+                <dt>Vehicle needed</dt><dd><span class="fac normal">Normal</span> · leafy, shelf life 2 days, short trip</dd>
+                <dt>Shelf life left</dt><dd>2 days</dd>
+                <dt>Ready from</dt><dd>13 Nov, 3:00 PM</dd>
+                <dt>Your vehicles that fit</dt><dd>All three (120 kg fits every vehicle)</dd>
+              </dl>
+            </div>
+            <div class="sec" data-form="FN-1058" data-need="normal" data-qty="120" data-def="2026-11-13T15:30"></div>
+          </div>
+
+          <div data-mdetail="t-1053" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 900 kg</h2><p class="muted">Deal FN-1053 · Nasima Khatun (Joypurhat) sold to Rangpur Mart (Rangpur) · no offers yet</p></div></div>
+              <div class="right"><span class="tag green">Open for offers</span><div class="small muted" style="margin-top:6px">Window closes in <span class="num" data-cd="38400"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="route">
+                <div class="end"><b>Panchbibi, Joypurhat</b><span>Nasima Khatun's farm</span></div>
+                <div class="line"><i></i><span class="km">about 140 km</span><i></i></div>
+                <div class="end to"><b>Station Road, Rangpur</b><span>Rangpur Mart</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Vehicle needed</dt><dd><span class="fac normal">Normal</span> · potato keeps for weeks</dd>
+                <dt>Shelf life left</dt><dd>40+ days</dd>
+                <dt>Ready from</dt><dd>14 Nov, 8:00 AM</dd>
+                <dt>Your vehicles that fit</dt><dd>All three (900 kg fits every vehicle)</dd>
+              </dl>
+            </div>
+            <div class="sec" data-form="FN-1053" data-need="normal" data-qty="900" data-def="2026-11-14T09:00"></div>
+          </div>
+
+          <!-- FN-1042 Karim potato: my offer -->
+          <div data-mdetail="t-1042" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 1,200 kg</h2><p class="muted">Deal FN-1042 · Karim Uddin (Bogura) sold to Kawran Bazar Agro (Dhaka) at ৳22/kg</p></div></div>
+              <div class="right"><span class="tag gold">Your offer sent</span></div>
+            </div>
+            <div class="sec">
+              <div class="route">
+                <div class="end"><b>Shakharia, Bogura</b><span>Karim Uddin's farm</span></div>
+                <div class="line"><i></i><span class="km">about 230 km</span><i></i></div>
+                <div class="end to"><b>Kawran Bazar, Dhaka</b><span>Kawran Bazar Agro</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your offer</dt><dd>Normal truck 3 t <span class="plate">Bogura-Ta 14-0932</span> · <b class="num">৳9,500</b> <span class="tag green">Cost-saving</span></dd>
+                <dt>Pickup → delivery</dt><dd>14 Nov, 7:00 AM → 14 Nov, 2:00 PM</dd>
+                <dt>Who decides</dt><dd>Kawran Bazar Agro (the dealer pays). Karim Uddin can see your offer too.</dd>
+              </dl>
+              <button class="btn sm ghost" data-tab="offers" style="margin-top:12px">Edit or withdraw in My trips</button>
+            </div>
+          </div>
+
+          <!-- FN-1047 Selina tomato: my offer -->
+          <div data-mdetail="t-1047" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 600 kg</h2><p class="muted">Deal FN-1047 · Selina Begum (Gaibandha) sold to Hasan Traders (Bogura) at ৳27/kg · 3 offers</p></div></div>
+              <div class="right"><span class="tag gold">Your offer sent</span></div>
+            </div>
+            <div class="sec">
+              <div class="route">
+                <div class="end"><b>Gaibandha Sadar</b><span>Selina Begum's farm</span></div>
+                <div class="line"><i></i><span class="km">about 74 km</span><i></i></div>
+                <div class="end to"><b>Rajabazar, Bogura</b><span>Hasan Traders</span></div>
+              </div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your offer</dt><dd>Normal truck 3 t <span class="plate">Bogura-Ta 14-1177</span> · <b class="num">৳5,000</b> <span class="tag green">Cost-saving</span></dd>
+                <dt>Pickup → delivery</dt><dd>14 Nov, 8:00 AM → 14 Nov, 11:00 AM</dd>
+                <dt>Other offers</dt><dd>Mintu Pickup ৳4,200 · Cold Line BD ৳7,800 (prices are visible to the dealer only; shown here as a prototype hint)</dd>
+              </dl>
+              <button class="btn sm ghost" data-tab="offers" style="margin-top:12px">Edit or withdraw in My trips</button>
+            </div>
+          </div>
+
+          <!-- Emergency chili -->
+          <div data-mdetail="t-em" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-chili"/></svg><div><h2>Green chili · 380 kg</h2><p class="muted">Emergency · original deal FN-1031, Karim Uddin to Kawran Bazar Agro</p></div></div>
+              <div class="right"><span class="tag red">Emergency sale running</span></div>
+            </div>
+            <div class="sec">
+              <div class="note bad"><b>The vehicle broke down in Sirajganj and cannot move.</b> An admin approved the driver's report. The farmer is selling the chili to dealers in Sirajganj. When the highest bidder wins, a new transport stage opens here for local transporters.</div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Pickup point</dt><dd>The stuck vehicle · Dhaka–Bogura highway, Sirajganj</dd>
+                <dt>Deliver to</dt><dd>The winning dealer in Sirajganj (known when the sale ends)</dd>
+                <dt>Vehicle needed</dt><dd><span class="fac normal">Normal</span> is fine for this short trip</dd>
+                <dt>Shelf life left</dt><dd>2 days · urgent</dd>
+              </dl>
+              <div class="btns" style="margin-top:12px"><button class="btn sm" disabled>Send offer (opens after the sale)</button><button class="btn sm ghost" id="emNotify">Notify me when it opens</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         T3 — MY TRIPS
+    ============================================================ -->
+    <section data-view="trips" class="hidden">
+      <div class="head">
+        <div><h1>My trips</h1><p>Offers you sent, trips the dealer confirmed, trips on the road and finished trips.</p></div>
+        <span class="code">Screen T3</span>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button data-t="offers">Offers <em>3</em></button>
+        <button data-t="confirmed">Confirmed <em>1</em></button>
+        <button data-t="road">On the road <em>1</em></button>
+        <button data-t="done">Completed <em>3</em></button>
+      </div>
+
+      <!-- Offers -->
+      <div data-tpanel="offers">
+        <div class="waybill" id="wb1047">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Offer · deal FN-1047</span><span class="tag gold">Dealer is choosing</span></div>
+            <div class="route dash">
+              <div class="end"><b>Gaibandha Sadar</b><span>Selina Begum</span></div>
+              <div class="line"><i></i><span class="km">74 km</span><i></i></div>
+              <div class="end to"><b>Rajabazar, Bogura</b><span>Hasan Traders</span></div>
+            </div>
+            <div class="wb-meta"><span><b>Tomato · 600 kg</b></span><span>Truck <span class="plate">Bogura-Ta 14-1177</span></span><span>14 Nov, 8:00 AM → 11:00 AM</span><span class="tag green">Cost-saving</span></div>
+          </div>
+          <div class="wb-stub"><div><small>Your price</small><div class="wb-time" data-price>৳5,000</div><small>Closes in <span class="num" data-cd="16200"></span></small></div><div class="btns"><button class="btn sm ghost" data-edit="FN-1047">Edit</button><button class="btn sm warn" data-withdraw="FN-1047">Withdraw</button></div></div>
+        </div>
+        <div class="waybill" id="wb1042">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Offer · deal FN-1042</span><span class="tag gold">Dealer is choosing</span></div>
+            <div class="route dash">
+              <div class="end"><b>Shakharia, Bogura</b><span>Karim Uddin</span></div>
+              <div class="line"><i></i><span class="km">230 km</span><i></i></div>
+              <div class="end to"><b>Kawran Bazar, Dhaka</b><span>Kawran Bazar Agro</span></div>
+            </div>
+            <div class="wb-meta"><span><b>Potato · 1,200 kg</b></span><span>Truck <span class="plate">Bogura-Ta 14-0932</span></span><span>14 Nov, 7:00 AM → 2:00 PM</span><span class="tag green">Cost-saving</span></div>
+          </div>
+          <div class="wb-stub"><div><small>Your price</small><div class="wb-time" data-price>৳9,500</div><small>Closes in <span class="num" data-cd="24300"></span></small></div><div class="btns"><button class="btn sm ghost" data-edit="FN-1042">Edit</button><button class="btn sm warn" data-withdraw="FN-1042">Withdraw</button></div></div>
+        </div>
+        <div class="waybill" style="opacity:.6">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Offer · deal FN-1040</span><span class="tag plain">Not chosen</span></div>
+            <div class="wb-meta" style="margin-top:8px"><span><b>Cauliflower · 500 kg</b></span><span>Gaibandha → Dhaka</span><span>The dealer chose a refrigerated van from another provider. Your covered van is free again.</span></div>
+          </div>
+          <div class="wb-stub"><div><small>Your price</small><div class="wb-time">৳11,000</div><small>12 Nov</small></div></div>
+        </div>
+      </div>
+
+      <!-- Confirmed -->
+      <div data-tpanel="confirmed" class="hidden">
+        <div class="panel">
+          <div class="dhead">
+            <div class="ttl"><svg class="ic lg"><use href="#i-brinjal"/></svg><div><h2>Brinjal · 600 kg</h2><p class="muted">Trip FN-1045 · Abdul Kader (Sherpur, Bogura) to Rangpur Mart (Rangpur) · ৳6,800 paid by the dealer</p></div></div>
+            <div class="right"><span class="tag blue" id="c45State">Pickup tomorrow, 5:30 AM</span></div>
+          </div>
+          <div class="sec"><div class="track" id="c45Track"><div class="done">Offer sent</div><div class="now">Transport confirmed</div><div>Picked up</div><div>In transit</div><div>Delivered</div><div>Completed</div></div></div>
+          <div class="sec">
+            <div class="grid g2">
+              <div>
+                <h4 style="font:600 15px var(--display);margin-bottom:10px">At pickup: enter the farmer's code</h4>
+                <p class="small muted" style="margin-bottom:10px">Load and weigh the produce first. Abdul Kader gives you a 4-digit code. It proves you collected the produce.</p>
+                <div style="display:flex;gap:10px;align-items:center"><input type="text" class="codein" maxlength="4" id="c45Code" placeholder="____"><button class="btn rust" data-pickup="FN-1045">Confirm pickup</button></div>
+                <p class="small muted" style="margin-top:6px">Prototype: any 4 digits work.</p>
+              </div>
+              <div>
+                <h4 style="font:600 15px var(--display);margin-bottom:10px">Trip details</h4>
+                <dl class="kv" style="grid-template-columns:110px 1fr">
+                  <dt>Vehicle</dt><dd>Covered van 2 t <span class="fac vent">Ventilated</span> <span class="plate">Bogura-Ma 11-2245</span></dd>
+                  <dt>Pickup</dt><dd>14 Nov, 5:30 AM · Sherpur, Bogura · farmer 01712-xxx-218</dd>
+                  <dt>Delivery</dt><dd>14 Nov, about 9:30 AM · Station Road, Rangpur</dd>
+                  <dt>Season</dt><dd>Winter fog on the Rangpur highway. Leave 20 minutes early.</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="sec"><div class="btns"><button class="btn warn sm" id="c45Cancel">Cancel this trip</button><button class="btn ghost sm" data-report="Abdul Kader" data-role="farmer" data-deal="FN-1045 · Brinjal 600 kg">Report the farmer</button><button class="btn ghost sm" data-report="Rangpur Mart" data-role="dealer" data-deal="FN-1045 · Brinjal 600 kg">Report the dealer</button><span class="small muted" style="align-self:center">If you cancel, the deal opens for transport offers again.</span></div></div>
+        </div>
+      </div>
+
+      <!-- On the road -->
+      <div data-tpanel="road" class="hidden">
+        <div class="panel">
+          <div class="dhead">
+            <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 1,000 kg</h2><p class="muted">Trip FN-1036 · Selina Begum (Gaibandha) to Hasan Traders (Rajabazar, Bogura) · ৳6,500 paid by the dealer</p></div></div>
+            <div class="right"><span class="tag rust" id="r36State">In transit</span><div class="small muted" style="margin-top:6px">Arriving about 2:00 PM</div></div>
+          </div>
+          <div class="sec"><div class="track" id="r36Track"><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="now">In transit</div><div>Delivered</div><div>Completed</div></div></div>
+          <div class="sec">
+            <div class="route">
+              <div class="end"><b>Gaibandha Sadar</b><span>Picked up 7:10 AM · farmer's code checked</span></div>
+              <div class="line"><i></i><span class="km">74 km</span><svg class="truck" id="r36Truck" style="left:68%"><use href="#i-truck"/></svg><i></i></div>
+              <div class="end to"><b>Rajabazar, Bogura</b><span>Hasan Traders</span></div>
+            </div>
+          </div>
+          <div class="sec" id="r36Deliver">
+            <h4 style="font:600 15px var(--display);margin-bottom:10px">At delivery: enter the dealer's code</h4>
+            <p class="small muted" style="margin-bottom:10px">Hasan Traders checks and weighs the potatoes, then gives you a 4-digit code.</p>
+            <div style="display:flex;gap:10px;align-items:center"><input type="text" class="codein" maxlength="4" id="r36Code" placeholder="____"><button class="btn rust" data-deliver="FN-1036">Confirm delivery</button><span class="small muted">Prototype: the dealer's code is 7390 (shown on the Dealer page).</span></div>
+          </div>
+          <div class="sec" id="r36Fail">
+            <div class="note warn" style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div><b>Problem on the road?</b> If the vehicle breaks down or the road is blocked, send a delivery failure report from where you are. An admin checks it, then the farmer can sell the produce to dealers nearby.</div><button class="btn sm warn" id="failBtn" style="white-space:nowrap">Report delivery failure</button></div>
+          </div>
+          <div class="sec"><div class="btns"><button class="btn ghost sm" data-report="Selina Begum" data-role="farmer" data-deal="FN-1036 · Potato 1,000 kg">Report the farmer</button><button class="btn ghost sm" data-report="Hasan Traders" data-role="dealer" data-deal="FN-1036 · Potato 1,000 kg">Report the dealer</button><span class="small muted" style="align-self:center">The produce is picked up, so this trip cannot be cancelled.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Completed -->
+      <div data-tpanel="done" class="hidden">
+        <div class="waybill">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Trip FN-1024 · completed 9 Nov</span><span class="stars">★★★★★</span></div>
+            <div class="wb-meta" style="margin-top:8px"><span><b>Potato · 800 kg</b></span><span>Gaibandha → Rajabazar, Bogura</span><span>Selina Begum to Hasan Traders</span></div>
+            <p class="small" style="margin-top:8px">"Came on time and handled the sacks carefully." <span class="muted">· Selina Begum</span></p>
+          </div>
+          <div class="wb-stub"><div><small>Paid by dealer</small><div class="wb-time">৳5,200</div></div></div>
+        </div>
+        <div class="waybill">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Trip FN-1012 · completed 2 Nov</span><span class="stars">★★★★<span style="color:#c9c0aa">★</span></span></div>
+            <div class="wb-meta" style="margin-top:8px"><span><b>Cauliflower · 700 kg</b></span><span>Bogura → Rangpur</span><span>Karim Uddin to Rangpur Mart</span></div>
+            <p class="small" style="margin-top:8px">"Good driver. Was 30 minutes late because of fog." <span class="muted">· Karim Uddin</span></p>
+          </div>
+          <div class="wb-stub"><div><small>Paid by dealer</small><div class="wb-time">৳7,100</div></div></div>
+        </div>
+        <div class="waybill" style="border-color:#e8c9bb">
+          <div class="wb-main">
+            <div class="wb-top"><span class="wb-id">Trip FN-0991 · 28 Oct</span><span class="tag red">Failed · admin approved</span></div>
+            <div class="wb-meta" style="margin-top:8px"><span><b>Tomato · 900 kg</b></span><span>Breakdown at Gobindaganj, Gaibandha</span><span>Sold in an emergency sale to a Gaibandha dealer; the same truck delivered it.</span></div>
+            <p class="small muted" style="margin-top:8px">Failures count on your rating ("1 failure in 52 trips").</p>
+          </div>
+          <div class="wb-stub"><div><small>Result</small><div class="wb-time" style="font-size:16px">Emergency sale</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         T4 — MY VEHICLES
+    ============================================================ -->
+    <section data-view="fleet" class="hidden">
+      <div class="head">
+        <div><h1>My vehicles</h1><p>Each vehicle has its own type, capacity, facility and districts. Deals are matched to each vehicle.</p></div>
+        <span class="code">Screen T4</span>
+      </div>
+      <div class="fleet">
+        <div class="vcard">
+          <div class="vpic"><svg viewBox="0 0 60 34"><use href="#i-truck"/></svg></div>
+          <div class="vb">
+            <h4>Truck · 3 ton</h4>
+            <p><span class="plate">Bogura-Ta 14-0932</span> <span class="fac normal">Normal</span> <span class="tag green">Papers verified</span></p>
+            <p class="small muted" style="margin-top:8px">Works in: Bogura, Gaibandha, Joypurhat, Dhaka</p>
+            <dl class="sched"><dt>Today</dt><dd><b>On trip FN-1036</b> until about 2:00 PM</dd><dt>14 Nov</dt><dd>Offered for FN-1042 (7 AM–2 PM), not booked yet</dd></dl>
+            <div class="btns" style="margin-top:12px"><button class="btn sm ghost" data-veh="Bogura-Ta 14-0932">Edit</button></div>
+          </div>
+        </div>
+        <div class="vcard">
+          <div class="vpic"><svg viewBox="0 0 60 34"><use href="#i-truck"/></svg></div>
+          <div class="vb">
+            <h4>Truck · 3 ton</h4>
+            <p><span class="plate">Bogura-Ta 14-1177</span> <span class="fac normal">Normal</span> <span class="tag green">Papers verified</span></p>
+            <p class="small muted" style="margin-top:8px">Works in: Bogura, Gaibandha, Rangpur</p>
+            <dl class="sched"><dt>Today</dt><dd>Free</dd><dt>14 Nov</dt><dd>Offered for FN-1047 (8–11 AM), not booked yet</dd></dl>
+            <div class="btns" style="margin-top:12px"><button class="btn sm ghost" data-veh="Bogura-Ta 14-1177">Edit</button></div>
+          </div>
+        </div>
+        <div class="vcard">
+          <div class="vpic" style="background:#eaf0f1"><svg viewBox="0 0 60 34"><use href="#i-van"/></svg></div>
+          <div class="vb">
+            <h4>Covered van · 2 ton</h4>
+            <p><span class="plate">Bogura-Ma 11-2245</span> <span class="fac vent">Ventilated</span> <span class="tag green">Papers verified</span></p>
+            <p class="small muted" style="margin-top:8px">Works in: Bogura, Rangpur, Sirajganj, Dhaka</p>
+            <dl class="sched"><dt>Today</dt><dd>Free</dd><dt>14 Nov</dt><dd><b>Booked FN-1045</b> 5:30–11:00 AM. Cannot be offered for this time.</dd></dl>
+            <div class="btns" style="margin-top:12px"><button class="btn sm ghost" data-veh="Bogura-Ma 11-2245">Edit</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="vcard add" id="addVeh" style="margin-top:14px;min-height:80px"><b>+ Add a vehicle</b>&nbsp;<span class="small">(an admin checks its registration papers first)</span></div>
+    </section>
+
+    <!-- ============================================================
+         T5 — PROFILE & REVIEWS
+    ============================================================ -->
+    <section data-view="profile" class="hidden">
+      <div class="head">
+        <div><h1>Profile &amp; reviews</h1><p>Your business details, verification and what farmers say about your trips.</p></div>
+        <span class="code">Screen T5</span>
+      </div>
+      <div class="grid g-main">
+        <div class="grid">
+          <div class="panel">
+            <h3>Verification</h3>
+            <div class="pb">
+              <div id="verOk"><div class="note good"><b>Verified transport provider</b> since 3 Sep 2026. Farmers and dealers see a verified badge on your offers.</div></div>
+              <div id="verPending" class="hidden"><div class="note warn"><b>Waiting for admin check.</b> Usually within 1 working day. You can look at deals, but not send offers.</div></div>
+              <table class="ledger" style="margin-top:12px">
+                <tr><th>Document</th><th>For</th><th>Status</th><th></th></tr>
+                <tr><td>National ID (NID)</td><td>Rafiq Islam (owner)</td><td><span class="tag green">Checked</span></td><td></td></tr>
+                <tr><td>Driving license</td><td>Rafiq Islam</td><td><span class="tag green">Checked</span></td><td></td></tr>
+                <tr><td>Vehicle registration</td><td><span class="plate">Bogura-Ta 14-0932</span></td><td><span class="tag green">Checked</span></td><td></td></tr>
+                <tr><td>Vehicle registration</td><td><span class="plate">Bogura-Ta 14-1177</span></td><td><span class="tag green">Checked</span></td><td></td></tr>
+                <tr><td>Vehicle registration</td><td><span class="plate">Bogura-Ma 11-2245</span></td><td><span class="tag green">Checked 10 Nov</span></td><td class="right"><button class="btn sm ghost" id="reupload">Re-upload</button></td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Business details</h3>
+            <div class="pb">
+              <div class="row"><div class="field"><label>Business name</label><input type="text" value="Bogura Logistics"></div><div class="field"><label>Owner</label><input type="text" value="Rafiq Islam"></div></div>
+              <div class="row"><div class="field"><label>Phone (login)</label><input type="tel" value="01711-xxx-645"></div><div class="field"><label>District</label><select><option>Bogura</option></select></div></div>
+              <div class="field"><label>Address</label><input type="text" value="Banani bus stand, Bogura Sadar"></div>
+              <button class="btn" id="saveProfile">Save</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Password</h3>
+            <div class="pb"><div class="row"><div class="field"><label>Current password</label><input type="password"></div><div class="field"><label>New password</label><input type="password"></div></div><button class="btn ghost" id="savePass">Change password</button></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="panel">
+            <h3>Your record</h3>
+            <div class="pb">
+              <div style="display:flex;align-items:baseline;gap:10px"><b style="font:600 36px var(--display);color:var(--forest)">4.6</b><span class="stars">★★★★★</span><span class="muted small">52 reviews</span></div>
+              <dl class="kv" style="grid-template-columns:1fr auto;margin-top:10px">
+                <dt>Trips completed</dt><dd class="num">52</dd>
+                <dt>Delivery failures</dt><dd class="num">1 <span class="muted small">(admin approved)</span></dd>
+                <dt>Trips you cancelled</dt><dd class="num">0 in 30 days</dd>
+              </dl>
+              <p class="small muted" style="margin-top:8px">Dealers see this record next to every offer you send.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Reviews from farmers</h3>
+            <table class="ledger">
+              <tr><td><span class="stars">★★★★★</span> <b>Selina Begum</b> <span class="muted small">· Potato, 800 kg · 9 Nov</span><br>Came on time and handled the sacks carefully.</td></tr>
+              <tr><td><span class="stars">★★★★<span style="color:#c9c0aa">★</span></span> <b>Karim Uddin</b> <span class="muted small">· Cauliflower, 700 kg · 2 Nov</span><br>Good driver. Was 30 minutes late because of fog.</td></tr>
+              <tr><td><span class="stars">★★★★★</span> <b>Abdul Kader</b> <span class="muted small">· Brinjal, 500 kg · 25 Oct</span><br>Clean van, product arrived fresh.</td></tr>
+              <tr><td><span class="stars">★★<span style="color:#c9c0aa">★★★</span></span> <b>Jalal Mia</b> <span class="muted small">· Potato, 1,000 kg · 12 Oct</span><br>Driver asked for extra money at the farm. <a href="#" data-report="this review" data-role="review">Report this review</a></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- modal + toast -->
+<div class="veil hidden" id="veil"><div class="modal"><h3 id="mTitle"></h3><div class="pb" id="mBody"></div><div class="foot" id="mFoot"></div></div></div>
+<div class="toast hidden" id="toast"></div>
+
+<script src="js/transporter.js"></script>
+</body>
+</html>

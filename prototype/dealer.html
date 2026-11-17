@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshNest — Dealer dashboard (prototype)</title>
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<!-- farm graphics (line art, reused with <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <g id="none"></g>
+  <symbol id="i-tomato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7" fill="#f6d9cf"/><path d="M12 7.5V4.5M12 7.5l-3-1.6M12 7.5l3-1.6"/></symbol>
+  <symbol id="i-potato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="12.5" rx="8.2" ry="6" transform="rotate(-18 12 12.5)" fill="#efe4c8"/><path d="M9 11h.01M13.5 10h.01M14.5 14.5h.01M10 15h.01" stroke-width="1.8"/></symbol>
+  <symbol id="i-cauliflower" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5c.6 5 3.8 7.5 7.5 7.5s6.900-2.500 7.500-7.500z" fill="#d9e8cd"/><path d="M6.500 12.500a3 3 0 0 1 2-5.200 3.600 3.600 0 0 1 7 0 3 3 0 0 1 2 5.200z" fill="#fbf8ee"/></symbol>
+  <symbol id="i-chili" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.500c2.200-.6 4 .4 4.300 2.600.5 4 3.500 7 8.200 7.900-6.500 2.500-13.500-1.500-13.500-8.500 0-.8.300-1.500 1-2z" fill="#d6e8c6"/><path d="M8.500 7.200c-.2-2 .8-3.400 2.800-3.700"/></symbol>
+  <symbol id="i-brinjal" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.500 8.500c4 2.200 4.800 7.800 1 10.600s-9.500.8-9.500-4.300c0-3.800 4-5.800 8.500-6.300z" fill="#e6dbee"/><path d="M11.500 9.600l3-1.100 2.200 2.300M15.200 8.300l1.800-3.800"/></symbol>
+  <symbol id="i-scene" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="418" cy="44" r="18" fill="#f1dc9c"/>
+    <path d="M150 104c60-34 130-36 200-12s130 10 210-10v68H150z" fill="#eef4e8"/>
+    <path d="M60 150c70-44 170-52 270-28s160 6 230-8v36z" fill="#dfebd5"/>
+    <g stroke="#9dbb93" stroke-width="1.200">
+      <path d="M150 150c50-26 110-38 180-34M230 150c40-18 90-26 150-22M310 150c36-12 76-17 124-13M392 150c28-8 60-11 96-8M470 150c22-5 46-7 72-5"/>
+    </g>
+    <g stroke="#4a7a50" stroke-width="1.400">
+      <path d="M256 128v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M342 132v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M424 137v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M500 141v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3"/>
+    </g>
+    <path d="M296 92v-20" stroke="#4a7a50" stroke-width="1.400"/><circle cx="296" cy="64" r="12" fill="#c6dcbb"/>
+    <path d="M360 96v-14l11-9 11 9v14z" fill="#fff" stroke="#4a7a50" stroke-width="1.300"/><path d="M369 96v-7h5v7" stroke="#4a7a50" stroke-width="1.300"/>
+    <path d="M196 44c5-5 9-5 13 0m6-10c4-4 7-4 10 0" stroke="#b9bcae" stroke-width="1.200"/>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(528 152) scale(1)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(546 152) scale(.8)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+  </symbol>
+</svg>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 34 34" fill="none" stroke="#24452f" stroke-width="1.500" stroke-linecap="round" stroke-linejoin="round"><path d="M17 24V12"/><path d="M17 15c0-5.500 4-8 9-8 0 6-3.500 9.500-9 8z" fill="#cfe2c3"/><path d="M17 19c0-4.500-3.200-6.500-7.500-6.500 0 4.800 3 7.500 7.500 6.500z" fill="#edf3e6"/><path d="M6 23c3.500 6 18.500 6 22 0" stroke="#b98412"/></svg>
+      <div><b>FreshNest</b><span>Farm-gate market</span></div>
+    </div>
+    <nav class="nav">
+      <a href="#home" data-nav="home">Home <i>D1</i></a>
+      <a href="#market" data-nav="market"><span>Marketplace <em class="em-badge">1</em></span> <i>D2</i></a>
+      <a href="#buys" data-nav="buys"><span>My Purchases <em>6</em></span> <i>D3</i></a>
+      <a href="#profile" data-nav="profile">Profile &amp; reviews <i>D4</i></a>
+    </nav>
+    <div class="season">
+      <svg viewBox="0 0 232 96" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="182" cy="34" r="12" fill="#f1dc9c"/><path d="M0 70c40-22 90-22 130-8s70 8 102-4v38H0z" fill="#d7e2c9"/><path d="M96 62v-14" stroke="#4a7a50" stroke-width="1.300"/><circle cx="96" cy="43" r="8" fill="#c6dcbb"/><path d="M40 74v-7m0 2c-2.500-3.500-5-3.500-7-2.500m7 2.500c2.500-3.500 5-3.500 7-2.500M150 72v-7m0 2c-2.500-3.500-5-3.500-7-2.500m7 2.500c2.500-3.500 5-3.500 7-2.500" stroke="#4a7a50" stroke-width="1.300"/><g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(204 98) scale(.75)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g><g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(216 98) scale(.6)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g></svg>
+      <p><b>Winter season · Nov–Feb</b>Normal-vehicle transport offers are marked cost-saving. They are cheaper and safe in this weather.</p>
+    </div>
+  </aside>
+
+  <div>
+    <!-- ============ TOP BAR ============ -->
+    <header class="top">
+      <div class="roles">
+        <a href="farmer.html">Farmer</a>
+        <a class="on" href="dealer.html">Dealer</a>
+        <a href="transporter.html">Transporter</a>
+        <a href="admin.html">Admin</a>
+      </div>
+      <span class="proto-note">Prototype with sample data · today is Fri 13 Nov 2026, 10:50 AM</span>
+      <div class="sp"></div>
+      <label class="small muted" style="display:flex;gap:6px;align-items:center;cursor:pointer" title="Prototype only"><input type="checkbox" id="pendingToggle"> Preview: not verified yet</label>
+      <button class="bell" id="bell" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c2a21" stroke-width="1.8"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <b>5</b>
+      </button>
+      <div class="who">
+        <div class="avatar">H</div>
+        <div>Hasan Traders<small>Dealer · Bogura</small></div>
+      </div>
+    </header>
+
+    <div class="drop hidden" id="drop">
+      <h4>Notifications</h4>
+      <ul>
+        <li class="new" data-mk="m-em">Emergency sale in Bogura: 700 kg cauliflower from a stuck vehicle at Shibganj.<small>10:30 AM · ends in 2 hours</small></li>
+        <li class="new" data-go="p-chili">Selina Begum countered your green chili offer: ৳52/kg.<small>10:05 AM · answer before your timer ends</small></li>
+        <li class="new" data-go="p-brinjal">You were outbid on Brinjal (400 kg). Highest bid is now ৳32/kg.<small>9:48 AM</small></li>
+        <li class="new" data-go="p-tomato2">3 transport offers arrived for deal FN-1047 (tomato from Selina Begum).<small>8:40 AM · choose one</small></li>
+        <li class="new" data-go="p-potato2">Your potato from Selina Begum was picked up. Arriving today about 2:00 PM.<small>7:15 AM</small></li>
+        <li data-go="p-brin-fail">Deal FN-1028 failed in Joypurhat and was released for an emergency sale.<small>11 Nov</small></li>
+      </ul>
+    </div>
+
+    <main>
+    <div class="note warn hidden" id="pendingBanner" style="margin-bottom:16px"><b>Your account is waiting for admin verification.</b> You can browse the marketplace, but you cannot bid, send offers or buy until an admin checks your NID and trade license. <a href="#profile">See verification status</a></div>
+
+    <!-- ============================================================
+         D1 — HOME
+    ============================================================ -->
+    <section data-view="home">
+      <div class="head hero">
+        <svg class="scene" viewBox="0 0 560 150"><use href="#i-scene"/></svg>
+        <div><h1>Good morning, Hasan</h1><p>Friday, 13 November 2026 · Hasan Traders, Rajabazar, Bogura</p><a class="btn" href="#market" style="margin-top:14px">Browse produce</a></div>
+        <span class="code">Screen D1</span>
+      </div>
+
+      <div class="stats">
+        <div><span>Active bids</span><b class="num">2</b><small>1 leading · 1 outbid</small></div>
+        <div><span>Offers to farmers</span><b class="num">2</b><small>1 waiting · 1 counter-offer</small></div>
+        <div><span>Deals in progress</span><b class="num">2</b><small>1 choose transport · 1 arriving today</small></div>
+        <div><span>Your rating</span><b class="num">4.7</b><small>from 41 reviews</small></div>
+      </div>
+
+      <div class="grid g-main">
+        <div class="grid">
+          <div class="note bad" style="display:flex;gap:16px;align-items:center;justify-content:space-between">
+            <div><b>Emergency sale in Bogura · Cauliflower, 700 kg</b><br><span class="small">A vehicle broke down at Shibganj on its way to Dhaka. Pick up from the vehicle. 2 days of shelf life left. Ends in <span class="num" data-cd="7200"></span>.</span></div>
+            <button class="btn sm warn" data-mk="m-em" style="white-space:nowrap">See emergency sale</button>
+          </div>
+
+          <div class="panel">
+            <h3>Needs your attention <small>most urgent first</small></h3>
+            <table class="ledger">
+              <tr>
+                <td><span class="tag gold">Counter-offer</span></td>
+                <td><b>Selina Begum</b> wants ৳52/kg for 300 kg green chili (you offered ৳48)<br><span class="muted small">Answer within <span class="num" data-cd="9000"></span> or it expires.</span></td>
+                <td class="right"><button class="btn sm" data-go="p-chili">Answer</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag blue">Choose transport</span></td>
+                <td><b>Tomato, 600 kg</b> from Selina Begum: 3 transport offers<br><span class="muted small">Offers close in <span class="num" data-cd="16200"></span>. You choose and you pay.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="p-tomato2">Compare offers</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag gold">Arriving today</span></td>
+                <td><b>Potato, 1,000 kg</b>, Bogura Logistics, about 2:00 PM<br><span class="muted small">Give your delivery code to the driver after you check the produce.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="p-potato2">Delivery code</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag red">Outbid</span></td>
+                <td><b>Brinjal, 400 kg</b>: Dealer #3 bid ৳32/kg, your bid is ৳31<br><span class="muted small">Bidding ends in <span class="num" data-cd="51000"></span>.</span></td>
+                <td class="right"><button class="btn sm ghost" data-mk="m-brin">Raise bid</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag plain">Review</span></td>
+                <td><b>Potato, 800 kg</b> from Selina Begum, completed 9 Nov<br><span class="muted small">Rate the farmer.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="p-done2">Leave review</button></td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="panel">
+            <h3>New in the marketplace <a class="small" href="#market">Open Marketplace</a></h3>
+            <table class="ledger">
+              <tr><th>Product</th><th>Farmer</th><th>Selling mode</th><th class="right">Quantity</th><th class="right">Price</th><th>Ends</th></tr>
+              <tr class="click" data-mk="m-pot2">
+                <td><div class="nm"><svg class="ic"><use href="#i-potato"/></svg><div><b>Potato</b><br><span class="muted small">Harvested 6 Nov</span></div></div></td>
+                <td>Jalal Mia<br><span class="muted small">Rangpur · nationwide</span></td>
+                <td>Own price</td><td class="right num">3,000 kg</td><td class="right num">৳19.00<br><span class="muted small">asking</span></td><td class="muted">When sold out</td>
+              </tr>
+              <tr class="click" data-mk="m-tom">
+                <td><div class="nm"><svg class="ic"><use href="#i-tomato"/></svg><div><b>Tomato</b><br><span class="muted small">Harvest 15 Nov</span></div></div></td>
+                <td>Karim Uddin<br><span class="muted small">Bogura</span></td>
+                <td>Bidding</td><td class="right num">1,000 kg</td><td class="right num">৳28.00<br><span class="muted small">your bid leads</span></td><td class="num" data-cd="119400"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <h3>Season tip</h3>
+            <div class="pb">
+              <div class="note good"><b>Winter: normal vehicles are safe and cheaper.</b><br>Transport offers with a normal vehicle are marked cost-saving. In summer and monsoon you will see a weather warning on them instead.</div>
+              <p class="small muted" style="margin-top:10px">Advice only. You can always choose any vehicle.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>November so far</h3>
+            <div class="pb">
+              <dl class="kv" style="grid-template-columns:1fr auto">
+                <dt>Bought</dt><dd class="num right">4,100 kg</dd>
+                <dt>Spent on produce</dt><dd class="num right">৳1,02,300</dd>
+                <dt>Spent on transport</dt><dd class="num right">৳14,600</dd>
+                <dt>Deals completed</dt><dd class="num right">5</dd>
+                <dt>Your cancellations (30 days)</dt><dd class="num right">0</dd>
+              </dl>
+              <p class="small muted" style="margin-top:10px">Farmers can see your cancellation count on your profile.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         D2 — MARKETPLACE
+    ============================================================ -->
+    <section data-view="market" class="hidden">
+      <div class="head">
+        <div><h1>Marketplace</h1><p>Produce you can buy: listings in Bogura, listings that target Bogura, and nationwide listings.</p></div>
+        <span class="code">Screen D2</span>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px">
+        <div class="pb" style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px;align-items:end">
+          <div class="field" style="margin:0"><label>Product</label><select id="fProd"><option value="">All products</option><option>Tomato</option><option>Potato</option><option>Cauliflower</option><option>Brinjal</option><option>Green chili</option></select></div>
+          <div class="field" style="margin:0"><label>Farmer's district</label><select id="fDist"><option value="">All districts</option><option>Bogura</option><option>Gaibandha</option><option>Rangpur</option></select></div>
+          <div class="field" style="margin:0"><label>Farmer's upazila</label><select id="fUpa"><option value="">All upazilas</option></select></div>
+          <div class="field" style="margin:0"><label>Selling mode</label><select id="fMode"><option value="">Any</option><option value="bid">Bidding</option><option value="own">Own price</option><option value="em">Emergency sale</option></select></div>
+          <div class="field" style="margin:0"><label>Vehicle needed</label><select id="fStore"><option value="">Any</option><option>Normal</option><option>Ventilated</option><option>Refrigerated</option></select></div>
+          <div class="field" style="margin:0"><label>Harvest</label><select id="fHarv"><option value="">Any time</option><option value="done">Already harvested</option><option value="soon">Harvest coming</option></select></div>
+          <div class="field" style="margin:0"><label>Sort</label><select id="fSort"><option value="near">Nearest first</option><option value="new">Newest first</option></select></div>
+        </div>
+      </div>
+
+      <div class="md">
+        <div class="panel list" id="mkList">
+          <h5><span id="mkCount">6</span> listings</h5>
+          <button class="item" data-m="m-em" data-upa="Pirganj" data-km="22" data-ord="0" data-prod="Cauliflower" data-dist="Rangpur" data-mode="em" data-store="Ventilated" data-harv="done"><b><span class="nm"><svg class="ic"><use href="#i-cauliflower"/></svg>Cauliflower · 700 kg</span> <span class="tag red">Emergency</span></b><span>Stuck at Shibganj, Bogura · ends in <span class="num" data-cd="7200"></span> · <span class="km">Pirganj · 22 km (pickup at Shibganj)</span></span></button>
+          <button class="item" data-m="m-tom" data-upa="Bogura Sadar" data-km="4" data-ord="1" data-prod="Tomato" data-dist="Bogura" data-mode="bid" data-store="Normal" data-harv="soon"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 1,000 kg</span> <span class="tag green">You lead</span></b><span>Karim Uddin · bidding · ৳28.00 highest · <span class="km">Bogura Sadar · 4 km</span></span></button>
+          <button class="item" data-m="m-brin" data-upa="Gobindaganj" data-km="38" data-ord="2" data-prod="Brinjal" data-dist="Gaibandha" data-mode="bid" data-store="Normal" data-harv="soon"><b><span class="nm"><svg class="ic"><use href="#i-brinjal"/></svg>Brinjal · 400 kg</span> <span class="tag red" id="brinTag">Outbid</span></b><span>Selina Begum · bidding · ৳<span id="brinTop">32.00</span> highest · <span class="km">Gobindaganj · 38 km</span></span></button>
+          <button class="item" data-m="m-pot" data-upa="Bogura Sadar" data-km="4" data-ord="3" data-prod="Potato" data-dist="Bogura" data-mode="own" data-store="Normal" data-harv="done"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 800 kg left</span> <span class="tag gold">Your offer</span></b><span>Karim Uddin · own price · ৳22/kg asking · <span class="km">Bogura Sadar · 4 km</span></span></button>
+          <button class="item" data-m="m-chili" data-upa="Gobindaganj" data-km="38" data-ord="4" data-prod="Green chili" data-dist="Gaibandha" data-mode="own" data-store="Ventilated" data-harv="done"><b><span class="nm"><svg class="ic"><use href="#i-chili"/></svg>Green chili · 500 kg</span> <span class="tag gold">Countered</span></b><span>Selina Begum · own price · ৳55/kg asking · <span class="km">Gobindaganj · 38 km</span></span></button>
+          <button class="item" data-m="m-pot2" data-upa="Mithapukur" data-km="96" data-ord="5" data-prod="Potato" data-dist="Rangpur" data-mode="own" data-store="Normal" data-harv="done"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 3,000 kg</span> <span class="tag plain">New</span></b><span>Jalal Mia · own price · ৳19/kg asking · <span class="km">Mithapukur · 96 km</span></span></button>
+          <p class="small muted hidden" id="mkEmpty" style="padding:12px">No listings match these filters.</p>
+        </div>
+
+        <div class="panel">
+
+          <!-- ---------- Emergency cauliflower ---------- -->
+          <div data-mdetail="m-em">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-cauliflower"/></svg><div><h2>Cauliflower · 700 kg</h2><p class="muted">Emergency sale · Jalal Mia (Rangpur) · 4.5 (18)</p></div></div>
+              <div class="right"><span class="tag red" id="emState">Emergency · bidding live</span><div class="small muted" style="margin-top:6px">Ends in <span class="num" data-cd="7200"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="note bad"><b>Why this is on sale:</b> the vehicle taking this cauliflower from Rangpur to Dhaka broke down at Shibganj, Bogura. An admin checked and approved the failure report at 10:24 AM. Dealers in Shibganj upazila were told first; after 1 hour without a bid it opened to all verified dealers in Bogura.</div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Pickup point</dt><dd>The vehicle's current location: Dhaka–Rangpur highway, Shibganj, Bogura</dd>
+                <dt>Condition</dt><dd>Good · <span class="num">700 kg</span> usable of 720 · photo from the driver</dd>
+                <dt>Shelf life left</dt><dd><span class="tag gold">2 days</span></dd>
+                <dt>Delivery</dt><dd>The vehicle can still move slowly, so <b>the same vehicle delivers to you</b> (Cold Line BD, ventilated). No new transport stage needed.</dd>
+                <dt>Starting price</dt><dd class="num">৳22.00 / kg <span class="muted small">(farmer dropped the price by 20%)</span></dd>
+                <dt>Minimum increase</dt><dd class="num">৳0.50 / kg</dd>
+                <dt>Winner</dt><dd>Highest bid wins automatically when the sale ends</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <div class="bidbox" data-lot="em" data-top="24" data-inc="0.5" data-qty="700" data-buy="28">
+                <div class="grid g3" style="margin-bottom:12px">
+                  <div><span class="small muted">Highest bid</span><div class="num" style="font:600 26px var(--display)">৳<span class="hi">24.00</span></div><span class="small muted who-top">Dealer #2</span></div>
+                  <div><span class="small muted">Your bid</span><div class="num" style="font:600 26px var(--display)"><span class="mine">—</span></div><span class="small muted">You appear as Dealer #4</span></div>
+                  <div class="buywrap"><span class="small muted">Buy Now</span><div class="num" style="font:600 26px var(--display)">৳28.00</div><span class="small muted">Whole lot · instant deal</span></div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+                  <div class="field" style="margin:0;width:180px"><label>Your bid (৳/kg)</label><input type="number" class="amt" step="0.5" value="24.5"></div>
+                  <button class="btn" data-bid>Place bid</button>
+                  <button class="btn gold buybtn" data-buy>Buy Now at ৳28.00</button>
+                  <span class="small muted">Bid is for the whole 700 kg · total <b class="num tot">৳17,150</b></span>
+                </div>
+              </div>
+            </div>
+            <div class="sec flush">
+              <h4>Bids <small>Bidders are anonymous to each other</small></h4>
+              <table class="ledger bids" style="margin-top:8px">
+                <tr><th>Bidder</th><th class="right">Bid / kg</th><th>Placed</th></tr>
+                <tr><td>Dealer #2</td><td class="right num">৳24.00</td><td class="small">10:46 AM</td></tr>
+                <tr><td>Dealer #3</td><td class="right num">৳23.50</td><td class="small">10:41 AM</td></tr>
+                <tr><td>Dealer #1</td><td class="right num">৳22.50</td><td class="small">10:33 AM</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- ---------- Karim tomato ---------- -->
+          <div data-mdetail="m-tom" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 1,000 kg</h2><p class="muted">Karim Uddin · Shakharia, Bogura Sadar · 4.6 (23) · 0 cancellations</p></div></div>
+              <div class="right"><span class="tag green">Bidding live</span><div class="small muted" style="margin-top:6px">Ends in <span class="num" data-cd="119400"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="photos" style="margin-bottom:12px"><div class="ph">Photo 1</div><div class="ph">Photo 2</div><div class="ph">Photo 3</div></div>
+              <dl class="kv">
+                <dt>Harvest date</dt><dd>15 Nov (in 2 days) · shelf life 7 days after harvest</dd>
+                <dt>Base price</dt><dd class="num">৳25.00 / kg</dd>
+                <dt>Minimum increase</dt><dd class="num">৳0.50 / kg</dd>
+                <dt>Deadline</dt><dd>14 Nov, 8:00 PM · highest bid wins automatically</dd>
+                <dt>Vehicle</dt><dd>Normal vehicle is fine within district</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <div class="bidbox" data-lot="tom" data-top="28" data-inc="0.5" data-qty="1000" data-mine="1">
+                <div class="grid g3" style="margin-bottom:12px">
+                  <div><span class="small muted">Highest bid</span><div class="num" style="font:600 26px var(--display)">৳<span class="hi">28.00</span></div><span class="small muted who-top">You (Dealer #1)</span></div>
+                  <div><span class="small muted">Your bid</span><div class="num" style="font:600 26px var(--display)"><span class="mine">৳28.00</span></div><span class="tag green">Leading</span></div>
+                  <div><span class="small muted">Buy Now</span><div class="muted" style="margin-top:6px">Not offered on this listing any more</div></div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+                  <div class="field" style="margin:0;width:180px"><label>Raise your bid (৳/kg)</label><input type="number" class="amt" step="0.5" value="28.5"></div>
+                  <button class="btn" data-bid>Place bid</button>
+                  <span class="small muted">Whole 1,000 kg · total <b class="num tot">৳28,500</b></span>
+                </div>
+              </div>
+            </div>
+            <div class="sec flush">
+              <h4>Bids <small>You see other bidders only as Dealer #2, #3</small></h4>
+              <table class="ledger bids" style="margin-top:8px">
+                <tr><th>Bidder</th><th class="right">Bid / kg</th><th>Placed</th></tr>
+                <tr><td><b>You (Dealer #1)</b></td><td class="right num">৳28.00</td><td class="small">11 Nov, 4:12 PM</td></tr>
+                <tr><td>Dealer #2</td><td class="right num">৳27.50</td><td class="small">11 Nov, 1:30 PM</td></tr>
+                <tr><td>Dealer #3</td><td class="right num">৳26.00</td><td class="small">10 Nov, 9:05 AM</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- ---------- Selina brinjal ---------- -->
+          <div data-mdetail="m-brin" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-brinjal"/></svg><div><h2>Brinjal · 400 kg</h2><p class="muted">Selina Begum · Gaibandha (targets Bogura) · 4.8 (15) · 0 cancellations</p></div></div>
+              <div class="right"><span class="tag green">Bidding live</span><div class="small muted" style="margin-top:6px">Ends in <span class="num" data-cd="51000"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Harvest date</dt><dd>14 Nov · shelf life 6 days after harvest</dd>
+                <dt>Base price</dt><dd class="num">৳28.00 / kg</dd>
+                <dt>Minimum increase</dt><dd class="num">৳0.50 / kg</dd>
+                <dt>Deadline</dt><dd>14 Nov, 1:00 AM · highest bid wins automatically</dd>
+                <dt>Vehicle</dt><dd>Normal vehicle is fine (Gaibandha is a nearby district)</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <div class="bidbox" data-lot="brin" data-top="32" data-inc="0.5" data-qty="400" data-buy="36">
+                <div class="grid g3" style="margin-bottom:12px">
+                  <div><span class="small muted">Highest bid</span><div class="num" style="font:600 26px var(--display)">৳<span class="hi">32.00</span></div><span class="small muted who-top">Dealer #3</span></div>
+                  <div><span class="small muted">Your bid</span><div class="num" style="font:600 26px var(--display)"><span class="mine">৳31.00</span></div><span class="tag red state">Outbid</span></div>
+                  <div class="buywrap"><span class="small muted">Buy Now</span><div class="num" style="font:600 26px var(--display)">৳36.00</div><span class="small muted">Whole lot · instant deal</span></div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+                  <div class="field" style="margin:0;width:180px"><label>Raise your bid (৳/kg)</label><input type="number" class="amt" step="0.5" value="32.5"></div>
+                  <button class="btn" data-bid>Place bid</button>
+                  <button class="btn gold buybtn" data-buy>Buy Now at ৳36.00</button>
+                  <span class="small muted">Whole 400 kg · total <b class="num tot">৳13,000</b></span>
+                </div>
+              </div>
+            </div>
+            <div class="sec flush">
+              <h4>Bids</h4>
+              <table class="ledger bids" style="margin-top:8px">
+                <tr><th>Bidder</th><th class="right">Bid / kg</th><th>Placed</th></tr>
+                <tr><td>Dealer #3</td><td class="right num">৳32.00</td><td class="small">9:48 AM</td></tr>
+                <tr><td><b>You (Dealer #2)</b></td><td class="right num">৳31.00</td><td class="small">12 Nov, 6:20 PM</td></tr>
+                <tr><td>Dealer #1</td><td class="right num">৳29.00</td><td class="small">12 Nov, 11:00 AM</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- ---------- Karim potato (own price, offer pending) ---------- -->
+          <div data-mdetail="m-pot" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 800 kg left of 2,000</h2><p class="muted">Karim Uddin · Bogura · 4.6 (23) · own price</p></div></div>
+              <div class="right"><span class="tag green">Open for offers</span></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Asking price</dt><dd class="num">৳22.00 / kg</dd>
+                <dt>Minimum order</dt><dd class="num">200 kg</dd>
+                <dt>Shortest reply timer</dt><dd>6 hours (set by the farmer)</dd>
+                <dt>Harvested</dt><dd>8 Nov · potatoes keep for weeks</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <h4>Your offer</h4>
+              <div class="offer" id="myPotOffer">
+                <div><h5>800 kg × ৳<span class="p">20.00</span> = ৳<span class="t">16,000</span></h5>
+                  <div class="small muted st">Waiting for Karim · expires in <span class="num" data-cd="15000"></span></div></div>
+                <div class="btns acts"><button class="btn sm ghost" data-editoffer>Edit</button><button class="btn sm warn" data-withdraw>Withdraw</button></div>
+              </div>
+              <p class="small muted" style="margin-top:8px">One active offer per listing. You can edit or withdraw until the farmer accepts it. After that it is locked.</p>
+            </div>
+          </div>
+
+          <!-- ---------- Selina chili (countered) ---------- -->
+          <div data-mdetail="m-chili" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-chili"/></svg><div><h2>Green chili · 500 kg</h2><p class="muted">Selina Begum · Gaibandha · 4.8 (15) · own price</p></div></div>
+              <div class="right"><span class="tag gold">Counter-offer for you</span></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Asking price</dt><dd class="num">৳55.00 / kg</dd>
+                <dt>Minimum order</dt><dd class="num">100 kg</dd>
+                <dt>Vehicle</dt><dd>Ventilated vehicle for long trips · normal is fine to Bogura</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <p>You answer the counter-offer on the My Purchases page.</p>
+              <button class="btn sm" data-go="p-chili" style="margin-top:8px">Answer the counter-offer</button>
+            </div>
+          </div>
+
+          <!-- ---------- Jalal potato (new, send offer) ---------- -->
+          <div data-mdetail="m-pot2" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 3,000 kg</h2><p class="muted">Jalal Mia · Pirganj, Rangpur · 4.5 (18) · 1 cancellation in 30 days</p></div></div>
+              <div class="right"><span class="tag green">Open for offers</span></div>
+            </div>
+            <div class="sec">
+              <div class="photos" style="margin-bottom:12px"><div class="ph">Photo 1</div><div class="ph">Photo 2</div></div>
+              <dl class="kv">
+                <dt>Asking price</dt><dd class="num">৳19.00 / kg</dd>
+                <dt>Available</dt><dd class="num">3,000 kg</dd>
+                <dt>Minimum order</dt><dd class="num">500 kg</dd>
+                <dt>Shortest reply timer</dt><dd>6 hours (set by the farmer)</dd>
+                <dt>Visible to</dt><dd>Nationwide · normal vehicle is fine (long shelf life)</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <h4>Send an offer <small>Your own quantity and price</small></h4>
+              <div id="offerForm">
+                <div class="row3" style="margin-top:10px">
+                  <div class="field"><label>Quantity (kg)</label><input type="number" id="oQty" value="1000" min="500" max="3000"><small>500 to 3,000 kg</small></div>
+                  <div class="field"><label>Your price per kg (৳)</label><input type="number" id="oPrice" value="18.5" step="0.5"><small>Asking ৳19.00</small></div>
+                  <div class="field"><label>Farmer must reply within</label><select id="oTimer"><option disabled>2 hours (below farmer's minimum)</option><option selected>6 hours</option><option>12 hours</option><option>24 hours</option></select><small>The offer expires after this</small></div>
+                </div>
+                <div style="display:flex;gap:14px;align-items:center">
+                  <span>Total <b class="num" id="oTotal" style="font:600 20px var(--display)">৳18,500</b></span>
+                  <button class="btn" id="oSend">Send offer</button>
+                  <span class="small muted" id="oErr"></span>
+                </div>
+              </div>
+              <div class="note good hidden" id="offerSent"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         D3 — MY PURCHASES
+    ============================================================ -->
+    <section data-view="buys" class="hidden">
+      <div class="head">
+        <div><h1>My Purchases</h1><p>Your bids, offers, deals and deliveries in one place.</p></div>
+        <span class="code">Screen D3</span>
+      </div>
+
+      <div class="md">
+        <div class="panel list">
+          <h5>Bids</h5>
+          <button class="item" data-d="p-tomato"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 1,000 kg</span> <span class="tag green">Leading</span></b><span>Karim Uddin · ৳28.00 · ends in <span class="num" data-cd="119400"></span></span></button>
+          <button class="item" data-d="p-brinjal"><b><span class="nm"><svg class="ic"><use href="#i-brinjal"/></svg>Brinjal · 400 kg</span> <span class="tag red">Outbid</span></b><span>Selina Begum · your ৳31 vs ৳32</span></button>
+          <h5>Offers</h5>
+          <button class="item" data-d="p-chili"><b><span class="nm"><svg class="ic"><use href="#i-chili"/></svg>Green chili · 300 kg</span> <span class="tag gold">Countered</span></b><span>Selina Begum · ৳52 asked</span></button>
+          <button class="item" data-d="p-potato"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 800 kg</span> <span class="tag plain">Waiting</span></b><span>Karim Uddin · ৳20/kg offered</span></button>
+          <h5>Deals &amp; delivery</h5>
+          <button class="item" data-d="p-tomato2"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 600 kg</span> <span class="tag blue">Choose transport</span></b><span>FN-1047 · Selina Begum</span></button>
+          <button class="item" data-d="p-potato2"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 1,000 kg</span> <span class="tag gold">Arriving today</span></b><span>FN-1036 · Selina Begum</span></button>
+          <button class="item" data-d="p-brin-fail"><b><span class="nm"><svg class="ic"><use href="#i-brinjal"/></svg>Brinjal · 300 kg</span> <span class="tag red">Failed</span></b><span>FN-1028 · Jalal Mia · released</span></button>
+          <h5>Completed</h5>
+          <button class="item" data-d="p-done2"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 800 kg</span> <span class="tag plain">Review</span></b><span>FN-1024 · Selina Begum · 9 Nov</span></button>
+          <button class="item" data-d="p-done"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 800 kg</span> <span class="tag green">Reviewed</span></b><span>FN-1019 · Karim Uddin · 6 Nov</span></button>
+        </div>
+
+        <div class="panel">
+
+          <!-- Bid: tomato leading -->
+          <div data-detail="p-tomato">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 1,000 kg</h2><p class="muted">Bid on Karim Uddin's listing · you are Dealer #1</p></div></div>
+              <div class="right"><span class="tag green">Leading</span><div class="small muted" style="margin-top:6px">Ends in <span class="num" data-cd="119400"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your bid</dt><dd class="num">৳28.00 / kg · ৳28,000 total</dd>
+                <dt>Next highest</dt><dd class="num">৳27.50 (Dealer #2)</dd>
+                <dt>When it ends</dt><dd>If you are still highest on 14 Nov at 8:00 PM, the primary deal is created automatically.</dd>
+              </dl>
+              <button class="btn sm ghost" data-mk="m-tom" style="margin-top:12px">Open listing</button>
+            </div>
+          </div>
+
+          <!-- Bid: brinjal outbid -->
+          <div data-detail="p-brinjal" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-brinjal"/></svg><div><h2>Brinjal · 400 kg</h2><p class="muted">Bid on Selina Begum's listing · you are Dealer #2</p></div></div>
+              <div class="right"><span class="tag red">Outbid</span><div class="small muted" style="margin-top:6px">Ends in <span class="num" data-cd="51000"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your bid</dt><dd class="num">৳31.00 / kg</dd>
+                <dt>Highest bid</dt><dd class="num">৳32.00 (Dealer #3)</dd>
+                <dt>Buy Now</dt><dd class="num">৳36.00 / kg, still available</dd>
+              </dl>
+              <button class="btn sm" data-mk="m-brin" style="margin-top:12px">Raise bid or Buy Now</button>
+            </div>
+          </div>
+
+          <!-- Offer: chili countered -->
+          <div data-detail="p-chili" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-chili"/></svg><div><h2>Green chili · 300 kg</h2><p class="muted">Offer to Selina Begum · Gaibandha</p></div></div>
+              <div class="right"><span class="tag gold" id="chiState">Counter-offer</span><div class="small muted" style="margin-top:6px" id="chiTime">Answer within <span class="num" data-cd="9000"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your offer</dt><dd class="num">300 kg × ৳48.00 = ৳14,400 · 6-hour timer</dd>
+                <dt>Farmer's counter</dt><dd class="num"><b>300 kg × ৳52.00 = ৳15,600</b></dd>
+                <dt>Rule</dt><dd>The farmer can counter only once. If you accept, the primary deal is created. If you reject or your timer ends, the offer closes.</dd>
+              </dl>
+              <div class="btns" style="margin-top:12px" id="chiBtns"><button class="btn sm" id="chiAcc">Accept ৳52/kg</button><button class="btn sm warn" id="chiRej">Reject</button></div>
+            </div>
+          </div>
+
+          <!-- Offer: potato waiting -->
+          <div data-detail="p-potato" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 800 kg</h2><p class="muted">Offer to Karim Uddin · Bogura</p></div></div>
+              <div class="right"><span class="tag plain">Waiting for the farmer</span><div class="small muted" style="margin-top:6px">Expires in <span class="num" data-cd="15000"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Your offer</dt><dd class="num">800 kg × ৳20.00 = ৳16,000</dd>
+                <dt>Asking price</dt><dd class="num">৳22.00 / kg</dd>
+                <dt>Other offers</dt><dd>1 other dealer has an offer. If the quantity runs out first, your offer is cancelled automatically and you are notified.</dd>
+              </dl>
+              <button class="btn sm ghost" data-mk="m-pot" style="margin-top:12px">Edit or withdraw</button>
+            </div>
+          </div>
+
+          <!-- Deal: tomato, choose transport -->
+          <div data-detail="p-tomato2" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 600 kg</h2><p class="muted">Deal FN-1047 · from Selina Begum (Gaibandha) at ৳27/kg · <span class="num">৳16,200</span> · won by bidding</p></div></div>
+              <div class="right"><span class="tag blue" id="t2State">Choose transport</span><div class="small muted" style="margin-top:6px" id="t2Win">Offers close in <span class="num" data-cd="16200"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="track">
+                <div class="done">Primary deal</div><div class="now" id="t2s1">Transport offers</div><div id="t2s2">Transport confirmed</div><div>Picked up</div><div>In transit</div><div>Delivered</div><div>Completed</div>
+              </div>
+            </div>
+            <div class="sec flush">
+              <h4>Transport offers <small>You choose and you pay. The farmer can see these too.</small></h4>
+              <table class="ledger" style="margin-top:8px" id="t2Offers">
+                <tr><th>Provider</th><th>Vehicle</th><th>Pickup</th><th>Delivery</th><th class="right">Price</th><th></th><th></th></tr>
+                <tr><td><b>Mintu Pickup</b><br><span class="muted small">4.5 (30) · no failures</span></td><td>Normal pickup, 1 ton</td><td class="small">14 Nov, 6:00 AM</td><td class="small">14 Nov, 9:30 AM</td><td class="right num">৳4,200</td><td><span class="tag green">Cost-saving</span></td><td class="right"><button class="btn sm" data-pick="Mintu Pickup" data-price="4,200">Confirm</button></td></tr>
+                <tr><td><b>Bogura Logistics</b><br><span class="muted small">4.6 (52) · 1 failure in 52 trips</span></td><td>Normal truck, 3 ton</td><td class="small">14 Nov, 8:00 AM</td><td class="small">14 Nov, 11:00 AM</td><td class="right num">৳5,000</td><td><span class="tag green">Cost-saving</span></td><td class="right"><button class="btn sm ghost" data-pick="Bogura Logistics" data-price="5,000">Confirm</button></td></tr>
+                <tr><td><b>Cold Line BD</b><br><span class="muted small">4.9 (40) · no failures</span></td><td>Refrigerated van, 2 ton</td><td class="small">14 Nov, 7:00 AM</td><td class="small">14 Nov, 10:00 AM</td><td class="right num">৳7,800</td><td></td><td class="right"><button class="btn sm ghost" data-pick="Cold Line BD" data-price="7,800">Confirm</button></td></tr>
+              </table>
+            </div>
+            <div class="sec" id="t2Extend">
+              <div style="display:flex;gap:12px;align-items:center"><button class="btn sm ghost" id="extendBtn">Extend the offer window once</button><span class="small muted">Use this if no offer suits you. You can extend only once.</span></div>
+            </div>
+            <div class="sec"><div class="btns"><button class="btn warn sm" id="t2Cancel" data-cancel="FN-1047">Cancel this deal</button><button class="btn ghost sm" data-report="Selina Begum" data-role="farmer" data-deal="FN-1047 · Tomato 600 kg · ৳27/kg">Report the farmer</button><span class="small muted" style="align-self:center" id="t2CancelNote">No transport is booked yet, so you can cancel immediately.</span></div></div>
+          </div>
+
+          <!-- Deal: potato arriving -->
+          <div data-detail="p-potato2" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 1,000 kg</h2><p class="muted">Deal FN-1036 · from Selina Begum at ৳21/kg · <span class="num">৳21,000</span> + transport ৳6,500</p></div></div>
+              <div class="right"><span class="tag gold" id="p2State">In transit</span><div class="small muted" style="margin-top:6px">Arriving about 2:00 PM</div></div>
+            </div>
+            <div class="sec">
+              <div class="track" id="p2Track">
+                <div class="done">Primary deal</div><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="now">In transit</div><div>Delivered</div><div>Completed</div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="grid g2">
+                <div>
+                  <h4 style="font:600 15px var(--display);margin-bottom:10px">Your delivery code</h4>
+                  <div class="otp">7390</div>
+                  <p class="small muted" style="margin-top:10px">Give this code to the driver only after you have checked and weighed the produce. It proves the delivery happened.</p>
+                </div>
+                <div>
+                  <h4 style="font:600 15px var(--display);margin-bottom:10px">Transport</h4>
+                  <dl class="kv" style="grid-template-columns:110px 1fr">
+                    <dt>Provider</dt><dd>Bogura Logistics · 4.6 (52)</dd>
+                    <dt>Vehicle</dt><dd>Normal truck, 3 ton · Bogura-Ta 14-0932</dd>
+                    <dt>Picked up</dt><dd>13 Nov, 7:10 AM in Gaibandha (farmer's code checked)</dd>
+                    <dt>Delivery</dt><dd>13 Nov, about 2:00 PM at Rajabazar, Bogura</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+            <div class="sec"><div class="btns"><button class="btn sm" id="p2Recv">Driver gave my code: confirm receipt</button><button class="btn ghost sm" data-report="Bogura Logistics" data-role="transporter" data-deal="FN-1036 · Potato 1,000 kg">Report the transporter</button><span class="small muted" style="align-self:center">The produce is picked up, so this deal cannot be cancelled.</span></div></div>
+          </div>
+
+          <!-- Deal: failed -->
+          <div data-detail="p-brin-fail" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-brinjal"/></svg><div><h2>Brinjal · 300 kg</h2><p class="muted">Deal FN-1028 · from Jalal Mia (Rangpur) at ৳30/kg</p></div></div>
+              <div class="right"><span class="tag red">Failed: released for emergency sale</span></div>
+            </div>
+            <div class="sec">
+              <div class="track"><div class="done">Primary deal</div><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="fail">Failed in Joypurhat</div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>What happened</dt><dd>The vehicle was stopped by flooding on the road in Joypurhat on 11 Nov.</dd>
+                <dt>Admin decision</dt><dd>Failure approved on 11 Nov, 3:20 PM</dd>
+                <dt>For you</dt><dd>The deal is closed and you pay nothing. The produce was sold to dealers in Joypurhat in an emergency sale.</dd>
+              </dl>
+              <button class="btn sm ghost" style="margin-top:12px" data-mk="m-brin">See similar listings</button>
+            </div>
+          </div>
+
+          <!-- Completed: rate farmer -->
+          <div data-detail="p-done2" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 800 kg</h2><p class="muted">Deal FN-1024 · from Selina Begum at ৳20.50/kg · <span class="num">৳16,400</span></p></div></div>
+              <div class="right"><span class="tag green">Completed 9 Nov</span></div>
+            </div>
+            <div class="sec">
+              <div class="track"><div class="done">Primary deal</div><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="done">In transit</div><div class="done">Delivered</div><div class="done">Completed</div></div>
+            </div>
+            <div class="sec">
+              <div class="rv">
+                <h4 style="font:600 15px var(--display)">Rate the farmer</h4>
+                <p class="muted small" style="margin:2px 0 8px">Selina Begum · Gaibandha</p>
+                <div class="rate"><button>★</button><button>★</button><button>★</button><button>★</button><button>★</button></div>
+                <div class="field" style="margin-top:8px"><textarea rows="3" placeholder="Was the produce as described? Was the weight correct?"></textarea></div>
+                <button class="btn sm" data-review>Submit review</button>
+              </div>
+            </div>
+            <div class="sec">
+              <h4>The farmer's review of you</h4>
+              <span class="stars">★★★★★</span> <span class="muted small">Selina Begum · 9 Nov</span>
+              <p style="margin-top:4px">Confirmed the transport quickly and gave the code on time.</p>
+            </div>
+            <div class="sec"><button class="btn ghost sm" data-report="Selina Begum" data-role="farmer" data-deal="FN-1024 · Potato 800 kg · ৳20.50/kg">Report the farmer</button></div>
+          </div>
+
+          <!-- Completed: reviewed -->
+          <div data-detail="p-done" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 800 kg</h2><p class="muted">Deal FN-1019 · from Karim Uddin at ৳26.50/kg · <span class="num">৳21,200</span></p></div></div>
+              <div class="right"><span class="tag green">Completed 6 Nov</span></div>
+            </div>
+            <div class="sec">
+              <h4>Your review of the farmer</h4>
+              <span class="stars">★★★★★</span> <span class="muted small">6 Nov</span>
+              <p style="margin-top:4px">Tomatoes were exactly as in the photos and the weight was correct. Loaded on time.</p>
+            </div>
+            <div class="sec">
+              <h4>The farmer's review of you</h4>
+              <span class="stars">★★★★★</span> <span class="muted small">Karim Uddin · 6 Nov</span>
+              <p style="margin-top:4px">Fair price and quick payment. Chose transport fast.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         D4 — PROFILE & REVIEWS
+    ============================================================ -->
+    <section data-view="profile" class="hidden">
+      <div class="head">
+        <div><h1>Profile &amp; reviews</h1><p>What farmers and transporters see about you.</p></div>
+        <span class="code">Screen D4</span>
+      </div>
+
+      <div class="grid g2" style="align-items:start">
+        <div class="grid">
+          <div class="panel">
+            <h3>Verification</h3>
+            <div class="pb" id="verOk">
+              <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px"><span class="tag green">Verified dealer</span><span class="small muted">Approved by Admin Nusrat on 2 Mar 2026</span></div>
+              <table class="ledger">
+                <tr><td><b>National ID (NID)</b><br><span class="muted small">Md. Hasan Ali · ending 4417</span></td><td class="right"><span class="tag green">Checked</span></td></tr>
+                <tr><td><b>Trade license</b><br><span class="muted small">Bogura Pourashava · TL-2025-08812 · valid to Jun 2027</span></td><td class="right"><span class="tag green">Checked</span></td></tr>
+              </table>
+            </div>
+            <div class="pb hidden" id="verPending">
+              <div class="note warn" style="margin-bottom:12px"><b>Waiting for admin verification</b><br>Submitted 12 Nov, 9:30 PM. Usually checked within 24 hours. You can browse, but you cannot bid, offer or buy yet.</div>
+              <table class="ledger">
+                <tr><td><b>National ID (NID)</b><br><span class="muted small">nid-front.jpg, nid-back.jpg</span></td><td class="right"><span class="tag gold">In review</span></td></tr>
+                <tr><td><b>Trade license</b><br><span class="muted small">trade-license.pdf</span></td><td class="right"><span class="tag gold">In review</span></td></tr>
+              </table>
+              <button class="btn ghost sm" style="margin-top:10px" id="reupload">Replace a document</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Business details</h3>
+            <div class="pb">
+              <div class="row">
+                <div class="field"><label>Business name</label><input type="text" value="Hasan Traders"></div>
+                <div class="field"><label>Owner name</label><input type="text" value="Md. Hasan Ali"></div>
+              </div>
+              <div class="row">
+                <div class="field"><label>Phone</label><input type="tel" value="01819-552301"></div>
+                <div class="field"><label>District</label><select><option>Bogura</option><option>Joypurhat</option><option>Gaibandha</option></select><small>You see listings from this district and listings that target it</small></div>
+              </div>
+              <div class="field"><label>Market address (delivery point)</label><input type="text" value="Shop 14, Rajabazar wholesale market, Bogura Sadar"></div>
+              <div class="field"><label>Produce you usually buy <span class="muted" style="font-weight:400">(optional)</span></label><input type="text" value="Tomato, potato, brinjal, green chili"></div>
+              <button class="btn" id="saveProfile">Save changes</button>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Password</h3>
+            <div class="pb">
+              <div class="row">
+                <div class="field"><label>Current password</label><input type="password" value="password"></div>
+                <div class="field"><label>New password</label><input type="password" placeholder="At least 8 characters"></div>
+              </div>
+              <button class="btn ghost" id="savePass">Update password</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Reviews <small>from farmers after completed deals</small></h3>
+          <div class="pb" style="display:grid;grid-template-columns:150px 1fr;gap:20px;border-bottom:1px solid var(--line)">
+            <div><div class="num" style="font:600 46px/1 var(--display)">4.7</div><span class="stars">★★★★★</span><div class="small muted">41 reviews · 46 deals</div></div>
+            <div class="small" style="display:grid;gap:5px;align-content:center">
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">5</span><div class="bar"><i style="width:76%"></i></div><span class="num muted">31</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">4</span><div class="bar"><i style="width:17%"></i></div><span class="num muted">7</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">3</span><div class="bar"><i style="width:7%"></i></div><span class="num muted">3</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">2</span><div class="bar"><i style="width:0"></i></div><span class="num muted">0</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">1</span><div class="bar"><i style="width:0"></i></div><span class="num muted">0</span></div>
+            </div>
+          </div>
+          <div class="pb" style="border-bottom:1px solid var(--line)">
+            <dl class="kv" style="grid-template-columns:1fr auto">
+              <dt>Cancellations in the last 30 days</dt><dd class="num right">0</dd>
+              <dt>Deals completed</dt><dd class="num right">46</dd>
+            </dl>
+            <p class="small muted" style="margin-top:6px">Farmers see these numbers before they accept your offer.</p>
+          </div>
+          <table class="ledger">
+            <tr><td><span class="stars">★★★★★</span> <b>Karim Uddin</b> <span class="muted small">· Tomato, 800 kg · 6 Nov</span><br>Fair price and quick payment. Chose transport fast.</td></tr>
+            <tr><td><span class="stars">★★★★★</span> <b>Selina Begum</b> <span class="muted small">· Potato, 800 kg · 9 Nov</span><br>Confirmed the transport quickly and gave the code on time.</td></tr>
+            <tr><td><span class="stars">★★★★<span style="color:#c9c0aa">★</span></span> <b>Jalal Mia</b> <span class="muted small">· Potato, 1,200 kg · 24 Oct</span><br>Good dealer. Took a little long to confirm transport.</td></tr>
+            <tr><td><span class="stars">★★★<span style="color:#c9c0aa">★★</span></span> <b>Abdul Kader</b> <span class="muted small">· Brinjal, 300 kg · 3 Oct</span><br>Argued about the weight at delivery. <a href="#" data-report="this review" data-role="review">Report this review</a></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- modal + toast -->
+<div class="veil hidden" id="veil"><div class="modal"><h3 id="mTitle"></h3><div class="pb" id="mBody"></div><div class="foot" id="mFoot"></div></div></div>
+<div class="toast hidden" id="toast"></div>
+
+<script src="js/dealer.js"></script>
+</body>
+</html>

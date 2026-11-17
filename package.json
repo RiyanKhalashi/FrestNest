@@ -1,0 +1,25 @@
+{
+  "name": "freshnest",
+  "private": true,
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "db:start": "./scripts/db.sh start",
+    "db:stop": "./scripts/db.sh stop",
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "dev": "npm run db:start; (npm run dev -w server & npm run dev -w web & wait)",
+    "seed": "npm run seed -w server",
+    "typecheck": "npm run typecheck -w server && npx -w web tsc --noEmit",
+    "demo": "npm run demo -w server",
+    "test": "npm run test -w server"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "esbuild@0.28.2": true,
+    "prisma@7.10.1": true,
+    "fsevents": false
+  }
+}

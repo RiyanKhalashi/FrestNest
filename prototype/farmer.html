@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshNest — Farmer dashboard (prototype)</title>
+<link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+<!-- farm graphics (line art, reused with <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <g id="none"></g>
+  <symbol id="i-tomato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7" fill="#f6d9cf"/><path d="M12 7.5V4.5M12 7.5l-3-1.6M12 7.5l3-1.6"/></symbol>
+  <symbol id="i-potato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="12.5" rx="8.2" ry="6" transform="rotate(-18 12 12.5)" fill="#efe4c8"/><path d="M9 11h.01M13.5 10h.01M14.5 14.5h.01M10 15h.01" stroke-width="1.8"/></symbol>
+  <symbol id="i-cauliflower" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5c.6 5 3.8 7.5 7.5 7.5s6.900-2.500 7.500-7.500z" fill="#d9e8cd"/><path d="M6.500 12.500a3 3 0 0 1 2-5.200 3.600 3.600 0 0 1 7 0 3 3 0 0 1 2 5.200z" fill="#fbf8ee"/></symbol>
+  <symbol id="i-chili" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.500c2.200-.6 4 .4 4.300 2.600.5 4 3.500 7 8.200 7.900-6.500 2.500-13.500-1.500-13.500-8.500 0-.8.300-1.500 1-2z" fill="#d6e8c6"/><path d="M8.500 7.200c-.2-2 .8-3.400 2.800-3.700"/></symbol>
+  <symbol id="i-brinjal" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.500 8.500c4 2.200 4.800 7.800 1 10.600s-9.500.8-9.500-4.300c0-3.800 4-5.800 8.500-6.300z" fill="#e6dbee"/><path d="M11.500 9.600l3-1.100 2.200 2.300M15.200 8.300l1.800-3.800"/></symbol>
+  <symbol id="i-scene" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="418" cy="44" r="18" fill="#f1dc9c"/>
+    <path d="M150 104c60-34 130-36 200-12s130 10 210-10v68H150z" fill="#eef4e8"/>
+    <path d="M60 150c70-44 170-52 270-28s160 6 230-8v36z" fill="#dfebd5"/>
+    <g stroke="#9dbb93" stroke-width="1.200">
+      <path d="M150 150c50-26 110-38 180-34M230 150c40-18 90-26 150-22M310 150c36-12 76-17 124-13M392 150c28-8 60-11 96-8M470 150c22-5 46-7 72-5"/>
+    </g>
+    <g stroke="#4a7a50" stroke-width="1.400">
+      <path d="M256 128v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M342 132v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M424 137v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M500 141v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3"/>
+    </g>
+    <path d="M296 92v-20" stroke="#4a7a50" stroke-width="1.400"/><circle cx="296" cy="64" r="12" fill="#c6dcbb"/>
+    <path d="M360 96v-14l11-9 11 9v14z" fill="#fff" stroke="#4a7a50" stroke-width="1.300"/><path d="M369 96v-7h5v7" stroke="#4a7a50" stroke-width="1.300"/>
+    <path d="M196 44c5-5 9-5 13 0m6-10c4-4 7-4 10 0" stroke="#b9bcae" stroke-width="1.200"/>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(528 152) scale(1)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(546 152) scale(.8)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+  </symbol>
+</svg>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 34 34" fill="none" stroke="#24452f" stroke-width="1.500" stroke-linecap="round" stroke-linejoin="round"><path d="M17 24V12"/><path d="M17 15c0-5.500 4-8 9-8 0 6-3.500 9.500-9 8z" fill="#cfe2c3"/><path d="M17 19c0-4.500-3.200-6.500-7.500-6.500 0 4.800 3 7.500 7.500 6.500z" fill="#edf3e6"/><path d="M6 23c3.500 6 18.500 6 22 0" stroke="#b98412"/></svg>
+      <div><b>FreshNest</b><span>Farm-gate market</span></div>
+    </div>
+    <nav class="nav">
+      <a href="#home" data-nav="home">Home <i>F1</i></a>
+      <a href="#create" data-nav="create">Create listing <i>F2</i></a>
+      <a href="#sales" data-nav="sales"><span>My Sales <em>4</em></span> <i>F3</i></a>
+      <a href="#profile" data-nav="profile">Profile &amp; reviews <i>F4</i></a>
+    </nav>
+    <div class="season">
+      <svg viewBox="0 0 232 96" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="182" cy="34" r="12" fill="#f1dc9c"/><path d="M0 70c40-22 90-22 130-8s70 8 102-4v38H0z" fill="#d7e2c9"/><path d="M96 62v-14" stroke="#4a7a50" stroke-width="1.300"/><circle cx="96" cy="43" r="8" fill="#c6dcbb"/><path d="M40 74v-7m0 2c-2.500-3.500-5-3.500-7-2.500m7 2.500c2.500-3.500 5-3.500 7-2.500M150 72v-7m0 2c-2.500-3.500-5-3.500-7-2.500m7 2.500c2.500-3.500 5-3.500 7-2.500" stroke="#4a7a50" stroke-width="1.300"/><g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(204 98) scale(.75)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g><g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(216 98) scale(.6)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g></svg>
+      <p><b>Winter season · Nov–Feb</b>Good weather for transport. A normal vehicle is enough for most produce and costs less.</p>
+    </div>
+  </aside>
+
+  <div>
+    <!-- ============ TOP BAR ============ -->
+    <header class="top">
+      <div class="roles">
+        <a class="on" href="farmer.html">Farmer</a>
+        <a href="dealer.html">Dealer</a>
+        <a href="transporter.html">Transporter</a>
+        <a href="admin.html">Admin</a>
+      </div>
+      <span class="proto-note">Prototype with sample data · today is Fri 13 Nov 2026, 10:50 AM</span>
+      <div class="sp"></div>
+      <button class="bell" id="bell" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c2a21" stroke-width="1.8"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <b>4</b>
+      </button>
+      <div class="who">
+        <div class="avatar">K</div>
+        <div>Karim Uddin<small>Farmer · Bogura</small></div>
+      </div>
+    </header>
+
+    <div class="drop hidden" id="drop">
+      <h4>Notifications</h4>
+      <ul>
+        <li class="new" data-go="d-chili">Delivery failed in Sirajganj. Admin approved the request for your green chili deal.<small>10:42 AM · set up the emergency sale</small></li>
+        <li class="new" data-go="l-potato">Rangpur Mart sent an offer: 300 kg potato at ৳21/kg.<small>9:20 AM · 9h 30m to respond</small></li>
+        <li class="new" data-go="d-potato">2 transport offers arrived for your potato deal with Kawran Bazar Agro.<small>8:05 AM</small></li>
+        <li class="new" data-go="l-cauli">Cauliflower has 3 days of shelf life left and no bids.<small>Today · see suggestions</small></li>
+        <li data-go="l-tomato">Hasan Traders raised their bid on Tomato to ৳28/kg.<small>11 Nov, 4:12 PM</small></li>
+        <li data-go="d-done">Your tomato deal with Hasan Traders is completed. Leave a review.<small>6 Nov</small></li>
+      </ul>
+    </div>
+
+    <main>
+
+    <!-- ============================================================
+         F1 — HOME
+    ============================================================ -->
+    <section data-view="home">
+      <div class="head hero">
+        <svg class="scene" viewBox="0 0 560 150"><use href="#i-scene"/></svg>
+        <div><h1>Good morning, Karim</h1><p>Friday, 13 November 2026 · Bogura Sadar, Bogura</p><a class="btn" href="#create" style="margin-top:14px">Create listing</a></div>
+        <span class="code">Screen F1</span>
+      </div>
+
+      <div class="stats">
+        <div><span>Open listings</span><b class="num">3</b><small>1 bidding · 1 own price · 1 unsold</small></div>
+        <div><span>Bids &amp; offers waiting</span><b class="num">5</b><small>3 bids · 2 dealer offers</small></div>
+        <div><span>Deals in progress</span><b class="num">3</b><small>1 needs action now</small></div>
+        <div><span>Your rating</span><b class="num">4.6</b><small>from 23 reviews</small></div>
+      </div>
+
+      <div class="grid g-main">
+        <div class="grid">
+          <div class="panel">
+            <h3>Needs your attention <small>most urgent first</small></h3>
+            <table class="ledger">
+              <tr>
+                <td><span class="tag red">Delivery failed</span></td>
+                <td><b>Green chili, 400 kg</b> — vehicle broke down in Sirajganj<br><span class="muted small">Admin approved at 10:42 AM. 2 days of shelf life left.</span></td>
+                <td class="right"><button class="btn sm" data-go="d-chili">Set up emergency sale</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag gold">Pickup today</span></td>
+                <td><b>Brinjal, 500 kg</b> — Mintu Pickup arrives at 3:00 PM<br><span class="muted small">Give your pickup code to the driver.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="d-brinjal">Show pickup code</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag gold">Offer ending</span></td>
+                <td><b>Hasan Traders</b> offers 800 kg potato at ৳20/kg<br><span class="muted small">Expires in <span class="num" data-cd="15000"></span></span></td>
+                <td class="right"><button class="btn sm ghost" data-go="l-potato">Respond</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag gold">3 days left</span></td>
+                <td><b>Cauliflower, 600 kg</b> — harvested, not sold yet<br><span class="muted small">Bidding ended with no bids. Listing expires 16 Nov.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="l-cauli">See suggestions</button></td>
+              </tr>
+              <tr>
+                <td><span class="tag plain">Review</span></td>
+                <td><b>Tomato, 800 kg</b> — deal with Hasan Traders completed<br><span class="muted small">Rate the dealer and the transporter.</span></td>
+                <td class="right"><button class="btn sm ghost" data-go="d-done">Leave review</button></td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="panel">
+            <h3>Open listings <a class="small" href="#sales">Open My Sales</a></h3>
+            <table class="ledger">
+              <tr><th>Product</th><th>Selling mode</th><th class="right">Quantity</th><th class="right">Price</th><th>Status</th><th>Ends</th></tr>
+              <tr>
+                <td><div class="nm"><svg class="ic"><use href="#i-tomato"/></svg><div><b>Tomato</b><br><span class="muted small">Harvest 15 Nov</span></div></div></td>
+                <td>Bidding</td><td class="right num">1,000 kg</td>
+                <td class="right num">৳28.00<br><span class="muted small">highest bid</span></td>
+                <td><span class="tag green">3 bids</span></td>
+                <td class="num" data-cd="119400"></td>
+              </tr>
+              <tr>
+                <td><div class="nm"><svg class="ic"><use href="#i-potato"/></svg><div><b>Potato</b><br><span class="muted small">Harvested 8 Nov</span></div></div></td>
+                <td>Own price</td><td class="right num">800 kg<br><span class="muted small">of 2,000 left</span></td>
+                <td class="right num">৳22.00<br><span class="muted small">asking</span></td>
+                <td><span class="tag green">2 offers</span></td>
+                <td class="muted">When sold out</td>
+              </tr>
+              <tr>
+                <td><div class="nm"><svg class="ic"><use href="#i-cauliflower"/></svg><div><b>Cauliflower</b><br><span class="muted small">Harvested 10 Nov</span></div></div></td>
+                <td>Bidding</td><td class="right num">600 kg</td>
+                <td class="right num">৳30.00<br><span class="muted small">base</span></td>
+                <td><span class="tag gold">No bids · 3 days left</span></td>
+                <td class="muted">Expires 16 Nov</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <h3>Season tip</h3>
+            <div class="pb">
+              <div class="note good"><b>Winter: a normal vehicle is enough.</b><br>Cool, dry weather keeps produce fresh on the road. Dealers will see normal-vehicle transport offers marked as cost-saving.</div>
+              <p class="small muted" style="margin-top:10px">This tip applies only to normal (open) vehicles and is advice only. It never blocks a choice.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>November so far</h3>
+            <div class="pb">
+              <dl class="kv" style="grid-template-columns:1fr auto">
+                <dt>Sold</dt><dd class="num right">3,400 kg</dd>
+                <dt>Deal value</dt><dd class="num right">৳84,600</dd>
+                <dt>Deals completed</dt><dd class="num right">4</dd>
+                <dt>Average above base price</dt><dd class="num right">+9%</dd>
+                <dt>Deals cancelled</dt><dd class="num right">0</dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         F2 — CREATE LISTING
+    ============================================================ -->
+    <section data-view="create" class="hidden">
+      <div class="head">
+        <div><h1>Create listing</h1><p>List a crop before or after harvest. Quantity and price must be exact.</p></div>
+        <span class="code">Screen F2</span>
+      </div>
+
+      <div class="grid g-main">
+        <div class="panel">
+          <!-- 1 product -->
+          <div class="step"><b>1</b><div>
+            <h4>Product</h4>
+            <div class="row">
+              <div class="field"><label>Category</label>
+                <select id="cat"><option>Vegetable</option><option>Fruit</option></select></div>
+              <div class="field"><label>Product</label>
+                <select id="prod"></select></div>
+            </div>
+            <label class="small"><input type="checkbox" id="custom"> My product is not in the list</label>
+            <div class="hidden" id="customBox" style="margin-top:10px">
+              <div class="row3">
+                <div class="field"><label>Product name</label><input type="text" id="cName" placeholder="e.g. Deshi lau"></div>
+                <div class="field"><label>Shelf life after harvest (days)</label><input type="number" id="cShelf" min="1" placeholder="e.g. 10"><small>How long it stays fresh</small></div>
+                <div class="field"><label>Vehicle it needs</label><select id="cStore"><option>Normal</option><option>Ventilated</option><option>Refrigerated</option></select><small>For a long journey</small></div>
+              </div>
+            </div>
+            <div id="autoInfo" style="margin:12px 0 14px"></div>
+            <div class="field"><label>Photos <span class="muted" style="font-weight:400">(you can add several)</span></label>
+              <div class="photos" id="photos">
+                <div style="background:#9c3b2a">field.jpg</div>
+                <div style="background:#b8552f">close-up.jpg</div>
+                <button type="button" class="add" id="addPhoto" style="width:86px;height:66px">+ Add photo</button>
+              </div></div>
+          </div></div>
+
+          <!-- 2 harvest -->
+          <div class="step"><b>2</b><div>
+            <h4>Harvest, quantity and price</h4>
+            <div class="row3">
+              <div class="field"><label>Harvest date</label><input type="date" id="harvest" value="2026-11-20"><small id="harvestHint"></small></div>
+              <div class="field"><label>Quantity (kg)</label><input type="number" id="qty" value="1000" min="1"><small>Exact amount you will sell</small></div>
+              <div class="field"><label>Price per kg (৳)</label><input type="number" id="price" value="25" step="0.5" min="0"><small id="priceHint">Base price for bidding</small></div>
+            </div>
+          </div></div>
+
+          <!-- 3 visibility -->
+          <div class="step"><b>3</b><div>
+            <h4>Who can see this listing</h4>
+            <div id="scopeTip" style="margin-bottom:12px"></div>
+            <div class="choice" style="grid-template-columns:1fr 1fr 1fr">
+              <div><input type="radio" name="scope" id="sc0" value="upazila"><label for="sc0"><b>Only my upazila</b><small>Dealers in Bogura Sadar and the neighbouring upazilas you tick</small></label></div>
+              <div><input type="radio" name="scope" id="sc1" value="district" checked><label for="sc1"><b>Within district</b><small>Dealers in Bogura and the nearby districts you tick</small></label></div>
+              <div><input type="radio" name="scope" id="sc2" value="nation"><label for="sc2"><b>Nationwide</b><small id="sc2hint">Dealers in all 64 districts</small></label></div>
+            </div>
+            <div id="upaBox" class="hidden">
+              <div class="lbl" style="margin-bottom:6px">Neighbouring upazilas <span class="muted" style="font-weight:400">(quick-select · all in Bogura)</span> <a href="#" class="small" id="upaAll" style="margin-left:6px">Tick all</a></div>
+              <div class="checks" id="upaNear">
+                <label><input type="checkbox" checked>Shajahanpur</label>
+                <label><input type="checkbox" checked>Gabtali</label>
+                <label><input type="checkbox">Shibganj</label>
+                <label><input type="checkbox">Kahaloo</label>
+                <label><input type="checkbox">Sariakandi</label>
+              </div>
+              <p class="small muted" style="margin:-4px 0 12px">Good for small lots and short shelf life: buyers are close, so a pickup or normal vehicle is enough and the produce arrives fresher.</p>
+            </div>
+            <div id="nearBox">
+              <div class="lbl" style="margin-bottom:6px">Nearby districts <span class="muted" style="font-weight:400">(count as within district)</span></div>
+              <div class="checks" id="near">
+                <label><input type="checkbox" checked>Joypurhat</label>
+                <label><input type="checkbox" checked>Gaibandha</label>
+                <label><input type="checkbox">Naogaon</label>
+                <label><input type="checkbox">Natore</label>
+                <label><input type="checkbox">Sirajganj</label>
+                <label><input type="checkbox">Jamalpur</label>
+              </div>
+            </div>
+            <div class="field"><label>Other targeted districts <span class="muted" style="font-weight:400">(optional)</span></label>
+              <select id="target"><option value="">Add a district…</option><option>Rajshahi</option><option>Rangpur</option><option>Dinajpur</option><option>Pabna</option><option>Tangail</option><option>Dhaka</option></select></div>
+            <div class="checks" id="targets"></div>
+            <div id="weatherTip"></div>
+          </div></div>
+
+          <!-- 4 selling mode -->
+          <div class="step"><b>4</b><div>
+            <h4>How you want to sell</h4>
+            <div class="choice">
+              <div><input type="radio" name="mode" id="m1" value="bid" checked><label for="m1"><b>Bidding</b><small>Dealers bid for the whole quantity. The highest bid wins automatically.</small></label></div>
+              <div><input type="radio" name="mode" id="m2" value="own"><label for="m2"><b>My own price</b><small>Dealers offer their own quantity and price. You accept, reject or counter.</small></label></div>
+            </div>
+
+            <div id="bidBox">
+              <div class="row3">
+                <div class="field"><label>Minimum bid increase (৳/kg)</label><input type="number" id="inc" value="0.5" step="0.25"></div>
+                <div class="field"><label>Buy Now price (৳/kg) <span class="muted" style="font-weight:400">optional</span></label><input type="number" id="buynow" value="32" step="0.5"><small id="buyHint">A dealer paying this gets the deal instantly</small></div>
+                <div class="field"><label>Bidding deadline</label><input type="datetime-local" id="deadline"></div>
+              </div>
+              <div class="note good" id="dlRec"></div>
+              <div class="note warn" id="dlSafe"></div>
+              <div class="note bad hidden" id="dlWarn"></div>
+              <div class="note" style="margin-top:8px"><b>The highest bid wins automatically.</b> When bidding closes, the primary deal is made with the highest bidder. You do not need to do anything.</div>
+            </div>
+
+            <div id="ownBox" class="hidden">
+              <div class="row">
+                <div class="field"><label>Minimum order (kg) <span class="muted" style="font-weight:400">optional</span></label><input type="number" id="minOrder" value="200"><small>Dealers cannot offer for less than this</small></div>
+                <div class="field"><label>Minimum response time you need</label>
+                  <select id="minResp"><option>2 hours</option><option selected>6 hours</option><option>12 hours</option><option>24 hours</option></select><small>Dealers cannot set a shorter timer on their offers</small></div>
+              </div>
+              <div class="note">The listing stays open until the whole quantity is sold. Each offer you accept becomes its own deal with its own transport.</div>
+            </div>
+            <div style="height:14px"></div>
+          </div></div>
+        </div>
+
+        <!-- summary -->
+        <div class="panel" style="position:sticky;top:74px">
+          <h3>Listing summary</h3>
+          <div class="pb">
+            <dl class="kv" style="grid-template-columns:110px 1fr" id="sum"></dl>
+            <div style="border-top:1px solid var(--line);margin:14px 0;padding-top:14px">
+              <div class="muted small">Value at your price</div>
+              <div class="num" style="font:600 28px var(--display)" id="sumTotal"></div>
+            </div>
+            <div class="btns"><button class="btn" id="publish">Publish listing</button><button class="btn ghost" id="draft">Save draft</button></div>
+            <p class="small muted" style="margin-top:12px">You can edit or withdraw the listing until the first bid or offer arrives. After that it is locked.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         F3 — MY SALES
+    ============================================================ -->
+    <section data-view="sales" class="hidden">
+      <div class="head">
+        <div><h1>My Sales</h1><p>Your listings, bids and offers, deals and deliveries in one place.</p></div>
+        <span class="code">Screen F3</span>
+      </div>
+
+      <div class="md">
+        <div class="panel list">
+          <h5>Open listings</h5>
+          <button class="item" data-d="l-tomato"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 1,000 kg</span> <span class="tag green">3 bids</span></b><span>Bidding · ends in <span class="num" data-cd="119400"></span></span></button>
+          <button class="item" data-d="l-potato"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 800 kg left</span> <span class="tag green">2 offers</span></b><span>Own price · ৳22/kg asking</span></button>
+          <button class="item" data-d="l-cauli"><b><span class="nm"><svg class="ic"><use href="#i-cauliflower"/></svg>Cauliflower · 600 kg</span> <span class="tag gold">3 days left</span></b><span>Bidding ended · no bids</span></button>
+          <h5>Deals in progress</h5>
+          <button class="item" data-d="d-chili"><b><span class="nm"><svg class="ic"><use href="#i-chili"/></svg>Green chili · 400 kg</span> <span class="tag red">Failed</span></b><span>FN-1031 · stuck in Sirajganj</span></button>
+          <button class="item" data-d="d-brinjal"><b><span class="nm"><svg class="ic"><use href="#i-brinjal"/></svg>Brinjal · 500 kg</span> <span class="tag gold">Pickup today</span></b><span>FN-1038 · Joypurhat Fresh</span></button>
+          <button class="item" data-d="d-potato"><b><span class="nm"><svg class="ic"><use href="#i-potato"/></svg>Potato · 1,200 kg</span> <span class="tag blue">Transport</span></b><span>FN-1042 · Kawran Bazar Agro</span></button>
+          <h5>Completed</h5>
+          <button class="item" data-d="d-done"><b><span class="nm"><svg class="ic"><use href="#i-tomato"/></svg>Tomato · 800 kg</span> <span class="tag plain">Review</span></b><span>FN-1019 · Hasan Traders · 6 Nov</span></button>
+        </div>
+
+        <div class="panel" id="detail">
+
+          <!-- ---------- Tomato: live bidding ---------- -->
+          <div data-detail="l-tomato">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 1,000 kg</h2><p class="muted">Listed 9 Nov · harvest on 15 Nov (in 2 days)</p></div></div>
+              <div class="right"><span class="tag green" id="tomState">Bidding live</span><div class="small muted" style="margin-top:6px" id="tomEnds">Ends in <span class="num" data-cd="119400"></span></div></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Base price</dt><dd class="num">৳25.00 / kg</dd>
+                <dt>Minimum increase</dt><dd class="num">৳0.50 / kg</dd>
+                <dt>Buy Now price</dt><dd><span class="num">৳32.00 / kg</span> <span class="tag plain">Locked</span> <span class="muted small">Locked since the first bid. Hidden from dealers once a bid reaches it.</span></dd>
+                <dt>Deadline</dt><dd>14 Nov, 8:00 PM <span class="muted small">(recommended: one day before harvest)</span></dd>
+                <dt>Winner</dt><dd>Highest bid wins automatically when bidding closes</dd>
+                <dt>Visible to</dt><dd>Dealers in Bogura, Joypurhat, Gaibandha</dd>
+                <dt>Storage</dt><dd>Normal vehicle is fine within district · shelf life 7 days</dd>
+              </dl>
+            </div>
+            <div class="sec flush">
+              <h4>Bids <small>Dealers see each other only as Dealer #1, #2, #3. You see who they are.</small></h4>
+              <table class="ledger" style="margin-top:8px">
+                <tr><th>Dealer</th><th>District</th><th>Rating</th><th class="right">Bid / kg</th><th class="right">Total</th><th>Placed</th><th></th></tr>
+                <tr class="top-row"><td><b>Hasan Traders</b><br><span class="muted small">Dealer #1 · verified</span></td><td>Bogura</td><td><span class="num">4.7</span> <span class="muted small">(41)</span></td><td class="right num"><b>৳28.00</b></td><td class="right num">৳28,000</td><td class="small">11 Nov, 4:12 PM</td><td class="right"><span class="tag green" id="tomLead">Leading</span></td></tr>
+                <tr><td><b>Joypurhat Fresh</b><br><span class="muted small">Dealer #2 · verified</span></td><td>Joypurhat</td><td><span class="num">4.9</span> <span class="muted small">(18)</span></td><td class="right num">৳27.00</td><td class="right num">৳27,000</td><td class="small">10 Nov, 6:40 PM</td><td></td></tr>
+                <tr><td><b>Gaibandha Sabji Ghar</b><br><span class="muted small">Dealer #3 · verified</span></td><td>Gaibandha</td><td><span class="num">4.2</span> <span class="muted small">(9)</span></td><td class="right num">৳26.50</td><td class="right num">৳26,500</td><td class="small">10 Nov, 2:05 PM</td><td></td></tr>
+              </table>
+            </div>
+            <div class="sec">
+              <div class="note" id="tomNote">When bidding closes on 14 Nov at 8:00 PM, the highest bidder wins automatically and the primary deal is created.</div>
+              <div class="btns" style="margin-top:12px">
+                <button class="btn ghost sm" id="skip">Prototype only: jump to the deadline</button>
+                <button class="btn ghost sm" disabled title="Locked after the first bid">Edit listing</button>
+                <button class="btn ghost sm" disabled title="Locked after the first bid">Withdraw listing</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------- Potato: own price ---------- -->
+          <div data-detail="l-potato" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 2,000 kg</h2><p class="muted">Listed 9 Nov · harvested 8 Nov · shelf life 60 days</p></div></div>
+              <div class="right"><span class="tag green" id="potState">Open for offers</span></div>
+            </div>
+            <div class="sec">
+              <dl class="kv">
+                <dt>Asking price</dt><dd class="num">৳22.00 / kg</dd>
+                <dt>Minimum order</dt><dd class="num">200 kg</dd>
+                <dt>Your response time</dt><dd>At least 6 hours on every offer</dd>
+                <dt>Visible to</dt><dd>Nationwide · normal vehicle is fine</dd>
+              </dl>
+              <div style="margin-top:14px">
+                <div style="display:flex;justify-content:space-between" class="small"><span><b id="potSold" class="num">1,200</b> kg sold</span><span><b id="potLeft" class="num">800</b> kg left of 2,000</span></div>
+                <div class="bar" style="margin-top:5px"><i id="potBar" style="width:60%"></i></div>
+              </div>
+            </div>
+            <div class="sec">
+              <h4>Dealer offers <small>One offer per dealer. You may counter once.</small></h4>
+
+              <div class="offer" id="of-hasan" data-qty="800">
+                <div><h5>Hasan Traders <span class="muted small" style="font-weight:400">· Bogura · 4.7 (41)</span></h5>
+                  <span class="num">800 kg × ৳<span class="p">20.00</span> = ৳<span class="t">16,000</span></span>
+                  <div class="small muted st">Expires in <span class="num" data-cd="15000"></span></div></div>
+                <div class="btns acts"><button class="btn sm" data-acc>Accept</button><button class="btn sm ghost" data-cnt>Counter</button><button class="btn sm warn" data-rej>Reject</button></div>
+                <div class="counter hidden"><span class="small">Your price per kg (৳)</span><input type="number" value="21" step="0.5"><button class="btn sm" data-send>Send counter</button><span class="small muted">The dealer answers before their timer ends.</span></div>
+              </div>
+
+              <div class="offer" id="of-rangpur" data-qty="300">
+                <div><h5>Rangpur Mart <span class="muted small" style="font-weight:400">· Rangpur · 4.4 (12)</span></h5>
+                  <span class="num">300 kg × ৳<span class="p">21.00</span> = ৳<span class="t">6,300</span></span>
+                  <div class="small muted st">Expires in <span class="num" data-cd="34200"></span></div></div>
+                <div class="btns acts"><button class="btn sm" data-acc>Accept</button><button class="btn sm ghost" data-cnt>Counter</button><button class="btn sm warn" data-rej>Reject</button></div>
+                <div class="counter hidden"><span class="small">Your price per kg (৳)</span><input type="number" value="22" step="0.5"><button class="btn sm" data-send>Send counter</button><span class="small muted">The dealer answers before their timer ends.</span></div>
+              </div>
+
+              <div class="offer">
+                <div><h5>Kawran Bazar Agro <span class="muted small" style="font-weight:400">· Dhaka · 4.8 (67)</span></h5>
+                  <span class="num">1,200 kg × ৳22.00 = ৳26,400</span>
+                  <div class="small muted">Accepted 12 Nov · became deal FN-1042</div></div>
+                <div><span class="tag green">Accepted</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------- Cauliflower: unsold after harvest ---------- -->
+          <div data-detail="l-cauli" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-cauliflower"/></svg><div><h2>Cauliflower · 600 kg</h2><p class="muted">Listed 8 Nov · harvested 10 Nov · shelf life 6 days</p></div></div>
+              <div class="right"><span class="tag gold">3 days left</span><div class="small muted" style="margin-top:6px">Listing expires 16 Nov</div></div>
+            </div>
+            <div class="sec">
+              <div class="note warn"><b>Harvested and not sold yet.</b> Bidding closed on 12 Nov with no bids. The shelf-life countdown started on the harvest date, and the listing hides itself from dealers on 16 Nov.</div>
+              <dl class="kv" style="margin-top:14px">
+                <dt>Base price</dt><dd class="num" id="cauPrice">৳30.00 / kg</dd>
+                <dt>Selling mode</dt><dd id="cauMode">Bidding</dd>
+                <dt>Deadline</dt><dd id="cauDl">12 Nov, 8:00 PM (ended)</dd>
+                <dt>Visible to</dt><dd id="cauScope">Nationwide · ventilated vehicle needed</dd>
+              </dl>
+            </div>
+            <div class="sec">
+              <h4>Suggestions <small>You decide. Nothing changes unless you apply it.</small></h4>
+              <table class="ledger">
+                <tr><td><b>Reduce the price by 10%</b><br><span class="muted small">৳30.00 → ৳27.00 per kg. Dealers get a fresh notification.</span></td><td class="right"><button class="btn sm ghost" data-sug="price">Apply</button></td></tr>
+                <tr><td><b>Narrow to within district</b><br><span class="muted small">With 3 days left, nearby dealers can use a normal vehicle and receive it fresher.</span></td><td class="right"><button class="btn sm ghost" data-sug="scope">Apply</button></td></tr>
+                <tr><td><b>Extend the deadline once</b><br><span class="muted small">New deadline 14 Nov, 12:00 PM, the latest safe time for this product.</span></td><td class="right"><button class="btn sm ghost" data-sug="dl">Extend</button></td></tr>
+                <tr><td><b>Switch to my own price</b><br><span class="muted small">Let dealers offer for part of the quantity instead of the whole lot.</span></td><td class="right"><button class="btn sm ghost" data-sug="mode">Switch</button></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- ---------- Green chili: delivery failure ---------- -->
+          <div data-detail="d-chili" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-chili"/></svg><div><h2>Green chili · 400 kg</h2><p class="muted">Deal FN-1031 · sold to Kawran Bazar Agro (Dhaka) at ৳60/kg</p></div></div>
+              <div class="right"><span class="tag red">Delivery failed</span></div>
+            </div>
+            <div class="sec">
+              <div class="track">
+                <div class="done">Primary deal</div><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="fail">Failed in Sirajganj</div><div class="now" id="chStep">Emergency sale</div><div>New deal</div><div>Delivered</div>
+              </div>
+            </div>
+            <div class="sec">
+              <h4>What happened</h4>
+              <dl class="kv">
+                <dt>Reported by</dt><dd>Driver of Bogura Logistics (ventilated covered van) at 10:15 AM</dd>
+                <dt>Location</dt><dd>Sirajganj, on the way to Dhaka</dd>
+                <dt>Reason</dt><dd>Breakdown · the vehicle cannot move</dd>
+                <dt>Produce</dt><dd>Good condition · <span class="num">380 kg</span> usable of 400 · 2 days of shelf life left</dd>
+                <dt>Admin decision</dt><dd>Approved by Admin Nusrat at 10:42 AM</dd>
+                <dt>Original deal</dt><dd>Released. Kawran Bazar Agro has been notified.</dd>
+              </dl>
+            </div>
+
+            <div class="sec" id="emSetup">
+              <h4>Set up the emergency sale <small>Goes first to verified dealers in Shahjadpur upazila, where the vehicle is stuck</small></h4>
+              <div class="note" style="margin-bottom:14px"><b>Suggested for 2 days of shelf life:</b> drop the price by 25% and run the bid for 3 hours. You can change both.</div>
+              <div class="row3">
+                <div class="field"><label>Price drop (%)</label><input type="number" id="emDrop" value="25" min="0" max="90"><small>Starting price <b class="num" id="emStart">৳45.00</b> / kg (was ৳60.00)</small></div>
+                <div class="field"><label>Bid duration</label><select id="emDur"><option>1 hour</option><option selected>3 hours</option><option>6 hours</option></select></div>
+                <div class="field"><label>Buy Now price (৳/kg) <span class="muted" style="font-weight:400">optional</span></label><input type="number" id="emBuy" value="55"></div>
+              </div>
+              <div class="note" style="margin-bottom:14px">The highest bid wins automatically when the emergency sale ends.</div>
+              <div class="btns"><button class="btn" id="emGo">Start emergency sale</button></div>
+              <p class="small muted" style="margin-top:10px">For this deal you chose to set up the emergency sale yourself. The pickup point for the new dealer is the vehicle's location in Sirajganj.</p>
+            </div>
+
+            <div class="sec hidden" id="emLive">
+              <h4>Emergency sale is live <small>Ends in <span class="num" data-cd="10800"></span></small></h4>
+              <div class="note good" style="margin-bottom:12px">Quantity 380 kg, starting at <b class="num" id="emStart2">৳45.00</b>/kg. Dealers are told in steps, closest first, so the produce travels the least.</div>
+              <ol class="tiers">
+                <li class="on"><b>Now · Shahjadpur upazila</b><span>6 verified dealers near the vehicle were notified</span></li>
+                <li><b>After 1 hour without a bid · all of Sirajganj</b><span>8 more dealers in the district</span></li>
+                <li><b>Then · neighbouring districts</b><span>Pabna, Tangail, Natore, Bogura</span></li>
+              </ol>
+              <table class="ledger">
+                <tr><th>Dealer</th><th>District</th><th class="right">Bid / kg</th><th class="right">Total</th><th>Placed</th></tr>
+                <tr class="top-row"><td><b>Jamuna Kacha Bazar</b><br><span class="muted small">Dealer #1 · verified</span></td><td>Sirajganj</td><td class="right num"><b>৳47.00</b></td><td class="right num">৳17,860</td><td class="small">2 min ago</td></tr>
+                <tr><td><b>Shahjadpur Agro</b><br><span class="muted small">Dealer #2 · verified</span></td><td>Sirajganj</td><td class="right num">৳45.50</td><td class="right num">৳17,290</td><td class="small">6 min ago</td></tr>
+              </table>
+              <div class="note" style="margin-top:12px"><b>After the sale:</b> the vehicle cannot move, so a new transport stage opens for transporters in Sirajganj. The driver hands over the produce with a code.</div>
+              <div class="note warn"><b>If nobody bids:</b> you can extend once, drop the price further, or widen the sale to the districts next to Sirajganj (Pabna, Tangail, Natore, Bogura).</div>
+            </div>
+          </div>
+
+          <!-- ---------- Brinjal: pickup today ---------- -->
+          <div data-detail="d-brinjal" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-brinjal"/></svg><div><h2>Brinjal · 500 kg</h2><p class="muted">Deal FN-1038 · sold to Joypurhat Fresh at ৳30/kg · <span class="num">৳15,000</span></p></div></div>
+              <div class="right"><span class="tag gold">Pickup today, 3:00 PM</span></div>
+            </div>
+            <div class="sec">
+              <div class="track">
+                <div class="done">Primary deal</div><div class="done">Transport offers</div><div class="now">Transport confirmed</div><div>Picked up</div><div>In transit</div><div>Delivered</div><div>Completed</div>
+              </div>
+            </div>
+            <div class="sec">
+              <div class="grid g2">
+                <div>
+                  <h4 style="font:600 15px var(--display);margin-bottom:10px">Your pickup code</h4>
+                  <div class="otp">4821</div>
+                  <p class="small muted" style="margin-top:10px">Give this code to the driver only after the produce is loaded. It proves you handed it over.</p>
+                </div>
+                <div>
+                  <h4 style="font:600 15px var(--display);margin-bottom:10px">Transport</h4>
+                  <dl class="kv" style="grid-template-columns:110px 1fr">
+                    <dt>Provider</dt><dd>Mintu Pickup · 4.5 (30)</dd>
+                    <dt>Vehicle</dt><dd>Normal pickup, 1 ton · Bogura-Tha 11-4521</dd>
+                    <dt>Pickup</dt><dd>13 Nov, 3:00 PM at your farm</dd>
+                    <dt>Delivery</dt><dd>13 Nov, about 5:00 PM in Joypurhat</dd>
+                    <dt>Chosen by</dt><dd>Joypurhat Fresh (the dealer pays)</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+            <div class="sec">
+              <h4>If the delivery fails</h4>
+              <div class="choice">
+                <div><input type="radio" name="fb1" id="fb1a" checked><label for="fb1a"><b>Start the emergency sale for me</b><small>Uses the suggested price drop and duration if you do not respond quickly.</small></label></div>
+                <div><input type="radio" name="fb1" id="fb1b"><label for="fb1b"><b>Wait for me</b><small>Nothing starts until you set it up yourself.</small></label></div>
+              </div>
+            </div>
+            <div class="sec"><div class="btns"><button class="btn warn sm" data-cancel="FN-1038" data-booked="1">Ask admin to cancel this deal</button><button class="btn ghost sm" data-report="Joypurhat Fresh">Report the dealer</button><button class="btn ghost sm" data-report="Mintu Pickup">Report the transporter</button><span class="small muted" style="align-self:center">Transport is already booked, so cancelling needs admin approval.</span></div></div>
+          </div>
+
+          <!-- ---------- Potato deal: transport offers ---------- -->
+          <div data-detail="d-potato" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-potato"/></svg><div><h2>Potato · 1,200 kg</h2><p class="muted">Deal FN-1042 · sold to Kawran Bazar Agro (Dhaka) at ৳22/kg · <span class="num">৳26,400</span></p></div></div>
+              <div class="right"><span class="tag blue">Waiting for transport</span><div class="small muted" style="margin-top:6px">Offers close in <span class="num" data-cd="19200"></span></div></div>
+            </div>
+            <div class="sec">
+              <div class="track">
+                <div class="done">Primary deal</div><div class="now">Transport offers</div><div>Transport confirmed</div><div>Picked up</div><div>In transit</div><div>Delivered</div><div>Completed</div>
+              </div>
+            </div>
+            <div class="sec flush">
+              <h4>Transport offers <small>You can see them. The dealer chooses and pays.</small></h4>
+              <table class="ledger" style="margin-top:8px">
+                <tr><th>Provider</th><th>Vehicle</th><th>Pickup</th><th>Delivery</th><th class="right">Price</th><th></th></tr>
+                <tr><td><b>Bogura Logistics</b><br><span class="muted small">4.6 (52) · 1 failure in 52 trips</span></td><td>Normal truck, 3 ton</td><td class="small">14 Nov, 7:00 AM</td><td class="small">14 Nov, 2:00 PM</td><td class="right num">৳9,500</td><td><span class="tag green">Cost-saving</span></td></tr>
+                <tr><td><b>Uttara Carriers</b><br><span class="muted small">4.3 (21) · no failures</span></td><td>Covered van, ventilated, 1.5 ton</td><td class="small">14 Nov, 9:00 AM</td><td class="small">14 Nov, 4:30 PM</td><td class="right num">৳11,800</td><td></td></tr>
+              </table>
+            </div>
+            <div class="sec">
+              <h4>If the delivery fails</h4>
+              <div class="choice">
+                <div><input type="radio" name="fb2" id="fb2a"><label for="fb2a"><b>Start the emergency sale for me</b><small>Uses the suggested price drop and duration if you do not respond quickly.</small></label></div>
+                <div><input type="radio" name="fb2" id="fb2b" checked><label for="fb2b"><b>Wait for me</b><small>Nothing starts until you set it up yourself.</small></label></div>
+              </div>
+            </div>
+            <div class="sec"><div class="btns"><button class="btn warn sm" data-cancel="FN-1042">Cancel this deal</button><button class="btn ghost sm" data-report="Kawran Bazar Agro">Report the dealer</button><span class="small muted" style="align-self:center">No transport is booked yet, so you can cancel immediately.</span></div></div>
+          </div>
+
+          <!-- ---------- Completed: reviews ---------- -->
+          <div data-detail="d-done" class="hidden">
+            <div class="dhead">
+              <div class="ttl"><svg class="ic lg"><use href="#i-tomato"/></svg><div><h2>Tomato · 800 kg</h2><p class="muted">Deal FN-1019 · sold to Hasan Traders at ৳26.50/kg · <span class="num">৳21,200</span></p></div></div>
+              <div class="right"><span class="tag green">Completed 6 Nov</span></div>
+            </div>
+            <div class="sec">
+              <div class="track"><div class="done">Primary deal</div><div class="done">Transport offers</div><div class="done">Transport confirmed</div><div class="done">Picked up</div><div class="done">In transit</div><div class="done">Delivered</div><div class="done">Completed</div></div>
+            </div>
+            <div class="sec">
+              <div class="grid g2">
+                <div class="rv">
+                  <h4 style="font:600 15px var(--display)">Rate the dealer</h4>
+                  <p class="muted small" style="margin:2px 0 8px">Hasan Traders · Bogura</p>
+                  <div class="rate"><button>★</button><button>★</button><button>★</button><button>★</button><button>★</button></div>
+                  <div class="field" style="margin-top:8px"><textarea rows="3" placeholder="How was the deal? Was the dealer fair and on time?"></textarea></div>
+                  <button class="btn sm" data-review>Submit review</button>
+                </div>
+                <div class="rv">
+                  <h4 style="font:600 15px var(--display)">Rate the transporter</h4>
+                  <p class="muted small" style="margin:2px 0 8px">Mintu Pickup · normal pickup, 1 ton</p>
+                  <div class="rate"><button>★</button><button>★</button><button>★</button><button>★</button><button>★</button></div>
+                  <div class="field" style="margin-top:8px"><textarea rows="3" placeholder="Was the pickup on time? Was the produce handled with care?"></textarea></div>
+                  <button class="btn sm" data-review>Submit review</button>
+                </div>
+              </div>
+            </div>
+            <div class="sec">
+              <h4>The dealer's review of you</h4>
+              <span class="stars">★★★★★</span> <span class="muted small">Hasan Traders · 6 Nov</span>
+              <p style="margin-top:4px">Tomatoes were exactly as in the photos and the weight was correct. Loaded on time.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         F4 — PROFILE & REVIEWS
+    ============================================================ -->
+    <section data-view="profile" class="hidden">
+      <div class="head">
+        <div><h1>Profile &amp; reviews</h1><p>What dealers and transporters see about you.</p></div>
+        <span class="code">Screen F4</span>
+      </div>
+
+      <div class="grid g2" style="align-items:start">
+        <div class="grid">
+          <div class="panel">
+            <h3>Your details</h3>
+            <div class="pb">
+              <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+                <div class="avatar" style="width:72px;height:72px;font-size:32px">K</div>
+                <div><button class="btn ghost sm" id="photoBtn">Change photo</button><p class="small muted" style="margin-top:6px">Member since March 2026 · farmers do not need verification</p></div>
+              </div>
+              <div class="row">
+                <div class="field"><label>Full name</label><input type="text" value="Karim Uddin"></div>
+                <div class="field"><label>Phone</label><input type="tel" value="01712-345678"></div>
+              </div>
+              <div class="row3">
+                <div class="field"><label>District</label><select><option>Bogura</option><option>Joypurhat</option><option>Rajshahi</option></select></div>
+                <div class="field"><label>Upazila</label><input type="text" value="Bogura Sadar"></div>
+                <div class="field"><label>Village</label><input type="text" value="Shakharia"></div>
+              </div>
+              <div class="field"><label>Crops you usually grow <span class="muted" style="font-weight:400">(optional)</span></label><input type="text" value="Tomato, potato, cauliflower, brinjal, green chili"></div>
+              <button class="btn" id="saveProfile">Save changes</button>
+            </div>
+          </div>
+          <div class="panel" id="partnerPanel">
+            <h3>Agri partner offers <small>optional · off by default</small></h3>
+            <div class="pb">
+              <label class="optin">
+                <input type="checkbox" id="partnerOn">
+                <span class="sw" aria-hidden="true"></span>
+                <span><b>Receive offers from verified agri companies</b><small>Seed, fertiliser, crop-care and equipment companies can send you offers that suit the crops you grow, such as early-season seed prices or crop advice for your upazila.</small></span>
+              </label>
+              <div class="safe">
+                <div class="lbl">You stay in control</div>
+                <ul>
+                  <li><b>Your phone number is never shared.</b> Offers arrive only as messages in your FreshNest notifications.</li>
+                  <li><b>Only companies checked by FreshNest.</b> Our admin team verifies every company before it can send anything.</li>
+                  <li><b>Your sales stay private.</b> Companies never see your prices, buyers or deal amounts.</li>
+                  <li><b>No obligation.</b> You decide whether to reply. Turn this off any time and it stops at once.</li>
+                </ul>
+              </div>
+              <div class="seen">
+                <div class="lbl">What a company would see</div>
+                <div class="card-mini"><b>Karim Uddin</b><span>Bogura Sadar, Bogura</span><span>Grows: tomato, potato, cauliflower, brinjal, green chili</span></div>
+                <p class="small muted" style="margin-top:6px">Never shown: phone, village, prices, buyers, ratings.</p>
+              </div>
+              <p class="small muted" id="partnerState" style="margin-top:10px">Off. Companies see your area only inside upazila totals, without your name.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Password</h3>
+            <div class="pb">
+              <div class="row">
+                <div class="field"><label>Current password</label><input type="password" value="password"></div>
+                <div class="field"><label>New password</label><input type="password" placeholder="At least 8 characters"></div>
+              </div>
+              <button class="btn ghost" id="savePass">Update password</button>
+              <p class="small muted" style="margin-top:10px">You sign in with your phone number and password.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Reviews <small>from dealers after completed deals</small></h3>
+          <div class="pb" style="display:grid;grid-template-columns:150px 1fr;gap:20px;border-bottom:1px solid var(--line)">
+            <div><div class="num" style="font:600 46px/1 var(--display)">4.6</div><span class="stars">★★★★★</span><div class="small muted">23 reviews · 27 deals</div></div>
+            <div class="small" style="display:grid;gap:5px;align-content:center">
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">5</span><div class="bar"><i style="width:70%"></i></div><span class="num muted">16</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">4</span><div class="bar"><i style="width:22%"></i></div><span class="num muted">5</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">3</span><div class="bar"><i style="width:8%"></i></div><span class="num muted">2</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">2</span><div class="bar"><i style="width:0"></i></div><span class="num muted">0</span></div>
+              <div style="display:grid;grid-template-columns:20px 1fr 24px;gap:8px;align-items:center"><span class="num">1</span><div class="bar"><i style="width:0"></i></div><span class="num muted">0</span></div>
+            </div>
+          </div>
+          <table class="ledger">
+            <tr><td><span class="stars">★★★★★</span> <b>Hasan Traders</b> <span class="muted small">· Tomato, 800 kg · 6 Nov</span><br>Tomatoes were exactly as in the photos and the weight was correct. Loaded on time.</td></tr>
+            <tr><td><span class="stars">★★★★★</span> <b>Kawran Bazar Agro</b> <span class="muted small">· Potato, 1,500 kg · 28 Oct</span><br>Clean, well-sorted potatoes. Easy to deal with.</td></tr>
+            <tr><td><span class="stars">★★★★<span style="color:#c9c0aa">★</span></span> <b>Joypurhat Fresh</b> <span class="muted small">· Brinjal, 300 kg · 19 Oct</span><br>Good quality. Pickup started a little late because the farm road was muddy.</td></tr>
+            <tr><td><span class="stars">★★★<span style="color:#c9c0aa">★★</span></span> <b>Rangpur Mart</b> <span class="muted small">· Cauliflower, 250 kg · 2 Oct</span><br>A few heads were smaller than in the photos. <a href="#" data-report="this review">Report this review</a></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- modal + toast -->
+<div class="veil hidden" id="veil"><div class="modal"><h3 id="mTitle"></h3><div class="pb" id="mBody"></div><div class="foot" id="mFoot"></div></div></div>
+<div class="toast hidden" id="toast"></div>
+
+<script src="js/farmer.js"></script>
+</body>
+</html>

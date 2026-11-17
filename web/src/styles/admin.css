@@ -1,0 +1,82 @@
+/* FreshNest prototype — Admin look ("office ledger"), loaded after base.css, scoped to <body class="ad"> */
+.ad {
+  --slate: #2f5568;
+  --slate-2: #3c6a80;
+  --slate-tint: #e6eef1;
+  /* chart roles (reference palette, light) */
+  --surface-1: #fcfcfb;
+  --text-primary: #1f2b24;
+  --text-secondary: #52514e;
+  --grid: #e7e6df;
+  --s-potato: #2a78d6;      /* slot 1 */
+  --s-tomato: #eb6834;      /* slot 2 */
+  --s-cauli: #1baf7a;       /* slot 3 */
+  --s-brinjal: #eda100;     /* slot 4 */
+  --s-chili: #e87ba4;       /* slot 5 */
+  --s-lalshak: #008300;     /* slot 6 */
+}
+.ad .side { background: #fbfbf7; border-right: 1px solid var(--line); }
+.ad .brand span { color: var(--slate); }
+.ad .nav a.on { background: var(--slate-tint); color: var(--slate); box-shadow: inset 3px 0 0 var(--slate); }
+.ad .nav .grp { font: 600 10.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 14px 12px 4px; }
+.ad .head h1::after { background: var(--slate); }
+.ad .stats { border-top-color: var(--slate); }
+.ad .hero { background: linear-gradient(90deg, #fff 40%, #eef3f2); border-bottom-color: #cddbe0; }
+.ad .tag.slate { color: var(--slate); background: var(--slate-tint); }
+.ad .btn.slate { background: var(--slate); border-color: var(--slate); }
+.ad .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.ad .tabs button { background: none; border: 0; padding: 9px 14px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.ad .tabs button.on { color: var(--slate); font-weight: 600; border-bottom-color: var(--slate); }
+.ad .tabs button em { font-style: normal; font-size: 11px; background: var(--line-soft); padding: 0 6px; border-radius: 3px; margin-left: 4px; }
+.ad .grid > *, .ad .md > * { min-width: 0; }
+.previewas { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.previewas select { padding: 4px 8px; font-size: 12.5px; }
+
+/* lock + timers */
+.lock { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 8px; border-radius: 3px; background: var(--slate-tint); color: var(--slate); font-weight: 600; }
+.lock.other { background: var(--mustard-tint); color: #7c5606; }
+.esc { font-size: 12px; font-weight: 600; color: var(--clay); }
+
+/* history panel beside cases */
+.hist { background: #f8f9f4; border-left: 1px solid var(--line); padding: 16px 18px; }
+.hist h4 { font: 600 14px var(--display); color: var(--forest); margin-bottom: 8px; }
+.hist dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 12.5px; margin: 0 0 10px; }
+.hist dd { margin: 0; font-weight: 600; text-align: right; }
+.hist ul { margin: 0; padding-left: 16px; font-size: 12.5px; color: var(--muted); }
+.case { display: grid; grid-template-columns: 1fr 250px; }
+.doc { width: 100%; aspect-ratio: 1.55; border: 1px solid var(--line); border-radius: 4px; background: repeating-linear-gradient(135deg, #f6f5ef 0 8px, #f1efe6 8px 16px); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px; }
+.doc.blur { filter: blur(1.4px); }
+
+/* analytics */
+.viz-root { background: var(--surface-1); }
+.filters { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 12px; align-items: end; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font: 11.5px var(--sans); fill: var(--text-secondary); }
+.chart .lbl-strong { fill: var(--text-primary); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: #fff; padding: 3px 9px; border-radius: 3px; font-size: 12.5px; cursor: pointer; }
+.chips label i { width: 10px; height: 10px; border-radius: 2px; }
+.tip { position: fixed; z-index: 60; pointer-events: none; background: #1f2b24; color: #fff; font-size: 12px; line-height: 1.45; padding: 7px 10px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,.18); max-width: 260px; }
+.tip b { font-weight: 600; }
+.hm td.cell { text-align: right; font: 500 12px var(--mono); padding: 6px 8px; cursor: pointer; border: 2px solid var(--surface-1); border-radius: 4px; }
+.hm th { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); padding: 4px 8px; text-align: right; }
+.hm th:first-child, .hm td:first-child { text-align: left; }
+.hm td.rowl { font-size: 12.5px; padding-right: 12px; white-space: nowrap; cursor: pointer; }
+.hm td.rowl:hover { color: var(--slate); text-decoration: underline; }
+.hm { border-collapse: separate; border-spacing: 0; width: 100%; }
+.minibar { display: inline-block; height: 8px; border-radius: 0 4px 4px 0; background: var(--slate-2); vertical-align: middle; margin-right: 8px; }
+.hero-num { font: 600 40px/1.1 var(--display); color: var(--forest); }
+.insight { border-left: 3px solid var(--slate); background: #f3f6f6; padding: 10px 14px; font-size: 13px; border-radius: 0 4px 4px 0; }
+.insight + .insight { margin-top: 8px; }
+.perm label { display: inline-flex; gap: 5px; align-items: center; margin-right: 10px; font-size: 12.5px; }
+.cal { display: grid; grid-template-columns: 110px repeat(12, 1fr); gap: 2px; font-size: 11.5px; }
+.cal div { padding: 6px 4px; text-align: center; background: #f4f4ee; }
+.cal .s { background: #f6e3c9; } .cal .m { background: #d9e8f1; } .cal .w { background: #e4ecdc; }
+.cal .rl { text-align: left; background: none; font-weight: 600; }
+.log td:first-child { font-family: var(--mono); font-size: 12px; white-space: nowrap; color: var(--muted); }
+.hide-perm { display: none !important; }
+
+.spon { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; padding: 8px 10px; border: 1px dashed #d8c58f; background: #fbf7ea; border-radius: 4px; cursor: pointer; font-size: 13px; }

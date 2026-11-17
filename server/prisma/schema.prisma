@@ -1,0 +1,584 @@
+// FreshNest database schema
+// Phase 1: users, roles, locations, products, admin permissions, activity log, notifications.
+// Phase 2: listings, bids, offers, deals.
+// Phase 3: vehicles, transport offers, delivery codes, cancellation requests, reviews.
+// Phase 4: delivery failures and emergency sales.
+// Phase 5: verification documents, reports, announcements, companies, case locks.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  FARMER
+  DEALER
+  TRANSPORTER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE      // can use everything
+  PENDING     // dealer/transporter waiting for admin verification
+  REUPLOAD    // admin asked for a better document
+  REJECTED
+  SUSPENDED   // temporary (until suspendedUntil)
+  BANNED      // permanent; only the Super Admin can lift it
+}
+
+enum AdminPermission {
+  VERIFY      // user + vehicle verification
+  DEALS       // delivery failures + cancellation requests
+  REPORTS     // reports and reviews
+  ANNOUNCE    // announcements
+  ANALYTICS
+}
+
+enum StorageNeed {
+  NORMAL
+  VENTILATED
+  REFRIGERATED
+}
+
+model District {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  nameBn   String?
+  upazilas Upazila[]
+  users    User[]
+  neighbours   District[] @relation("DistrictNeighbours")
+  neighbourOf  District[] @relation("DistrictNeighbours")
+  listingTargets Listing[] @relation("ListingDistricts")
+}
+
+model Upazila {
+  id         Int      @id @default(autoincrement())
+  name       String
+  nameBn     String?
+  districtId Int
+  district   District @relation(fields: [districtId], references: [id])
+  users      User[]
+  neighbours  Upazila[] @relation("UpazilaNeighbours")
+  neighbourOf Upazila[] @relation("UpazilaNeighbours")
+  listings       Listing[]
+  listingTargets Listing[] @relation("ListingUpazilas")
+  failures       DeliveryFailure[]
+
+  @@unique([districtId, name])
+}
+
+model User {
+  id           String     @id @default(cuid())
+  role         Role
+  phone        String     @unique
+  passwordHash String
+  name         String
+  status       UserStatus @default(ACTIVE)
+
+  districtId Int?
+  district   District? @relation(fields: [districtId], references: [id])
+  upazilaId  Int?
+  upazila    Upazila?  @relation(fields: [upazilaId], references: [id])
+  village    String?
+
+  // dealer: shop / business name · transporter: company name
+  businessName String?
+  // farmer: "Agri partner offers" switch (off by default)
+  partnerOffers Boolean @default(false)
+
+  // suspension / ban
+  suspendedUntil DateTime?
+  statusReason   String?
+
+  // admins only
+  isSuperAdmin Boolean           @default(false)
+  permissions  AdminPermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications Notification[]
+  adminActions  AdminLog[]     @relation("actor")
+  listings      Listing[]
+  bids          Bid[]
+  offers        Offer[]
+  farmerDeals   Deal[]         @relation("farmerDeals")
+  dealerDeals   Deal[]         @relation("dealerDeals")
+  vehicles        Vehicle[]
+  transportOffers TransportOffer[]
+  cancelRequests  CancelRequest[] @relation("requester")
+  reviewsGiven    Review[]        @relation("reviewFrom")
+  reviewsGot      Review[]        @relation("reviewTo")
+  failuresReported DeliveryFailure[] @relation("reporter")
+  docs             VerificationDoc[]
+  reportsMade      Report[] @relation("reportBy")
+  reportsAgainst   Report[] @relation("reportAgainst")
+  caseLocks        CaseLock[]
+  lastSeenAt       DateTime?
+
+  @@index([role, status])
+  @@index([upazilaId])
+}
+
+model Product {
+  id           Int         @id @default(autoincrement())
+  nameEn       String      @unique
+  nameBn       String
+  category     String      // Vegetable, Fruit …
+  shelfLifeDays Int
+  storage      StorageNeed @default(NORMAL)
+  // true = needs a ventilated vehicle only for long (nationwide) trips
+  ventilatedForLongTrips Boolean @default(false)
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  listings     Listing[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actor     User     @relation("actor", fields: [actorId], references: [id])
+  action    String
+  target    String?
+  targetUserId String? // user the action was about (user history)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Setting {
+  key   String @id
+  value Json
+}
+
+// ---------------------------------------------------------------- Phase 2
+
+enum Scope {
+  UPAZILA   // only my upazila (+ neighbouring upazilas ticked)
+  DISTRICT  // my district (+ nearby / targeted districts ticked)
+  NATION
+}
+
+enum SellMode {
+  BID   // open bidding, whole lot, highest bid wins automatically
+  OWN   // farmer's own price, dealers send quantity + price offers
+}
+
+enum ListingStatus {
+  OPEN
+  SOLD          // bidding won / Buy Now / all quantity sold through offers
+  NO_SALE       // bidding ended without bids (farmer may relist once)
+  WITHDRAWN
+  EXPIRED       // harvest date + shelf life passed
+}
+
+model Listing {
+  id     String @id @default(cuid())
+  code   Int    @unique @default(autoincrement()) // shown as FN-1001…
+  farmerId String
+  farmer   User   @relation(fields: [farmerId], references: [id])
+
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+  // when the product is not in the list, the farmer gives these
+  customName      String?
+  customShelfLife Int?
+  customStorage   StorageNeed?
+  category        String
+
+  quantityKg  Int
+  remainingKg Int
+  pricePerKg  Decimal  @db.Decimal(10, 2) // base price (BID) or asking price (OWN)
+  harvestDate DateTime
+  description String?
+  photos      String[]
+
+  upazilaId Int       // pickup upazila (farmer's)
+  upazila   Upazila   @relation(fields: [upazilaId], references: [id])
+  scope     Scope
+  targetDistricts District[] @relation("ListingDistricts")
+  targetUpazilas  Upazila[]  @relation("ListingUpazilas")
+
+  mode SellMode
+  // BID
+  bidEndsAt       DateTime?
+  minIncrement    Decimal?  @db.Decimal(10, 2)
+  buyNowPrice     Decimal?  @db.Decimal(10, 2)
+  relisted        Boolean   @default(false)
+  // OWN
+  minOrderKg       Int?
+  minResponseHours Int?
+
+  status    ListingStatus @default(OPEN)
+  closedAt  DateTime?
+  // Phase 4: emergency sale (pickup = the stuck vehicle's location)
+  isEmergency   Boolean   @default(false)
+  failureId     String?   @unique
+  failure       DeliveryFailure? @relation(fields: [failureId], references: [id])
+  tier          Int?      // 1 = stuck upazila, 2 = whole district, 3 = + neighbouring districts
+  tierChangedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bids   Bid[]
+  offers Offer[]
+  deals  Deal[]
+
+  @@index([status, scope])
+  @@index([farmerId])
+}
+
+model Bid {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  dealerId   String
+  dealer     User     @relation(fields: [dealerId], references: [id])
+  pricePerKg Decimal  @db.Decimal(10, 2)
+  createdAt  DateTime @default(now())
+
+  @@index([listingId, pricePerKg])
+}
+
+enum OfferStatus {
+  PENDING     // waiting for the farmer
+  COUNTERED   // farmer sent one counter-offer, waiting for the dealer
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  EXPIRED
+  CANCELLED   // quantity ran out or listing closed
+}
+
+model Offer {
+  id           String      @id @default(cuid())
+  listingId    String
+  listing      Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  dealerId     String
+  dealer       User        @relation(fields: [dealerId], references: [id])
+  quantityKg   Int
+  pricePerKg   Decimal     @db.Decimal(10, 2)
+  expiresAt    DateTime
+  status       OfferStatus @default(PENDING)
+  counterQtyKg Int?
+  counterPrice Decimal?    @db.Decimal(10, 2)
+  note         String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deal         Deal?
+
+  @@index([listingId, status])
+  @@index([dealerId, status])
+}
+
+enum DealSource {
+  BID
+  BUY_NOW
+  OFFER
+  EMERGENCY  // won in an emergency sale after a delivery failure
+}
+
+enum DealStatus {
+  AWAITING_TRANSPORT   // transporters send offers
+  TRANSPORT_CONFIRMED  // dealer chose an offer; vehicle booked
+  IN_TRANSIT           // farmer's pickup code entered by the driver
+  COMPLETED            // dealer's delivery code entered: dealer confirmed receipt
+  FAILURE_REQUESTED    // driver reported the vehicle is stuck; waiting for an admin
+  FAILED               // admin approved: "Failed: released for emergency sale"
+  CANCELLED
+}
+
+model Deal {
+  id         String     @id @default(cuid())
+  code       Int        @unique @default(autoincrement())
+  listingId  String
+  listing    Listing    @relation(fields: [listingId], references: [id])
+  farmerId   String
+  farmer     User       @relation("farmerDeals", fields: [farmerId], references: [id])
+  dealerId   String
+  dealer     User       @relation("dealerDeals", fields: [dealerId], references: [id])
+  offerId    String?    @unique
+  offer      Offer?     @relation(fields: [offerId], references: [id])
+  quantityKg Int
+  pricePerKg Decimal    @db.Decimal(10, 2)
+  source     DealSource
+  status     DealStatus @default(AWAITING_TRANSPORT)
+  cancelledBy     String?
+  cancelReason    String?
+  cancelledAt     DateTime?
+  createdAt  DateTime   @default(now())
+
+  // transport (Phase 3)
+  transportWindowEndsAt DateTime @default(dbgenerated("(now() + '12:00:00'::interval)"))
+  windowExtended        Boolean  @default(false)
+  windowNotified        Boolean  @default(false) // dealer told the window ended without offers
+  pickupCode            String?  // farmer gives it to the driver at pickup
+  deliveryCode          String?  // dealer gives it to the driver on arrival
+  codeAttempts          Int      @default(0)
+  pickedUpAt            DateTime?
+  deliveredAt           DateTime?
+  transportOffers TransportOffer[]
+  cancelRequests  CancelRequest[]
+  reviews         Review[]
+  // Phase 4
+  emergencyAuto   Boolean   @default(true) // farmer's choice: auto-start the emergency sale with suggested values if they do not respond
+  handoverById    String?   // emergency deals: the original driver who hands the produce over (sees the pickup code)
+  failures        DeliveryFailure[]
+
+  @@index([farmerId])
+  @@index([dealerId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------- Phase 3
+
+enum VehicleType {
+  PICKUP
+  MINI_TRUCK
+  TRUCK
+  COVERED_VAN
+}
+
+enum VehicleStatus {
+  PENDING   // waiting for admin to check the registration
+  APPROVED
+  REJECTED
+}
+
+model Vehicle {
+  id         String        @id @default(cuid())
+  ownerId    String
+  owner      User          @relation(fields: [ownerId], references: [id])
+  type       VehicleType
+  regNo      String        @unique
+  capacityKg Int
+  facility   StorageNeed   // NORMAL / VENTILATED / REFRIGERATED
+  docPhoto   String?       // registration document
+  status     VehicleStatus @default(PENDING)
+  statusNote String?
+  active     Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+  offers     TransportOffer[]
+
+  @@index([ownerId])
+}
+
+enum TransportOfferStatus {
+  PENDING    // waiting for the dealer
+  ACCEPTED   // dealer confirmed: vehicle booked
+  NOT_CHOSEN // dealer chose another offer
+  WITHDRAWN
+  CANCELLED  // transporter cancelled after confirmation, or the deal closed
+}
+
+model TransportOffer {
+  id            String               @id @default(cuid())
+  dealId        String
+  deal          Deal                 @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  transporterId String
+  transporter   User                 @relation(fields: [transporterId], references: [id])
+  vehicleId     String
+  vehicle       Vehicle              @relation(fields: [vehicleId], references: [id])
+  price         Int                  // total ৳, paid by the dealer
+  pickupAt      DateTime
+  deliverBy     DateTime
+  note          String?
+  status        TransportOfferStatus @default(PENDING)
+  cancelReason  String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([dealId, status])
+  @@index([vehicleId, status])
+  @@index([transporterId, status])
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/** Cancelling after transport is booked needs admin permission. */
+model CancelRequest {
+  id          String        @id @default(cuid())
+  dealId      String
+  deal        Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  byId        String
+  by          User          @relation("requester", fields: [byId], references: [id])
+  byRole      Role
+  reason      String
+  status      RequestStatus @default(PENDING)
+  decidedById String?
+  decisionNote String?
+  decidedAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([status])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  dealId    String
+  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  fromId    String
+  from      User     @relation("reviewFrom", fields: [fromId], references: [id])
+  toId      String
+  to        User     @relation("reviewTo", fields: [toId], references: [id])
+  stars     Int
+  comment   String
+  hidden    Boolean  @default(false) // admin can hide abusive or fake reviews
+  createdAt DateTime @default(now())
+  reports   Report[]
+
+  @@unique([dealId, fromId, toId])
+  @@index([toId])
+}
+
+// ---------------------------------------------------------------- Phase 4
+
+enum FailureReason {
+  BREAKDOWN
+  ACCIDENT
+  ROAD_BLOCKED
+  FLOOD
+  STRIKE
+  OTHER
+}
+
+enum ProduceCondition {
+  GOOD
+  PARTLY_DAMAGED
+  BADLY_DAMAGED
+}
+
+model DeliveryFailure {
+  id           String           @id @default(cuid())
+  dealId       String
+  deal         Deal             @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  reportedById String
+  reportedBy   User             @relation("reporter", fields: [reportedById], references: [id])
+  upazilaId    Int              // where the vehicle is stuck
+  upazila      Upazila          @relation(fields: [upazilaId], references: [id])
+  locationNote String?          // e.g. "Dhaka–Rangpur highway near Chandaikona"
+  reason       FailureReason
+  details      String?
+  photo        String?
+  condition    ProduceCondition
+  usableKg     Int
+  canMove      Boolean          // can the vehicle still drive slowly to a nearby buyer?
+  status       RequestStatus    @default(PENDING)
+  decidedById  String?
+  decisionNote String?
+  decidedAt    DateTime?
+  escalatedAt  DateTime?        // 30 min without an admin → urgent alert
+  createdAt    DateTime         @default(now())
+  emergency    Listing?
+
+  @@index([status])
+}
+
+// ---------------------------------------------------------------- Phase 5
+
+enum DocKind {
+  NID
+  TRADE_LICENSE     // dealers
+  DRIVING_LICENSE   // transporters
+}
+
+model VerificationDoc {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      DocKind
+  file      String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+enum ReportKind {
+  PRICE_CHANGED     // asked for a lower price after the deal
+  NO_SHOW           // did not come / did not hand over
+  WRONG_QUALITY
+  RUDE
+  FAKE_REVIEW
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  WARNED
+  SUSPENDED
+  DISMISSED
+  REVIEW_HIDDEN
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  byId        String
+  by          User         @relation("reportBy", fields: [byId], references: [id])
+  againstId   String
+  against     User         @relation("reportAgainst", fields: [againstId], references: [id])
+  dealCode    Int?
+  reviewId    String?
+  review      Review?      @relation(fields: [reviewId], references: [id], onDelete: SetNull)
+  kind        ReportKind
+  details     String
+  status      ReportStatus @default(OPEN)
+  decidedById String?
+  decisionNote String?
+  decidedAt   DateTime?
+  createdAt   DateTime     @default(now())
+
+  @@index([status])
+  @@index([againstId])
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  audience    String   // "all" | "role:FARMER" | "district:<id>" | "upazila:<id>"
+  audienceLabel String
+  sponsor     String?  // company name for sponsored announcements (farmers who opted in only)
+  reach       Int
+  byId        String
+  createdAt   DateTime @default(now())
+}
+
+model Company {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  sells      String
+  upazilaIds Int[]
+  trialUntil DateTime?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+/** "Being handled by X": one admin works on a case at a time; releases after 15 min idle. */
+model CaseLock {
+  key       String   @id // e.g. "verify:<userId>", "failure:<id>", "report:<id>"
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  touchedAt DateTime @default(now())
+}

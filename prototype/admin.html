@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshNest — Admin dashboard (prototype)</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="ad">
+<!-- farm graphics (line art, reused with <use>) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <g id="none"></g>
+  <symbol id="i-tomato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7" fill="#f6d9cf"/><path d="M12 7.5V4.5M12 7.5l-3-1.6M12 7.5l3-1.6"/></symbol>
+  <symbol id="i-potato" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round"><ellipse cx="12" cy="12.5" rx="8.2" ry="6" transform="rotate(-18 12 12.5)" fill="#efe4c8"/><path d="M9 11h.01M13.5 10h.01M14.5 14.5h.01M10 15h.01" stroke-width="1.8"/></symbol>
+  <symbol id="i-cauliflower" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5c.6 5 3.8 7.5 7.5 7.5s6.900-2.500 7.500-7.500z" fill="#d9e8cd"/><path d="M6.500 12.500a3 3 0 0 1 2-5.200 3.600 3.600 0 0 1 7 0 3 3 0 0 1 2 5.200z" fill="#fbf8ee"/></symbol>
+  <symbol id="i-chili" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7.500c2.200-.6 4 .4 4.300 2.600.5 4 3.500 7 8.200 7.900-6.500 2.500-13.500-1.500-13.500-8.500 0-.8.300-1.500 1-2z" fill="#d6e8c6"/><path d="M8.500 7.200c-.2-2 .8-3.400 2.800-3.700"/></symbol>
+  <symbol id="i-brinjal" viewBox="0 0 24 24" fill="none" stroke="#24452f" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M14.500 8.500c4 2.200 4.800 7.800 1 10.600s-9.500.8-9.500-4.300c0-3.800 4-5.800 8.500-6.300z" fill="#e6dbee"/><path d="M11.500 9.600l3-1.100 2.200 2.300M15.200 8.300l1.800-3.800"/></symbol>
+  <symbol id="i-scene" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="418" cy="44" r="18" fill="#f1dc9c"/>
+    <path d="M150 104c60-34 130-36 200-12s130 10 210-10v68H150z" fill="#eef4e8"/>
+    <path d="M60 150c70-44 170-52 270-28s160 6 230-8v36z" fill="#dfebd5"/>
+    <g stroke="#9dbb93" stroke-width="1.200">
+      <path d="M150 150c50-26 110-38 180-34M230 150c40-18 90-26 150-22M310 150c36-12 76-17 124-13M392 150c28-8 60-11 96-8M470 150c22-5 46-7 72-5"/>
+    </g>
+    <g stroke="#4a7a50" stroke-width="1.400">
+      <path d="M256 128v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M342 132v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M424 137v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3M500 141v-8m0 2c-3-4-6-4-8-3m8 3c3-4 6-4 8-3"/>
+    </g>
+    <path d="M296 92v-20" stroke="#4a7a50" stroke-width="1.400"/><circle cx="296" cy="64" r="12" fill="#c6dcbb"/>
+    <path d="M360 96v-14l11-9 11 9v14z" fill="#fff" stroke="#4a7a50" stroke-width="1.300"/><path d="M369 96v-7h5v7" stroke="#4a7a50" stroke-width="1.300"/>
+    <path d="M196 44c5-5 9-5 13 0m6-10c4-4 7-4 10 0" stroke="#b9bcae" stroke-width="1.200"/>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(528 152) scale(1)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+    <g stroke="#b98a1e" stroke-width="1.200" fill="#f1e2b4" transform="translate(546 152) scale(.8)"><path d="M0 0c0-20 2-38 6-54" fill="none"/><ellipse cx="7" cy="-58" rx="3" ry="6.500" transform="rotate(14 7 -58)"/><ellipse cx="-.5" cy="-46" rx="2.800" ry="6" transform="rotate(-24 -.5 -46)"/><ellipse cx="10.500" cy="-45" rx="2.800" ry="6" transform="rotate(42 10.500 -45)"/><ellipse cx="-2" cy="-33" rx="2.800" ry="6" transform="rotate(-24 -2 -33)"/><ellipse cx="9" cy="-32" rx="2.800" ry="6" transform="rotate(42 9 -32)"/></g>
+  </symbol>
+  <symbol id="i-desk" viewBox="0 0 560 150" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M150 112c70-24 150-26 220-10s130 6 190-8v56H150z" fill="#eef3ee"/>
+    <path d="M60 150c90-36 230-46 330-32s130 8 170 2v30z" fill="#e2ebdf"/>
+    <g stroke="#2f5568" stroke-width="1.4"><rect x="300" y="44" width="150" height="78" rx="3" fill="#fff"/><path d="M300 56h150"/><path d="M318 108v-22M336 108v-34M354 108v-16M372 108v-40M390 108v-28M408 108v-46M426 108v-30" stroke="#3c6a80" stroke-width="5"/></g>
+    <g stroke="#4a7a50" stroke-width="1.4"><path d="M486 120v-22"/><circle cx="486" cy="90" r="11" fill="#c6dcbb"/><path d="M250 122v-16"/><circle cx="250" cy="100" r="8" fill="#c6dcbb"/></g>
+    <circle cx="520" cy="36" r="13" fill="#f1dc9c"/>
+  </symbol>
+</svg>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <svg viewBox="0 0 34 34" fill="none" stroke="#24452f" stroke-width="1.500" stroke-linecap="round" stroke-linejoin="round"><path d="M17 24V12"/><path d="M17 15c0-5.500 4-8 9-8 0 6-3.500 9.500-9 8z" fill="#cfe2c3"/><path d="M17 19c0-4.500-3.200-6.500-7.500-6.500 0 4.800 3 7.500 7.500 6.500z" fill="#edf3e6"/><path d="M6 23c3.500 6 18.500 6 22 0" stroke="#2f5568"/></svg>
+      <div><b>FreshNest</b><span>Admin office</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#home" data-nav="home">Overview <i>A1</i></a>
+      <div class="grp">Queues</div>
+      <a href="#verify" data-nav="verify" data-perm="verify"><span>Verification <em>4</em></span> <i>A2</i></a>
+      <a href="#fail" data-nav="fail" data-perm="deals"><span>Delivery failures <em class="em-badge">2</em></span> <i>A3</i></a>
+      <a href="#cases" data-nav="cases" data-perm="deals reports"><span>Cases <em>6</em></span> <i>A4</i></a>
+      <a href="#users" data-nav="users" data-perm="reports"><span>Users</span> <i>A5</i></a>
+      <div class="grp">Platform</div>
+      <a href="#products" data-nav="products" data-perm="super"><span>Products &amp; seasons <em>2</em></span> <i>A6</i></a>
+      <a href="#announce" data-nav="announce" data-perm="announce">Announcements <i>A7</i></a>
+      <a href="#analytics" data-nav="analytics" data-perm="analytics">Analytics <i>A8</i></a>
+      <a href="#team" data-nav="team" data-perm="super">Admin team &amp; settings <i>A9</i></a>
+    </nav>
+    <div class="season">
+      <p style="background:#eef3f2"><b>Your permissions</b><span id="permText"></span></p>
+    </div>
+  </aside>
+
+  <div>
+    <header class="top">
+      <div class="roles">
+        <a href="farmer.html">Farmer</a>
+        <a href="dealer.html">Dealer</a>
+        <a href="transporter.html">Transporter</a>
+        <a class="on" href="admin.html">Admin</a>
+      </div>
+      <span class="proto-note">Sample data · Fri 13 Nov 2026, 10:50 AM</span>
+      <div class="sp"></div>
+      <label class="previewas" title="Prototype only">Preview as
+        <select id="asWho"><option value="nusrat">Nusrat (Super)</option><option value="tanvir">Tanvir</option><option value="mitu">Mitu</option></select>
+      </label>
+      <button class="bell" id="bell" aria-label="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c2a21" stroke-width="1.8"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 7H4c0-1 2-2 2-7z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+        <b>4</b>
+      </button>
+      <div class="who"><div class="avatar" style="background:var(--slate)" id="whoA">N</div><div id="whoN">Nusrat Jahan<small>Super Admin</small></div></div>
+    </header>
+
+    <div class="drop hidden" id="drop">
+      <h4>Notifications</h4>
+      <ul>
+        <li class="new" data-goto="fail">URGENT: tomato 900 kg stuck in Sherpur upazila, Bogura. No admin opened it for 30 minutes.<small>10:20 AM · escalated</small></li>
+        <li class="new" data-goto="cases">Alert: Hasan Traders cancelled 3 deals in 30 days.<small>9:40 AM</small></li>
+        <li class="new" data-goto="cases">Alert: Swift Carriers had 3 delivery failures in 30 days.<small>9:12 AM</small></li>
+        <li class="new" data-goto="products">2 new products suggested by farmers (Lal shak, Kochur loti).<small>Yesterday</small></li>
+      </ul>
+    </div>
+
+    <main>
+    <!-- ================= A1 OVERVIEW ================= -->
+    <section data-view="home">
+      <div class="head hero">
+        <svg class="scene" viewBox="0 0 560 150"><use href="#i-desk"/></svg>
+        <div><h1 id="hello">Good morning, Nusrat</h1><p>Friday, 13 November 2026 · 3 admins online · 5 districts, 41 upazilas active</p></div>
+        <span class="code">Screen A1</span>
+      </div>
+      <div class="stats">
+        <div data-perm="verify"><span>Waiting verification</span><b class="num">4</b><small>2 dealers · 1 transporter · 1 vehicle</small></div>
+        <div data-perm="deals"><span>Delivery failures</span><b class="num">2</b><small>1 escalated · oldest 31 min</small></div>
+        <div data-perm="deals reports"><span>Open cases</span><b class="num">6</b><small>2 cancel requests · 3 reports · 1 review</small></div>
+        <div data-perm="analytics super"><span>Saved by emergency sales</span><b class="num">1,460 kg</b><small>November · about ৳52,000</small></div>
+      </div>
+      <div class="grid g-main">
+        <div class="grid">
+          <div class="panel" data-perm="deals verify reports">
+            <h3>Needs action now</h3>
+            <table class="ledger" id="urgentList"></table>
+          </div>
+          <div class="panel" data-perm="analytics">
+            <h3>Last 14 days <a class="small" href="#analytics" id="toOps">Platform charts</a></h3>
+            <div class="pb"><div class="legend" id="lgHome"></div><div class="chart" id="cHome"></div></div>
+          </div>
+          <div class="panel" data-perm="analytics">
+            <h3>This week in the upazilas <a class="small" href="#analytics">Open Analytics</a></h3>
+            <div class="pb" id="weekInsights"></div>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="panel" data-perm="deals reports">
+            <h3>Automatic alerts <small class="muted">3 or more in 30 days</small></h3>
+            <table class="ledger">
+              <tr><td><span class="tag slate">Dealer</span></td><td><b>Hasan Traders</b> · Bogura Sadar<br><span class="muted small">3 cancellations in 30 days</span></td></tr>
+              <tr><td><span class="tag slate">Transporter</span></td><td><b>Swift Carriers</b> · Gaibandha Sadar<br><span class="muted small">3 delivery failures in 30 days</span></td></tr>
+              <tr><td><span class="tag slate">Farmer</span></td><td><b>Bablu Mia</b> · Kahaloo, Bogura<br><span class="muted small">3 cancellations in 30 days</span></td></tr>
+            </table>
+            <p class="small muted" style="padding:10px 16px">Alerts only. Nothing happens to the user until an admin acts.</p>
+          </div>
+          <div class="panel">
+            <h3>Admins on duty</h3>
+            <table class="ledger">
+              <tr><td><b>Nusrat Jahan</b><br><span class="muted small">Super Admin</span></td><td class="right"><span class="tag green">Online</span></td></tr>
+              <tr><td><b>Tanvir Ahmed</b><br><span class="muted small">Verification · deals</span></td><td class="right"><span class="tag gold">Idle 12 min</span></td></tr>
+              <tr><td><b>Mitu Rahman</b><br><span class="muted small">Reports · announcements · analytics</span></td><td class="right"><span class="tag green">Online</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= A2 VERIFICATION ================= -->
+    <section data-view="verify" class="hidden">
+      <div class="head"><div><h1>Verification</h1><p>Dealers and transporters can use FreshNest only after you check their documents. Farmers need no verification.</p></div><span class="code">Screen A2</span></div>
+      <div class="md">
+        <div class="panel list" id="verList"></div>
+        <div class="panel" id="verDetail"></div>
+      </div>
+    </section>
+
+    <!-- ================= A3 DELIVERY FAILURES ================= -->
+    <section data-view="fail" class="hidden">
+      <div class="head"><div><h1>Delivery failures</h1><p>Sorted by urgency (shelf life left). A request nobody opens in 30 minutes is escalated to every admin with this permission and the Super Admin.</p></div><span class="code">Screen A3</span></div>
+      <div class="md">
+        <div class="panel list" id="failList"></div>
+        <div class="panel" id="failDetail"></div>
+      </div>
+    </section>
+
+    <!-- ================= A4 CASES ================= -->
+    <section data-view="cases" class="hidden">
+      <div class="head"><div><h1>Cases</h1><p>Cancellation requests after transport is booked, reports between users, and reported reviews.</p></div><span class="code">Screen A4</span></div>
+      <div class="tabs" id="caseTabs">
+        <button data-t="cancel" data-perm="deals">Cancellation requests <em>2</em></button>
+        <button data-t="reports" data-perm="reports">Reports <em>3</em></button>
+        <button data-t="reviews" data-perm="reports">Reviews <em>1</em></button>
+      </div>
+      <div class="md">
+        <div class="panel list" id="caseList"></div>
+        <div class="panel" id="caseDetail"></div>
+      </div>
+    </section>
+
+    <!-- ================= A5 USERS ================= -->
+    <section data-view="users" class="hidden">
+      <div class="head"><div><h1>Users</h1><p>Find anyone, see their history, and warn, suspend or ban with a written reason.</p></div><span class="code">Screen A5</span></div>
+      <div class="panel" style="margin-bottom:16px"><div class="pb filters" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr">
+        <div class="field" style="margin:0"><label>Search name or phone</label><input type="text" id="uQ" placeholder="e.g. Karim"></div>
+        <div class="field" style="margin:0"><label>Role</label><select id="uRole"><option value="">All roles</option><option>Farmer</option><option>Dealer</option><option>Transporter</option></select></div>
+        <div class="field" style="margin:0"><label>District</label><select id="uDist"></select></div>
+        <div class="field" style="margin:0"><label>Upazila</label><select id="uUpa"></select></div>
+        <div class="field" style="margin:0"><label>Status</label><select id="uStat"><option value="">Any</option><option>Active</option><option>Warned</option><option>Suspended</option><option>Banned</option></select></div>
+      </div></div>
+      <div class="panel"><table class="ledger" id="userTable"></table></div>
+    </section>
+
+    <!-- ================= A6 PRODUCTS & SEASONS ================= -->
+    <section data-view="products" class="hidden">
+      <div class="head"><div><h1>Products &amp; seasons</h1><p>The product list farmers choose from, products farmers typed themselves, and the season calendar for weather advice.</p></div><span class="code">Screen A6</span></div>
+      <div class="panel" style="margin-bottom:16px">
+        <h3>Suggested by farmers <small>Products farmers typed because they were not in the list</small></h3>
+        <table class="ledger" id="suggTable"></table>
+      </div>
+      <div class="panel" style="margin-bottom:16px">
+        <h3>Product master list <button class="btn sm ghost" id="addProd">+ Add product</button></h3>
+        <table class="ledger" id="prodTable"></table>
+      </div>
+      <div class="panel">
+        <h3>Season calendar <small>Advice only. Applies to normal vehicles.</small></h3>
+        <div class="pb">
+          <div class="cal" id="cal"></div>
+          <table class="ledger" style="margin-top:14px">
+            <tr><th>Season</th><th>Months</th><th>Advice shown to users</th><th></th></tr>
+            <tr><td><b>Summer</b></td><td>Mar–May</td><td>Heat: ventilated vehicle, or travel at night / early morning.</td><td class="right"><button class="btn sm ghost" data-seas="Summer">Edit</button></td></tr>
+            <tr><td><b>Monsoon</b></td><td>Jun–Oct</td><td>Rain and humidity: covered vehicle or tarpaulin.</td><td class="right"><button class="btn sm ghost" data-seas="Monsoon">Edit</button></td></tr>
+            <tr><td><b>Winter</b></td><td>Nov–Feb</td><td>Low risk, normal vehicle recommended (cost-saving). Fog: allow extra travel time.</td><td class="right"><button class="btn sm ghost" data-seas="Winter">Edit</button></td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= A7 ANNOUNCEMENTS ================= -->
+    <section data-view="announce" class="hidden">
+      <div class="head"><div><h1>Announcements</h1><p>Messages arrive in users' notification bell. Send to everyone, one role, one district or one upazila.</p></div><span class="code">Screen A7</span></div>
+      <div class="grid g-main">
+        <div class="panel"><h3>New announcement</h3><div class="pb">
+          <div class="row"><div class="field"><label>Who receives it</label><select id="anWho"><option value="all">Everyone</option><option value="role">One role</option><option value="district">One district</option><option value="upazila">One upazila</option></select></div>
+          <div class="field" id="anPickF"><label id="anPickL">Choose</label><select id="anPick"></select></div></div>
+          <label class="spon"><input type="checkbox" id="anSp"> <b>Sponsored by an agri company</b> <span class="muted small">(paid, farmers only)</span></label>
+          <div class="field hidden" id="anSpF"><label>Company</label><select id="anCo"><option>GreenSeed Bangladesh</option><option>Krishi Sar Ltd.</option><option>FarmTools BD</option></select>
+            <small>Sent only to farmers who turned on "Agri partner offers" in their profile. Always shown with a <b>Sponsored</b> label.</small></div>
+          <div class="field"><label>Title</label><input type="text" id="anT" placeholder="e.g. Dense fog on the highway"></div>
+          <div class="field"><label>Message</label><textarea id="anM" rows="4"></textarea></div>
+          <p class="small muted" id="anReach" style="margin-bottom:10px"></p>
+          <button class="btn slate" id="anSend">Send announcement</button>
+        </div></div>
+        <div class="panel"><h3>Sent</h3><table class="ledger" id="anList">
+          <tr><td><span class="tag gold">Sponsored</span> <b>Winter tomato seed: 15% off before 30 Nov</b><br><span class="muted small">GreenSeed Bangladesh · Upazila: Bogura Sadar, Bogura · 61 opted-in farmers · 11 Nov</span></td></tr>
+          <tr><td><b>Dense fog on the Dhaka–Bogura highway</b><br><span class="muted small">Upazila: Ullapara, Sirajganj · 214 users · 12 Nov</span></td></tr>
+          <tr><td><b>Never hand over produce without the delivery code</b><br><span class="muted small">Role: Transporters · 186 users · 10 Nov</span></td></tr>
+          <tr><td><b>System maintenance Friday 2–3 AM</b><br><span class="muted small">Everyone · 4,812 users · 6 Nov</span></td></tr>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ================= A8 ANALYTICS ================= -->
+    <section data-view="analytics" class="hidden viz-root">
+      <div class="head"><div><h1>Analytics</h1><p>What sells where, down to the upazila. Built so agricultural companies can target seeds, fertiliser and services later.</p></div><span class="code">Screen A8</span></div>
+      <div class="tabs" id="anTabs"><button class="on" data-at="market">Market by upazila</button><button data-at="ops">Platform &amp; operations</button></div>
+      <div id="anMarket">
+
+      <div class="panel" style="margin-bottom:16px"><div class="pb filters">
+        <div class="field" style="margin:0"><label>Period</label><select id="fPer"><option value="1">Last 30 days (Nov)</option><option value="3" selected>Last 3 months</option><option value="12">Last 12 months</option></select></div>
+        <div class="field" style="margin:0"><label>District</label><select id="fDis"></select></div>
+        <div class="field" style="margin:0"><label>Upazila</label><select id="fUpa"></select></div>
+        <div class="field" style="margin:0"><label>Product</label><select id="fPro"></select></div>
+        <div class="btns"><button class="btn ghost sm" id="fReset">Reset</button><button class="btn slate sm" id="csv">Company report (CSV)</button></div>
+      </div></div>
+
+      <div class="stats" id="kpis"></div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="panel"><h3 id="hmTitle">Where each product sells</h3><div class="pb"><p class="small muted" style="margin-bottom:8px">Tonnes sold. Darker = more. Click an area to zoom in.</p><div id="heat"></div></div></div>
+        <div class="panel"><h3 id="topTitle">Top products</h3><div class="pb"><div class="chart" id="topBars"></div><div id="topNote" class="small muted" style="margin-top:8px"></div></div></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px">
+        <h3 id="priceTitle">Price ups and downs <small>Average deal price, ৳ per kg, by week</small></h3>
+        <div class="pb"><div class="chips" id="priceChips" style="margin-bottom:10px"></div><div class="chart" id="priceLine"></div></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px"><h3 id="farmTitle">Farmers by quantity sold</h3><table class="ledger" id="farmTable"></table>
+        <p class="small muted" style="padding:10px 16px">Names are shown to companies only for farmers who allowed it in their profile. Everyone else appears only inside upazila totals.</p></div>
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="panel"><h3 id="supTitle">Coming supply · next 30 days</h3><div class="pb"><div class="chart" id="supply"></div></div></div>
+        <div class="panel"><h3>Where the produce goes <small>Pickup upazila → buyer's district</small></h3><table class="ledger" id="flows"></table></div>
+      </div>
+
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="panel"><h3 id="seasTitle">Seasonality <small>Tonnes by month, last 12 months</small></h3><div class="pb"><div id="seas"></div></div></div>
+        <div class="panel"><h3>Produce saved by emergency sales</h3><div class="pb">
+          <div style="display:flex;gap:24px;align-items:flex-end;margin-bottom:10px"><div><div class="hero-num">1,460 kg</div><span class="small muted">saved in November · about ৳52,000 that would have rotted</span></div><div><div class="hero-num" style="font-size:26px">11,050 kg</div><span class="small muted">last 12 months</span></div></div>
+          <div class="chart" id="saved"></div></div></div>
+      </div>
+
+      <div class="panel"><h3>What this means for companies</h3><div class="pb" id="insights"></div></div>
+      <div class="panel" style="margin-top:16px"><h3>Company subscriptions <small>monthly upazila report · how FreshNest earns from this data</small></h3>
+        <table class="ledger" id="subTable"></table>
+        <p class="small muted" style="padding:10px 16px">Each report has upazila totals, top products, prices and coming supply. Farmer names appear only for farmers who turned on "Agri partner offers".</p></div>
+      </div>
+      <div id="anOps" class="hidden">
+        <div class="stats" id="opsKpis" style="grid-template-columns:repeat(5,1fr)"></div>
+        <div class="grid g2" style="margin-bottom:16px">
+          <div class="panel"><h3>Deals completed per week <small>last 12 weeks, by deal type</small></h3><div class="pb"><div class="legend" id="lgDeals"></div><div class="chart" id="cDeals"></div></div></div>
+          <div class="panel"><h3>Trade value per week <small>৳ lakh, deal value before transport</small></h3><div class="pb"><div class="chart" id="cValue"></div></div></div>
+        </div>
+        <div class="panel" style="margin-bottom:16px"><h3>New sign-ups per month <small>each role on its own scale · last 12 months</small></h3><div class="pb"><div class="grid g3" id="cUsers"></div></div></div>
+        <div class="grid g2" style="margin-bottom:16px">
+          <div class="panel"><h3>Delivery outcome by vehicle type <small>share of trips, last 3 months</small></h3><div class="pb"><div class="legend" id="lgOut"></div><div class="chart" id="cOut"></div></div></div>
+          <div class="panel"><h3>Why deliveries failed <small>reports approved by admins, last 3 months</small></h3><div class="pb"><div class="chart" id="cFailWhy"></div></div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:16px">
+          <div class="panel"><h3>Verification decisions per week <small>dealers, transporters and vehicles</small></h3><div class="pb"><div class="legend" id="lgVer"></div><div class="chart" id="cVer"></div><p class="small muted" id="verWait" style="margin-top:8px"></p></div></div>
+          <div class="panel"><h3>Reports by type <small>and what admins decided · last 3 months</small></h3><div class="pb"><div class="legend" id="lgRep"></div><div class="chart" id="cRep"></div></div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:16px">
+          <div class="panel"><h3>Pickup time of day <small>confirmed pickups, last 30 days</small></h3><div class="pb"><div class="chart" id="cHours"></div></div></div>
+          <div class="panel"><h3>Cancellations per week <small>by who cancelled</small></h3><div class="pb"><div class="legend" id="lgCan"></div><div class="chart" id="cCan"></div></div></div>
+        </div>
+        <div class="panel"><h3>Admin workload <small>cases closed per admin, last 30 days</small></h3><div class="pb"><div class="legend" id="lgAdm"></div><div class="chart" id="cAdm"></div></div></div>
+      </div>
+    </section>
+
+    <!-- ================= A9 TEAM & SETTINGS ================= -->
+    <section data-view="team" class="hidden">
+      <div class="head"><div><h1>Admin team &amp; settings</h1><p>Only the Super Admin sees this page.</p></div><span class="code">Screen A9</span></div>
+      <div class="panel" style="margin-bottom:16px">
+        <h3>Admins <button class="btn sm ghost" id="addAdmin">+ Add admin</button></h3>
+        <table class="ledger perm" id="adminTable"></table>
+      </div>
+      <div class="grid g2" style="margin-bottom:16px">
+        <div class="panel"><h3>System settings</h3><div class="pb">
+          <div class="row"><div class="field"><label>Minimum bidding time · within district</label><input type="number" value="12"> <small>hours</small></div><div class="field"><label>Minimum bidding time · nationwide</label><input type="number" value="24"> <small>hours</small></div></div>
+          <div class="row"><div class="field"><label>Shelf life left at the dealer</label><input type="number" value="40"> <small>% (the 40% rule)</small></div><div class="field"><label>Transport offer window</label><input type="text" value="6–12"> <small>hours</small></div></div>
+          <div class="row"><div class="field"><label>Alert after (any role)</label><input type="text" value="3 in 30 days"></div><div class="field"><label>Escalate unhandled failure after</label><input type="number" value="30"> <small>minutes</small></div></div>
+          <div class="row"><div class="field"><label>Release a case lock after</label><input type="number" value="15"> <small>minutes idle</small></div><div class="field"><label>Temporary suspension options</label><input type="text" value="7 days, 30 days"></div></div>
+          <button class="btn slate" id="saveSet">Save settings</button>
+        </div></div>
+        <div class="panel"><h3>Activity log <small>Every admin action</small></h3><table class="ledger log" id="log"></table></div>
+      </div>
+    </section>
+    </main>
+  </div>
+</div>
+
+<div class="veil hidden" id="veil"><div class="modal"><h3 id="mTitle"></h3><div class="pb" id="mBody"></div><div class="foot" id="mFoot"></div></div></div>
+<div class="toast hidden" id="toast"></div>
+<div class="tip hidden" id="tip"></div>
+<script src="js/admin.js"></script>
+</body>
+</html>

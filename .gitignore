@@ -1,0 +1,15 @@
+node_modules/
+.pgdata/
+.pgdata.log
+.env
+.next/
+dist/
+server/src/generated/
+.DS_Store
+server/uploads/
+web/.env*.local
+# helper files created by `prisma init` for AI assistants
+server/.agents/
+server/.claude/
+server/.windsurf/
+server/skills-lock.json

@@ -1,0 +1,3 @@
+-- Listing and deal numbers are shown as FN-1001, FN-1002 …
+ALTER SEQUENCE "Listing_code_seq" RESTART WITH 1001;
+ALTER SEQUENCE "Deal_code_seq" RESTART WITH 1001;
