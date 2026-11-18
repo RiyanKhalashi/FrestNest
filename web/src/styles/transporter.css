@@ -101,3 +101,12 @@
 .locked [data-offer], .locked #sendOffer, .locked [data-pickup], .locked [data-deliver] { opacity: .45; }
 .tp .grid > *, .tp .md > * { min-width: 0; }
 .tp .wb-meta { min-width: 0; }
+
+/* ---- responsive ---- */
+@media (max-width: 1024px) { .fleet { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .waybill { grid-template-columns: 1fr; }
+  .waybill::before, .waybill::after { display: none; }
+  .waybill .wb-stub { border-left: 0; border-top: 2px dashed #d4cdbb; border-radius: 0 0 6px 6px; }
+  .fleet { grid-template-columns: 1fr; }
+}

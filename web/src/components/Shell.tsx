@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { api, HOME, ROLE_LABEL, type Role, type User } from "@/lib/api";
 import { NAV, BRAND_SUB, BODY_CLASS } from "@/lib/nav";
 import { SessionProvider, useSession } from "./Session";
@@ -32,6 +32,8 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
   const { user, unread, loading } = useSession();
   const path = usePathname();
   const router = useRouter();
+  const [navOpen, setNavOpen] = useState(false);
+  useEffect(() => { setNavOpen(false); }, [path]); // close the mobile menu after navigating
 
   useEffect(() => {
     if (loading) return;
@@ -53,8 +55,9 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
   async function logout() { await api("/auth/logout", { method: "POST" }); window.location.assign("/login"); } // full reload clears all in-memory state on sign-out
 
   return (
-    <div className="app">
-      <aside className="side">
+    <div className={"app" + (navOpen ? " nav-open" : "")}>
+      <div className="scrim" onClick={() => setNavOpen(false)} />
+      <aside className="side" id="side-nav">
         <div className="brand"><Sprout /><div><b>FreshNest</b><span>{BRAND_SUB[role]}</span></div></div>
         <nav className="nav">
           {items.map((i, idx) => {
@@ -71,6 +74,9 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
       </aside>
       <div>
         <header className="top">
+          <button className="menu-btn" aria-label="Menu" aria-expanded={navOpen} aria-controls="side-nav" onClick={() => setNavOpen((o) => !o)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
           <span className="proto-note">{ROLE_LABEL[role]}{place ? " · " + place : ""}</span>
           <div className="sp" />
           <Bell initialUnread={unread} />

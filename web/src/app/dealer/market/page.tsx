@@ -61,7 +61,7 @@ function BidBox({ l, onDone, blocked }: { l: Listing; onDone: () => void; blocke
           </div>
         )
       ) : <div className="note">Bidding is closed.</div>}
-      {open && <p className="small muted" style={{ marginTop: 8 }}>Ends {dateTime(b.endsAt)} (in <Countdown to={b.endsAt} />). The highest bid wins automatically.</p>}
+      {open && <p className="small muted" style={{ marginTop: 8 }}>Ends {dateTime(b.endsAt)} (<Countdown to={b.endsAt} prefix="in " done="ending now" />). The highest bid wins automatically.</p>}
       {buy && (
         <Modal title="Buy the whole lot now?" onClose={() => setBuy(false)} actions={<button className="btn gold" disabled={busy} onClick={buyNow}>Confirm Buy Now</button>}>
           <p>You buy <b>{kg(l.quantityKg)} of {l.product.name}</b> at <b>{tk(b.buyNowPrice)}</b>/kg = <b>{tk0((b.buyNowPrice ?? 0) * l.quantityKg)}</b>.</p>
@@ -107,7 +107,7 @@ function OfferBox({ l, onDone, blocked }: { l: Listing; onDone: () => void; bloc
           <div>
             <h5>{kg(mine.quantityKg)} at {tk(mine.pricePerKg)}/kg = {tk0(mine.total)} <span className={"tag " + OFFER_TAG[mine.status][0]} style={{ marginLeft: 6 }}>{OFFER_TAG[mine.status][1]}</span></h5>
             {mine.status === "COUNTERED" && <div className="note" style={{ marginTop: 8 }}><b>Farmer&apos;s counter-offer:</b> {kg(mine.counterQtyKg ?? mine.quantityKg)} at <b>{tk(mine.counterPrice)}</b>/kg = {tk0((mine.counterPrice ?? 0) * (mine.counterQtyKg ?? mine.quantityKg))}. Answer before your offer time ends.</div>}
-            <div className="small muted" style={{ marginTop: 4 }}>Expires in <Countdown to={mine.expiresAt} /></div>
+            <div className="small muted" style={{ marginTop: 4 }}><Countdown to={mine.expiresAt} prefix="Expires in " done="Expired" /></div>
           </div>
           <div className="btns" style={{ justifyContent: "flex-end" }}>
             {mine.status === "PENDING" && <><button className="btn ghost sm" onClick={() => { setF({ q: String(mine.quantityKg), p: String(mine.pricePerKg), h: String(Math.max(minReply, 6)), note: mine.note ?? "" }); setEditing(true); }}>Edit</button>

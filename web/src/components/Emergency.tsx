@@ -57,7 +57,7 @@ export function EmergencySetup({ d, onChange }: { d: Deal; onChange: () => void 
 
   if (s.emergency) return (
     <div className="note good">
-      <b>Emergency sale {s.emergency.code} is {s.emergency.status === "OPEN" ? "live" : s.emergency.status.toLowerCase()}.</b> {s.emergency.status === "OPEN" && <>Visible to: {s.emergency.tierLabel.toLowerCase()}. Ends in <Countdown to={s.emergency.endsAt} />. It widens by itself after 1 hour without bids.</>}
+      <b>Emergency sale {s.emergency.code} is {s.emergency.status === "OPEN" ? "live" : s.emergency.status.toLowerCase()}.</b> {s.emergency.status === "OPEN" && <>Visible to: {s.emergency.tierLabel.toLowerCase()}. <Countdown to={s.emergency.endsAt} prefix="Ends in " done="Time is up" />. It widens by itself after 1 hour without bids.</>}
       <div className="btns" style={{ marginTop: 8 }}><Link className="btn sm" href={"/farmer/sales?l=" + s.emergency.id}>Open the emergency sale</Link>{s.emergency.status === "OPEN" && (s.emergency.tier ?? 1) < 3 && <button className="btn ghost sm" onClick={widen}>Widen now</button>}</div>
     </div>
   );

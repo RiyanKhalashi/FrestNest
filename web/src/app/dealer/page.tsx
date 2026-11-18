@@ -45,8 +45,8 @@ export default function Page() {
         <div className="panel">
           <h3>Needs your attention</h3>
           {outbid.length + countered.length ? <table className="ledger"><tbody>
-            {outbid.map((b) => <tr key={b.listingId}><td style={{ width: 90 }}><span className="tag red">Outbid</span></td><td><b>{b.product} · {kg(b.quantityKg)}</b> · highest {tk(b.top)}, yours {tk(b.myBest)}<br /><span className="small muted">Ends in <Countdown to={b.endsAt} /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + b.listingId}>Bid again</Link></td></tr>)}
-            {countered.map((o) => <tr key={o.id}><td><span className="tag blue">Counter</span></td><td><b>{o.listing.farmer}</b> asks {tk(o.counterPrice)}/kg for {o.listing.product}<br /><span className="small muted">Answer within <Countdown to={o.expiresAt} /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + o.listing.id}>Answer</Link></td></tr>)}
+            {outbid.map((b) => <tr key={b.listingId}><td style={{ width: 90 }}><span className="tag red">Outbid</span></td><td><b>{b.product} · {kg(b.quantityKg)}</b> · highest {tk(b.top)}, yours {tk(b.myBest)}<br /><span className="small muted"><Countdown to={b.endsAt} prefix="Ends in " done="Ended" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + b.listingId}>Bid again</Link></td></tr>)}
+            {countered.map((o) => <tr key={o.id}><td><span className="tag blue">Counter</span></td><td><b>{o.listing.farmer}</b> asks {tk(o.counterPrice)}/kg for {o.listing.product}<br /><span className="small muted"><Countdown to={o.expiresAt} prefix="Answer within " done="Answer time is over" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + o.listing.id}>Answer</Link></td></tr>)}
           </tbody></table> : <p className="pb muted">All caught up.</p>}
         </div>
         <div className="panel">

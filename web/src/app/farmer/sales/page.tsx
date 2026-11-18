@@ -26,7 +26,7 @@ function OfferRow({ o, onDone }: { o: Offer; onDone: () => void }) {
         <h5>{o.dealer.name} <span className="muted small" style={{ fontWeight: 400 }}>· {o.dealer.place}</span> <span className={"tag " + OFFER_TAG[o.status][0]} style={{ marginLeft: 6 }}>{OFFER_TAG[o.status][1]}</span></h5>
         <div className="small" style={{ marginTop: 3 }}><b className="num">{kg(o.quantityKg)}</b> at <b className="num">{tk(o.pricePerKg)}</b>/kg = {tk0(o.total)}{o.note ? <span className="muted"> · “{o.note}”</span> : null}</div>
         {o.status === "COUNTERED" && <div className="small" style={{ marginTop: 3 }}>You countered: {kg(o.counterQtyKg ?? o.quantityKg)} at {tk(o.counterPrice)}/kg. Waiting for the dealer.</div>}
-        {["PENDING", "COUNTERED"].includes(o.status) && <div className="small muted">Expires in <Countdown to={o.expiresAt} /> ({dateTime(o.expiresAt)})</div>}
+        {["PENDING", "COUNTERED"].includes(o.status) && <div className="small muted"><Countdown to={o.expiresAt} prefix="Expires in " done="Expired" /> ({dateTime(o.expiresAt)})</div>}
         {!["PENDING", "COUNTERED"].includes(o.status) && <div className="small muted">{ago(o.at)}</div>}
       </div>
       {open && (
@@ -97,7 +97,7 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
         <div className="ttl"><ProductIcon name={l.product.name} size={44} /><div><h2>{l.product.name} · {kg(l.quantityKg)}</h2><p className="muted">{l.code} · {l.mode === "BID" ? "Open bidding" : "Own price"} · {SCOPE_LABEL[l.scope]}</p></div></div>
         <div style={{ textAlign: "right" }}>
           <span className={"tag " + STATUS_TAG[l.status][0]}>{STATUS_TAG[l.status][1]}</span>
-          {l.status === "OPEN" && b && <div className="small muted" style={{ marginTop: 6 }}>Bidding ends in <Countdown to={b.endsAt} /></div>}
+          {l.status === "OPEN" && b && <div className="small muted" style={{ marginTop: 6 }}><Countdown to={b.endsAt} prefix="Bidding ends in " done="Bidding ended" /></div>}
           {l.urgent && l.status === "OPEN" && <div style={{ marginTop: 6 }}><span className="tag red">{l.daysLeft} day{l.daysLeft === 1 ? "" : "s"} of shelf life left</span></div>}
         </div>
       </div>
@@ -214,7 +214,7 @@ function Sales() {
                   <button key={l.id} className={"item" + (l.id === current?.id ? " on" : "")} onClick={() => router.replace("/farmer/sales?l=" + l.id, { scroll: false })}>
                     <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={l.product.name} />{l.product.name} · {kg(l.mode === "OWN" && l.status === "OPEN" ? l.remainingKg : l.quantityKg)}{l.mode === "OWN" && l.status === "OPEN" && l.remainingKg < l.quantityKg ? " left" : ""}</span>
                       {failed(l) ? <span className="tag red">Delivery failed</span> : l.emergency && l.status === "OPEN" ? <span className="tag red">Emergency</span> : waiting(l) > 0 ? <span className="tag gold">{waiting(l)} offer{waiting(l) > 1 ? "s" : ""}</span> : l.urgent && l.status === "OPEN" ? <span className="tag red">{l.daysLeft}d left</span> : <span className={"tag " + STATUS_TAG[l.status][0]}>{STATUS_TAG[l.status][1]}</span>}</b>
-                    <span>{l.code} · {l.mode === "BID" ? (l.bidding?.top ? `highest ${tk(l.bidding.top)}` : "no bids yet") : `asking ${tk(l.pricePerKg)}`}{l.status === "OPEN" && l.bidding ? <> · ends in <Countdown to={l.bidding.endsAt} /></> : null}</span>
+                    <span>{l.code} · {l.mode === "BID" ? (l.bidding?.top ? `highest ${tk(l.bidding.top)}` : "no bids yet") : `asking ${tk(l.pricePerKg)}`}{l.status === "OPEN" && l.bidding ? <> · <Countdown to={l.bidding.endsAt} prefix="ends in " /></> : null}</span>
                   </button>
                 ))}
               </div>

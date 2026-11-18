@@ -28,10 +28,13 @@ export function useNow(intervalMs = 1000) {
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), intervalMs); return () => clearInterval(t); }, [intervalMs]);
   return now;
 }
-export function Countdown({ to }: { to: string | Date | null | undefined }) {
+/** Live countdown. `prefix` is shown only while time remains; once it runs out, `done` is shown instead (so no "closes in ended"). */
+export function Countdown({ to, prefix = "", done = "ended" }: { to: string | Date | null | undefined; prefix?: string; done?: string }) {
   const now = useNow();
   if (!to) return null;
-  return <span className="num">{left(new Date(to).getTime() - now)}</span>;
+  const ms = new Date(to).getTime() - now;
+  if (ms <= 0) return <span>{done}</span>;
+  return <span>{prefix}<span className="num">{left(ms)}</span></span>;
 }
 export const STORAGE_LABEL: Record<string, string> = { NORMAL: "Normal", VENTILATED: "Ventilated", REFRIGERATED: "Refrigerated" };
 export const SCOPE_LABEL: Record<string, string> = { UPAZILA: "Only my upazila", DISTRICT: "Within district", NATION: "Nationwide" };

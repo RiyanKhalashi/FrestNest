@@ -87,7 +87,7 @@ function Detail({ d, vehicles, reload, blocked }: { d: Trip; vehicles: Vehicle[]
     <div className="panel">
       <div className="dhead">
         <div className="ttl"><ProductIcon name={d.listing.product} size={44} /><div><h2>{d.listing.product} · {kg(d.quantityKg)}</h2><p className="muted">Deal {d.code} · {d.farmer.name} ({d.route.from.district}) sold to {d.dealer.name} ({d.route.to.district ?? "—"}) · {d.transport.offers.length ? "your offer sent" : "no offer from you yet"}</p></div></div>
-        <div style={{ textAlign: "right" }}>{d.small ? <span className="tag plain">Small · local</span> : <span className="tag green">Open for offers</span>}<div className="small muted" style={{ marginTop: 6 }}>{d.transport.windowOpen ? <>Window closes in <Countdown to={d.transport.windowEndsAt} /></> : "Window closed"}</div></div>
+        <div style={{ textAlign: "right" }}>{d.small ? <span className="tag plain">Small · local</span> : <span className="tag green">Open for offers</span>}<div className="small muted" style={{ marginTop: 6 }}>{d.transport.windowOpen ? <Countdown to={d.transport.windowEndsAt} prefix="Window closes in " done="Window closed" /> : "Window closed"}</div></div>
       </div>
       <div className="sec"><Route d={d} /></div>
       <div className="sec">
@@ -154,7 +154,7 @@ function Deals() {
                 return (
                   <button key={d.id} className={"item" + (current?.id === d.id ? " on" : "")} onClick={() => router.replace("/transporter/deals?d=" + d.id, { scroll: false })}>
                     <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={d.listing.product} />{d.listing.product} · {kg(d.quantityKg)}</span>{mine ? <span className="tag gold">Your offer</span> : d.small ? <span className="tag plain">Small · local</span> : <span className="tag green">New</span>}</b>
-                    <span>{d.route.from.upazila} → {d.route.to.district ?? d.route.to.name} · {d.need.toLowerCase()} · closes in <Countdown to={d.transport.windowEndsAt} /></span>
+                    <span>{d.route.from.upazila} → {d.route.to.district ?? d.route.to.name} · {d.need.toLowerCase()} · <Countdown to={d.transport.windowEndsAt} prefix="closes in " done="closed" /></span>
                   </button>
                 );
               })}

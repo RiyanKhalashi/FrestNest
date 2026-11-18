@@ -57,7 +57,7 @@ export default function Page() {
               </tr>
             );
           })}</tbody></table> : <p className="pb muted">No trips booked. <Link href="/transporter/deals">Find deals</Link></p>}
-          {waiting.length > 0 && <><h3 style={{ borderTop: "1px solid var(--line)", borderRadius: 0 }}>Waiting for dealers</h3><table className="ledger"><tbody>{waiting.map((t) => <tr key={t.id}><td><b>{t.listing.product} · {kg(t.quantityKg)}</b> · {t.route.from.upazila} → {t.route.to.district}</td><td className="right small">closes in <Countdown to={t.transport.windowEndsAt} /></td></tr>)}</tbody></table></>}
+          {waiting.length > 0 && <><h3 style={{ borderTop: "1px solid var(--line)", borderRadius: 0 }}>Waiting for dealers</h3><table className="ledger"><tbody>{waiting.map((t) => <tr key={t.id}><td><b>{t.listing.product} · {kg(t.quantityKg)}</b> · {t.route.from.upazila} → {t.route.to.district}</td><td className="right small"><Countdown to={t.transport.windowEndsAt} prefix="closes in " done="offers closed" /></td></tr>)}</tbody></table></>}
         </div>
         <div className="grid">
           <div className="panel"><h3>Season tip</h3><div className="pb"><div className={"note " + sTone}><b>{sName}.</b> {sText}</div><p className="small muted" style={{ marginTop: 8 }}>Advice only. It never blocks an offer.</p></div></div>

@@ -80,3 +80,13 @@
 .hide-perm { display: none !important; }
 
 .spon { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; padding: 8px 10px; border: 1px dashed #d8c58f; background: #fbf7ea; border-radius: 4px; cursor: pointer; font-size: 13px; }
+
+/* ---- responsive ---- */
+@media (max-width: 1024px) {
+  .case { grid-template-columns: 1fr; }
+  .filters { grid-template-columns: repeat(2, 1fr); }
+  .cal { overflow-x: auto; grid-template-columns: 110px repeat(12, minmax(44px, 1fr)); }
+}
+@media (max-width: 640px) { .filters { grid-template-columns: 1fr; } }
+@media (max-width: 1024px) { .pb > div[style*="repeat(12"] { grid-template-columns: repeat(6, 1fr) !important; } }
+@media (max-width: 640px) { .pb > div[style*="repeat(12"] { grid-template-columns: repeat(4, 1fr) !important; } }
