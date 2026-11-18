@@ -4,10 +4,13 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { tk, tk0, kg, dateTime, toLocalInput, STORAGE_LABEL, SCOPE_LABEL } from "@/lib/format";
 import type { Listing, Product, Scope, Storage } from "@/lib/types";
+
+const STORAGES: Storage[] = ["NORMAL", "VENTILATED", "REFRIGERATED"];
+const RANK: Record<Storage, number> = { NORMAL: 0, VENTILATED: 1, REFRIGERATED: 2 };
 import { FieldErr, useToast } from "./ui";
 import { shrink } from "@/lib/image";
 
-interface Preview { info: { name: string; shelf: number; storage: Storage }; suggestion: { scope: Scope; why: string }; window: { min: string; latestSafe: string; recommended: string; expiresAt: string; tooShort: boolean } }
+interface Preview { info: { name: string; shelf: number; storage: Storage; suggested: Storage; longTrip: Storage }; season: { name: string; months: string; risk: boolean }; suggestion: { scope: Scope; why: string }; window: { min: string; latestSafe: string; recommended: string; expiresAt: string; tooShort: boolean } }
 interface Nearby { upazila: { id: number; name: string } | null; district: { id: number; name: string } | null; neighbourUpazilas: { id: number; name: string }[]; neighbourDistricts: { id: number; name: string }[]; otherDistricts: { id: number; name: string }[] }
 
 const tomorrow = () => { const d = new Date(Date.now() + 86400000); return d.toISOString().slice(0, 10); };
@@ -19,7 +22,7 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   const [nearby, setNearby] = useState<Nearby | null>(null);
   const [category, setCategory] = useState(edit?.product.category ?? "Vegetable");
   const [productId, setProductId] = useState<number | "custom" | 0>(edit ? (edit.product.custom ? "custom" : edit.product.id ?? 0) : 0);
-  const [custom, setCustom] = useState({ name: edit?.product.custom ? edit.product.name : "", shelf: edit?.product.custom ? String(edit.product.shelfLifeDays) : "", storage: (edit?.product.custom ? edit.product.storage : "NORMAL") as Storage });
+  const [custom, setCustom] = useState({ name: edit?.product.custom ? edit.product.name : "", shelf: edit?.product.custom ? String(edit.product.shelfLifeDays) : "", storage: (edit?.product.custom ? edit.product.longTrip : "NORMAL") as Storage });
   const [qty, setQty] = useState(edit ? String(edit.quantityKg) : "");
   const [price, setPrice] = useState(edit ? String(edit.pricePerKg) : "");
   const [harvest, setHarvest] = useState(edit ? edit.harvestDate.slice(0, 10) : tomorrow());
@@ -29,6 +32,7 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   const [scopeTouched, setScopeTouched] = useState(!!edit);
   const [tUp, setTUp] = useState<number[]>(edit?.targets.upazilas.map((x) => x.id) ?? []);
   const [tDist, setTDist] = useState<number[]>(edit?.targets.districts.map((x) => x.id) ?? []);
+  const [vehicle, setVehicle] = useState<Storage | "">(edit?.product.vehicleNeed ?? "");
   const [mode, setMode] = useState<"BID" | "OWN">(edit?.mode ?? "BID");
   const [bidEnd, setBidEnd] = useState(edit?.bidding ? toLocalInput(new Date(edit.bidding.endsAt)) : "");
   const [bidEndTouched, setBidEndTouched] = useState(!!edit);
@@ -69,14 +73,17 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   const end = bidEnd ? new Date(bidEnd) : null;
   const endState = !w || !end ? null : end.getTime() < new Date(w.min).getTime() - 15 * 60_000 ? "short" : end > new Date(w.latestSafe) ? "late" : "ok";
   const total = (+qty || 0) * (+price || 0);
-  const storageNow = preview?.info.storage;
+  // vehicle for this listing: the suggested one, or a better one the farmer picks (never worse)
+  const vSug = preview?.info.suggested;
+  const vEff: Storage | undefined = vSug && (vehicle && RANK[vehicle] > RANK[vSug] ? vehicle : vSug);
+  const vRaised = !!vSug && !!vEff && vEff !== vSug;
 
   async function submit() {
     setBusy(true); setError(""); setFields({});
     const data = {
       ...(productBody ?? {}), category,
       quantityKg: +qty, pricePerKg: +price, harvestDate: harvest + "T06:00:00", description: description || undefined,
-      scope: scope ?? "DISTRICT", targetUpazilaIds: tUp, targetDistrictIds: tDist, mode,
+      scope: scope ?? "DISTRICT", vehicleNeed: vRaised ? vEff : null, targetUpazilaIds: tUp, targetDistrictIds: tDist, mode,
       ...(mode === "BID" ? { bidEndsAt: end?.toISOString(), minIncrement: +inc || 0.5, buyNowPrice: buyNow ? +buyNow : null } : { minOrderKg: minOrder ? +minOrder : null, minResponseHours: +minReply }),
     };
     try {
@@ -123,10 +130,10 @@ export function ListingForm({ edit }: { edit?: Listing }) {
             <div className="row3">
               <div className="field"><label htmlFor="cn">Product name</label><input id="cn" value={custom.name} onChange={(e) => setCustom({ ...custom, name: e.target.value })} /></div>
               <div className="field"><label htmlFor="cs">Shelf life (days)</label><input id="cs" type="number" min={1} value={custom.shelf} onChange={(e) => setCustom({ ...custom, shelf: e.target.value })} /></div>
-              <div className="field"><label htmlFor="cv">Vehicle needed</label><select id="cv" value={custom.storage} onChange={(e) => setCustom({ ...custom, storage: e.target.value as Storage })}><option value="NORMAL">Normal</option><option value="VENTILATED">Ventilated</option><option value="REFRIGERATED">Refrigerated</option></select></div>
+              <div className="field"><label htmlFor="cv">Vehicle needed for nationwide</label><select id="cv" value={custom.storage} onChange={(e) => setCustom({ ...custom, storage: e.target.value as Storage })}><option value="NORMAL">Normal</option><option value="VENTILATED">Ventilated</option><option value="REFRIGERATED">Refrigerated</option></select></div>
             </div>
           )}
-          {preview && <div className="note" style={{ marginBottom: 12 }}><b>{preview.info.name}</b> keeps about <b>{preview.info.shelf} days</b> after harvest · vehicle: <b>{STORAGE_LABEL[preview.info.storage]}</b>{productId === "custom" ? " (your values)" : ""}.</div>}
+          {preview && <div className="note" style={{ marginBottom: 12 }}><b>{preview.info.name}</b> keeps about <b>{preview.info.shelf} days</b> after harvest · vehicle: {preview.info.longTrip === "NORMAL" ? <b>Normal</b> : <><b>Normal</b> within upazila/district, <b>{STORAGE_LABEL[preview.info.longTrip].toLowerCase()}</b> for nationwide</>}{productId === "custom" ? " (your values)" : ""}.</div>}
         </div></div>
 
         <div className="step"><b>2</b><div>
@@ -176,7 +183,17 @@ export function ListingForm({ edit }: { edit?: Listing }) {
                 <div className="checks" style={{ marginTop: 6 }}>{tDist.filter((id) => !nearby.neighbourDistricts.some((n) => n.id === id)).map((id) => <label key={id}><input type="checkbox" checked onChange={() => toggle(tDist, setTDist, id)} />{nearby.otherDistricts.find((d) => d.id === id)?.name}</label>)}</div></div>
             </>
           )}
-          {scope === "NATION" && storageNow && storageNow !== "NORMAL" && <div className="note warn" style={{ marginBottom: 12 }}>Nationwide needs a <b>{STORAGE_LABEL[storageNow].toLowerCase()}</b> vehicle. Only transporters with one can carry it.</div>}
+          {preview && vSug && vEff && (
+            <div className="field"><label htmlFor="vn">Vehicle for this listing</label>
+              <select id="vn" value={vEff} onChange={(e) => setVehicle(e.target.value as Storage)}>
+                {STORAGES.filter((s) => RANK[s] >= RANK[vSug]).map((s) => <option key={s} value={s}>{STORAGE_LABEL[s]}{s === vSug ? " (suggested)" : ""}</option>)}
+              </select>
+              <small>{scope === "NATION"
+                ? (vSug === "NORMAL" ? "A normal vehicle is fine nationwide. You can ask for a better one." : `Nationwide needs at least a ${STORAGE_LABEL[vSug].toLowerCase()} vehicle. You can ask for a better one, not a lower one.`)
+                : "Within upazila/district a normal vehicle is enough. Choose a better one if your produce needs it, for example in hot weather."}</small></div>
+          )}
+          {vRaised && vEff && <div className="note warn" style={{ marginBottom: 12 }}>Only transporters with a <b>{STORAGE_LABEL[vEff].toLowerCase()}</b> vehicle can make offers. You may get fewer offers, and transport may cost the dealer more.</div>}
+          {preview?.season.risk && vEff === "NORMAL" && preview.info.shelf <= 7 && <div className="note" style={{ marginBottom: 12 }}>Harvest falls in <b>{preview.season.name}</b> ({preview.season.months}): heat can spoil {preview.info.name.toLowerCase()} in a normal vehicle. A ventilated vehicle is safer. This is only a suggestion.</div>}
         </div></div>
 
         <div className="step"><b>4</b><div>
@@ -221,6 +238,7 @@ export function ListingForm({ edit }: { edit?: Listing }) {
             <dt>Value</dt><dd>{total ? tk0(total) : "—"}</dd>
             <dt>Harvest</dt><dd>{harvest ? new Date(harvest).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"}</dd>
             <dt>Visible to</dt><dd>{scope ? SCOPE_LABEL[scope] : "—"}{scope === "UPAZILA" && tUp.length ? ` + ${tUp.length} upazila${tUp.length > 1 ? "s" : ""}` : ""}{scope === "DISTRICT" && tDist.length ? ` + ${tDist.length} district${tDist.length > 1 ? "s" : ""}` : ""}</dd>
+            <dt>Vehicle</dt><dd>{vEff ? STORAGE_LABEL[vEff] + (vRaised ? " (your choice)" : "") : "—"}</dd>
             <dt>Selling</dt><dd>{mode === "BID" ? "Open bidding" : "Own price + offers"}</dd>
             {mode === "BID" && end && <><dt>Ends</dt><dd>{dateTime(end)}</dd></>}
             {mode === "BID" && buyNow && <><dt>Buy Now</dt><dd>{tk(+buyNow)} / kg</dd></>}

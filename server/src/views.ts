@@ -61,7 +61,7 @@ export function listingView(l: FullListing, viewer: User, near?: [number, string
 
   return {
     id: l.id, code: code(l.code), status: l.status, mode: l.mode, scope: l.scope,
-    product: { id: l.productId, name: info.name, nameBn: info.nameBn, shelfLifeDays: info.shelf, storage: info.storage, custom: info.custom, category: l.category },
+    product: { id: l.productId, name: info.name, nameBn: info.nameBn, shelfLifeDays: info.shelf, storage: info.storage, suggested: info.suggested, farmerSet: info.farmerSet, longTrip: info.longTrip, vehicleNeed: l.vehicleNeed, custom: info.custom, category: l.category },
     quantityKg: l.quantityKg, remainingKg: l.remainingKg, pricePerKg: money(l.pricePerKg),
     harvestDate: l.harvestDate, harvested, expiresAt, daysLeft, urgent: daysLeft !== null && daysLeft <= Math.max(1, Math.ceil(info.shelf * 0.4)),
     description: l.description, photos: l.photos,
@@ -87,7 +87,7 @@ export function listingView(l: FullListing, viewer: User, near?: [number, string
 
 // ---------------------------------------------------------------- deals (Phase 3)
 import { prisma } from "./db.js";
-import { tripNeed, seasonTag } from "./rules.js";
+import { tripNeed, seasonTag, windowOptions, setting } from "./rules.js";
 
 export const dealInclude = {
   listing: { include: { product: true, upazila: { include: { district: true } }, failure: { select: { locationNote: true, canMove: true, deal: { select: { code: true } } } } } },
@@ -120,12 +120,14 @@ export async function failureCounts(userIds: string[]) {
 export async function dealView(d: FullDeal, viewer: User) {
   const role = viewer.role;
   const isFarmer = viewer.id === d.farmerId, isDealer = viewer.id === d.dealerId;
-  const { need, long } = await tripNeed(d);
+  const { need, farmerSet: needByFarmer, long } = await tripNeed(d);
   const accepted = d.transportOffers.find((o) => o.status === "ACCEPTED");
   const isDriver = !!accepted && accepted.transporterId === viewer.id;
   const rate = await ratings(d.transportOffers.map((o) => o.transporterId));
   const fails = await failureCounts(d.transportOffers.map((o) => o.transporterId));
   const now = Date.now();
+  const win = isDealer && d.status === "AWAITING_TRANSPORT" && !d.windowExtended && d.transportOffers.length === 0 && d.transportWindowEndsAt.getTime() > now
+    ? await windowOptions(d.listing, long) : null;
   const booked = ["TRANSPORT_CONFIRMED", "IN_TRANSIT", "COMPLETED"].includes(d.status);
   const offerView = (o: FullDeal["transportOffers"][number]) => ({
     id: o.id, status: o.status, price: o.price, pickupAt: o.pickupAt, deliverBy: o.deliverBy, note: o.note, at: o.createdAt, cancelReason: o.cancelReason,
@@ -152,13 +154,16 @@ export async function dealView(d: FullDeal, viewer: User) {
       to: { name: d.dealer.businessName ?? d.dealer.name, upazila: d.dealer.upazila?.name ?? null, district: d.dealer.district?.name ?? null },
       long,
     },
-    need,
+    need, needByFarmer,
     farmer: { id: d.farmerId, name: d.farmer.name, phone: d.status === "CANCELLED" || role === "TRANSPORTER" && !isDriver ? null : d.farmer.phone },
     dealer: { id: d.dealerId, name: d.dealer.businessName ?? d.dealer.name, district: d.dealer.district?.name, phone: d.status === "CANCELLED" || role === "TRANSPORTER" && !isDriver ? null : d.dealer.phone },
     transport: {
       windowEndsAt: d.transportWindowEndsAt, windowExtended: d.windowExtended,
       windowOpen: d.status === "AWAITING_TRANSPORT" && d.transportWindowEndsAt.getTime() > now,
       canExtend: isDealer && d.status === "AWAITING_TRANSPORT" && !d.windowExtended && d.transportWindowEndsAt.getTime() <= now,
+      windowHours: d.windowHours, defaultHours: win?.def ?? await setting("transportOfferWindowHours", 12),
+      // the dealer can pick the window length until the first offer arrives
+      canSetWindow: !!win, windowOptions: win?.options ?? [],
       offers: visibleOffers.map(offerView),
       confirmed: accepted ? offerView(accepted) : null,
     },

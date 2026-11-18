@@ -3,7 +3,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../auth.js";
-import { productInfo, vehicleBusy, setting, newCode, code } from "../rules.js";
+import { productInfo, vehicleBusy, setting, newCode, code, tripNeed, windowOptions } from "../rules.js";
 import { dealInclude, dealView, vehicleLabel } from "../views.js";
 import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
@@ -58,6 +58,24 @@ dealsRouter.post("/:id/transport/:offerId/accept", requireRole("DEALER"), async 
   if (r.clashes.length) await notify(r.o.transporterId, "Offers withdrawn", `${r.clashes.length} other offer(s) with ${r.o.vehicle.regNo} at overlapping times were withdrawn, because the vehicle is now booked.`, "/transporter/trips");
   pingDeal(full, [r.o.transporterId, ...r.others.map((x) => x.transporterId)]); pingTransport();
   res.json({ ok: true });
+});
+
+/** The dealer chooses how long transporters can send offers (3/6/12/24 h), counted from now, until the first offer arrives. */
+dealsRouter.post("/:id/window", requireRole("DEALER"), async (req, res) => {
+  const p = z.object({ hours: z.coerce.number().int() }).safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: "Choose a time." });
+  const d = await prisma.deal.findUnique({ where: { id: String(req.params.id) }, include: { dealer: { select: { districtId: true } }, listing: { include: { product: true, upazila: true } }, _count: { select: { transportOffers: true } } } });
+  if (!d || d.dealerId !== req.user!.id) return res.status(404).json({ error: "Deal not found." });
+  if (d.status !== "AWAITING_TRANSPORT") return res.status(409).json({ error: "Transport is already arranged." });
+  if (d.windowExtended) return res.status(409).json({ error: "The window was already extended." });
+  if (d._count.transportOffers > 0) return res.status(409).json({ error: "An offer has already arrived, so the time cannot change now." });
+  const { long } = await tripNeed(d);
+  const o = (await windowOptions(d.listing, long)).options.find((x) => x.hours === p.data.hours);
+  if (!o) return res.status(400).json({ error: "Choose 3, 6, 12 or 24 hours." });
+  if (!o.ok) return res.status(400).json({ error: `${o.hours} hours is too long for this produce: it would not arrive fresh enough. Choose a shorter time.` });
+  await prisma.deal.update({ where: { id: d.id }, data: { windowHours: o.hours, transportWindowEndsAt: new Date(Date.now() + o.hours * 3600_000), windowNotified: false } });
+  pingDeal(d); pingTransport();
+  res.json({ ok: true, hours: o.hours });
 });
 
 /** No (good) offers in the window → the dealer can extend it once. */

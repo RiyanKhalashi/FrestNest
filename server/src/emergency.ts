@@ -59,7 +59,7 @@ export async function startEmergency(failureId: string, o: { hours: number; drop
   const t = await tierData(1, f.upazilaId);
   const em = await prisma.listing.create({
     data: {
-      farmerId: f.deal.farmerId, productId: l.productId, customName: l.customName, customShelfLife: l.customShelfLife, customStorage: l.customStorage, category: l.category,
+      farmerId: f.deal.farmerId, productId: l.productId, customName: l.customName, customShelfLife: l.customShelfLife, customStorage: l.customStorage, vehicleNeed: l.vehicleNeed, category: l.category,
       quantityKg: f.usableKg, remainingKg: f.usableKg, pricePerKg: start, harvestDate: l.harvestDate,
       description: `Emergency sale: the vehicle carrying deal ${code(f.deal.code)} is stuck${f.locationNote ? " at " + f.locationNote : ""}. ${f.canMove ? "The same vehicle can still deliver nearby." : "A local transporter collects from the vehicle."}`,
       photos: l.photos, upazilaId: f.upazilaId, scope: t.scope, mode: "BID",

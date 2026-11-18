@@ -1,7 +1,7 @@
 // Timed rules. A small sweeper runs every few seconds; all state lives in the database,
 // so nothing is lost when the server restarts (each step is idempotent and row-locked).
 import { prisma } from "./db.js";
-import { productInfo, code, DAY } from "./rules.js";
+import { productInfo, code, DAY, transportWindowEnd } from "./rules.js";
 import { notify, notifyMany } from "./notify.js";
 import { pingListing, pingMarket, pingTransport } from "./realtime.js";
 import { cancelOpenOffers } from "./routes/listings.js";
@@ -21,7 +21,7 @@ async function closeBidding() {
         return { l, deal: null };
       }
       await tx.listing.update({ where: { id }, data: { status: "SOLD", remainingKg: 0, closedAt: new Date() } });
-      const deal = await tx.deal.create({ data: { listingId: id, farmerId: l.farmerId, dealerId: top.dealerId, quantityKg: l.quantityKg, pricePerKg: top.pricePerKg, source: l.isEmergency ? "EMERGENCY" : "BID" } });
+      const deal = await tx.deal.create({ data: { listingId: id, farmerId: l.farmerId, dealerId: top.dealerId, quantityKg: l.quantityKg, pricePerKg: top.pricePerKg, source: l.isEmergency ? "EMERGENCY" : "BID", transportWindowEndsAt: await transportWindowEnd() } });
       const setup = l.isEmergency ? await setupEmergencyDelivery(tx, deal.id, id) : null;
       return { l, deal, top, setup };
     });

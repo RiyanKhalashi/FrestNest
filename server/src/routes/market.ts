@@ -3,7 +3,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole, requireActive } from "../auth.js";
-import { visibleTo, closeness, productInfo, money, code } from "../rules.js";
+import { visibleTo, closeness, productInfo, money, code, transportWindowEnd } from "../rules.js";
 import { listingInclude, listingView } from "../views.js";
 import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
@@ -85,7 +85,7 @@ marketRouter.post("/:id/buy-now", requireActive, async (req, res) => {
     if (!l.buyNowPrice) return { ok: false as const, status: 409, error: "This listing has no Buy Now price." };
     if (l.bids[0] && Number(l.bids[0].pricePerKg) >= Number(l.buyNowPrice)) return { ok: false as const, status: 409, error: "Buy Now is gone: bids have reached the Buy Now price." };
     await tx.listing.update({ where: { id }, data: { status: "SOLD", remainingKg: 0, closedAt: new Date() } });
-    const deal = await tx.deal.create({ data: { listingId: id, farmerId: l.farmerId, dealerId: me.id, quantityKg: l.quantityKg, pricePerKg: l.buyNowPrice, source: l.isEmergency ? "EMERGENCY" : "BUY_NOW" } });
+    const deal = await tx.deal.create({ data: { listingId: id, farmerId: l.farmerId, dealerId: me.id, quantityKg: l.quantityKg, pricePerKg: l.buyNowPrice, source: l.isEmergency ? "EMERGENCY" : "BUY_NOW", transportWindowEndsAt: await transportWindowEnd() } });
     const setup = l.isEmergency ? await setupEmergencyDelivery(tx, deal.id, id) : null;
     return { ok: true as const, l, deal, setup };
   });

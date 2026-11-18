@@ -203,6 +203,8 @@ model Listing {
   customShelfLife Int?
   customStorage   StorageNeed?
   category        String
+  // farmer asks for a better vehicle than the product needs (e.g. refrigerated even within district); null = suggested
+  vehicleNeed     StorageNeed?
 
   quantityKg  Int
   remainingKg Int
@@ -329,6 +331,7 @@ model Deal {
   // transport (Phase 3)
   transportWindowEndsAt DateTime @default(dbgenerated("(now() + '12:00:00'::interval)"))
   windowExtended        Boolean  @default(false)
+  windowHours           Int?     // offer window the dealer chose (3/6/12/24 h); null = the default
   windowNotified        Boolean  @default(false) // dealer told the window ended without offers
   pickupCode            String?  // farmer gives it to the driver at pickup
   deliveryCode          String?  // dealer gives it to the driver on arrival

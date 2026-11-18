@@ -8,7 +8,7 @@ export interface Product { id: number; nameEn: string; nameBn: string; category:
 
 export interface Listing {
   id: string; code: string; status: ListingStatus; mode: "BID" | "OWN"; scope: Scope;
-  product: { id: number | null; name: string; nameBn: string | null; shelfLifeDays: number; storage: Storage; custom: boolean; category: string };
+  product: { id: number | null; name: string; nameBn: string | null; shelfLifeDays: number; storage: Storage; suggested: Storage; farmerSet: boolean; longTrip: Storage; vehicleNeed: Storage | null; custom: boolean; category: string };
   quantityKg: number; remainingKg: number; pricePerKg: number;
   harvestDate: string; harvested: boolean; expiresAt: string; daysLeft: number | null; urgent: boolean;
   description: string | null; photos: string[];
@@ -47,10 +47,10 @@ export interface Deal {
   cancelReason: string | null; cancelledBy: string | null; cancelledAt: string | null;
   listing: { id: string; code: string; product: string; storage: Storage; harvestDate: string; place: string; shelfLifeDays: number };
   route: { from: { upazila: string; district: string; village: string | null }; to: { name: string; upazila: string | null; district: string | null }; long: boolean };
-  need: Storage;
+  need: Storage; needByFarmer: boolean;
   farmer: { id: string; name: string; phone: string | null };
   dealer: { id: string; name: string; district?: string; phone: string | null };
-  transport: { windowEndsAt: string; windowExtended: boolean; windowOpen: boolean; canExtend: boolean; offers: TransportOffer[]; confirmed: TransportOffer | null };
+  transport: { windowEndsAt: string; windowExtended: boolean; windowOpen: boolean; canExtend: boolean; windowHours: number | null; defaultHours: number; canSetWindow: boolean; windowOptions: { hours: number; ok: boolean }[]; offers: TransportOffer[]; confirmed: TransportOffer | null };
   pickupCode: string | null; deliveryCode: string | null; pickedUpAt: string | null; deliveredAt: string | null;
   cancelRequest: { by: string; reason: string; at: string; mine: boolean } | null;
   lastCancelDecision: { status: string; note: string | null } | null;

@@ -3,7 +3,7 @@ import { Router, type Request } from "express";
 import { z } from "zod";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole, requireActive } from "../auth.js";
-import { visibleTo, productInfo, deadlineWindow, code } from "../rules.js";
+import { visibleTo, productInfo, deadlineWindow, code, transportWindowEnd } from "../rules.js";
 import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
 import type { Prisma } from "../generated/prisma/client.js";
@@ -94,7 +94,7 @@ async function acceptOffer(offerId: string, by: "farmer" | "dealer") {
     if (qty > l.remainingKg) return { status: 409, error: `Only ${l.remainingKg} kg is left.` } as const;
     const remaining = l.remainingKg - qty;
     await tx.offer.update({ where: { id: o.id }, data: { status: "ACCEPTED" } });
-    const deal = await tx.deal.create({ data: { listingId: l.id, farmerId: l.farmerId, dealerId: o.dealerId, offerId: o.id, quantityKg: qty, pricePerKg: price, source: "OFFER" } });
+    const deal = await tx.deal.create({ data: { listingId: l.id, farmerId: l.farmerId, dealerId: o.dealerId, offerId: o.id, quantityKg: qty, pricePerKg: price, source: "OFFER", transportWindowEndsAt: await transportWindowEnd() } });
     await tx.listing.update({ where: { id: l.id }, data: { remainingKg: remaining, ...(remaining === 0 ? { status: "SOLD", closedAt: new Date() } : {}) } });
     // offers that no longer fit are cancelled automatically
     const conflicts = await tx.offer.findMany({ where: { listingId: l.id, status: { in: ["PENDING", "COUNTERED"] }, OR: [{ quantityKg: { gt: remaining } }, { counterQtyKg: { gt: remaining } }] }, select: { id: true, dealerId: true } });

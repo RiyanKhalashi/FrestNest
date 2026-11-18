@@ -11,15 +11,21 @@ export async function setting<T = number>(key: string, fallback: T): Promise<T> 
   return (s?.value as T) ?? fallback;
 }
 
+const RANK: Record<StorageNeed, number> = { NORMAL: 0, VENTILATED: 1, REFRIGERATED: 2 };
+
 /** Shelf life + vehicle need for a listing (from the product list, or the farmer's own values). */
-export function productInfo(l: { product?: { nameEn: string; nameBn: string; shelfLifeDays: number; storage: StorageNeed; ventilatedForLongTrips: boolean } | null; customName?: string | null; customShelfLife?: number | null; customStorage?: StorageNeed | null }, scope?: Scope) {
+export function productInfo(l: { product?: { nameEn: string; nameBn: string; shelfLifeDays: number; storage: StorageNeed; ventilatedForLongTrips: boolean } | null; customName?: string | null; customShelfLife?: number | null; customStorage?: StorageNeed | null; vehicleNeed?: StorageNeed | null }, scope?: Scope) {
   const p = l.product;
   const shelf = p ? p.shelfLifeDays : l.customShelfLife ?? 1;
-  let storage: StorageNeed = p ? p.storage : l.customStorage ?? "NORMAL";
-  // e.g. tomato: normal locally, ventilated only for long (nationwide) trips
-  if (p?.ventilatedForLongTrips && scope !== "NATION" && storage === "VENTILATED") storage = "NORMAL";
-  if (p?.ventilatedForLongTrips && scope === "NATION" && storage === "NORMAL") storage = "VENTILATED";
-  return { name: p ? p.nameEn : l.customName ?? "Produce", nameBn: p?.nameBn ?? null, shelf, storage, custom: !p };
+  const base: StorageNeed = p ? p.storage : l.customStorage ?? "NORMAL";
+  // The product's own vehicle need applies to long (nationwide) trips. Within upazila/district a normal vehicle is enough.
+  // "Ventilated for long trips" products (e.g. tomato) are normal locally but need ventilation on long trips.
+  const longTrip: StorageNeed = p?.ventilatedForLongTrips && base === "NORMAL" ? "VENTILATED" : base;
+  const suggested: StorageNeed = scope === "NATION" ? longTrip : "NORMAL";
+  // the farmer may ask for a better vehicle, never a worse one
+  const farmerSet = !!l.vehicleNeed && RANK[l.vehicleNeed] > RANK[suggested];
+  const storage: StorageNeed = farmerSet ? l.vehicleNeed! : suggested;
+  return { name: p ? p.nameEn : l.customName ?? "Produce", nameBn: p?.nameBn ?? null, shelf, storage, suggested, farmerSet, longTrip, custom: !p };
 }
 
 /** Suggested visibility for a product (farmer can override). */
@@ -50,6 +56,25 @@ export async function deadlineWindow(harvest: Date, shelfDays: number, scope: Sc
   if (recommended > latestSafe && latestSafe > min) recommended = latestSafe;
   const expiresAt = new Date(harvest.getTime() + shelfDays * DAY);
   return { min, latestSafe, recommended, expiresAt, tooShort: latestSafe < min };
+}
+
+/** When the transport offer window of a new deal closes (admin setting, default 12 h). Set in code, not by the database, so time zones cannot shift it. */
+export async function transportWindowEnd(from = new Date()) {
+  return new Date(from.getTime() + (await setting("transportOfferWindowHours", 12)) * H);
+}
+
+export const WINDOW_CHOICES = [3, 6, 12, 24] as const;
+/**
+ * Offer window lengths the dealer can choose for a deal. A choice is safe when the window plus travel time
+ * still leaves the resale share of shelf life (40%) at delivery, like the bidding deadline.
+ */
+export async function windowOptions(listing: Parameters<typeof productInfo>[0] & { harvestDate: Date }, long: boolean, now = new Date()) {
+  const leftPct = await setting("resaleShelfLeftPercent", 40);
+  const def = await setting("transportOfferWindowHours", 12);
+  const safeBy = listing.harvestDate.getTime() + productInfo(listing).shelf * DAY * (1 - leftPct / 100);
+  const travel = TRAVEL_H[long ? "NATION" : "DISTRICT"];
+  const hours = [...new Set([...WINDOW_CHOICES, def])].sort((a, b) => a - b);
+  return { def, options: hours.map((h) => ({ hours: h, ok: now.getTime() + (h + travel) * H <= safeBy })) };
 }
 
 /** A form can take a few minutes to fill in: the minimum bidding time is checked with this grace. */
@@ -89,7 +114,6 @@ export const code = (n: number) => "FN-" + n;
 
 // ---------------------------------------------------------------- Phase 3: transport
 
-const RANK: Record<StorageNeed, number> = { NORMAL: 0, VENTILATED: 1, REFRIGERATED: 2 };
 /** A refrigerated vehicle can carry what needs ventilation; a normal one cannot. */
 export const facilityFits = (have: StorageNeed, need: StorageNeed) => RANK[have] >= RANK[need];
 
@@ -101,7 +125,8 @@ export async function tripNeed(deal: { dealer: { districtId: number | null }; li
     const d = await prisma.district.findUnique({ where: { id: pickup }, select: { neighbours: { select: { id: true } } } });
     if (d?.neighbours.some((n) => n.id === to)) long = false;
   }
-  return { need: productInfo(deal.listing, long ? "NATION" : "DISTRICT").storage, long };
+  const i = productInfo(deal.listing, long ? "NATION" : "DISTRICT");
+  return { need: i.storage, farmerSet: i.farmerSet, long };
 }
 
 export type Season = { key: "winter" | "summer" | "monsoon"; name: string; months: string; risk: boolean; advice: string };

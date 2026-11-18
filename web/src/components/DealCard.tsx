@@ -85,6 +85,10 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
     try { await api(`/deals/${d.id}/transport/${choose.id}/accept`, { method: "POST" }); setChoose(null); toast("Transport confirmed. Your delivery code is ready."); onChange(); }
     catch (e) { toast(e instanceof ApiError ? e.message : "Failed."); setChoose(null); onChange(); } finally { setBusy(false); }
   }
+  async function setWindow(hours: number) {
+    try { await api(`/deals/${d.id}/window`, { body: { hours } }); toast(`Transporters now have ${hours} hours to send offers.`); onChange(); }
+    catch (e) { toast(e instanceof ApiError ? e.message : "Failed."); }
+  }
   async function extend() {
     try { const r = await api<{ hours: number }>(`/deals/${d.id}/extend`, { method: "POST" }); toast(`Offer window extended by ${r.hours} hours.`); onChange(); }
     catch (e) { toast(e instanceof ApiError ? e.message : "Failed."); }
@@ -106,7 +110,7 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
       {d.status !== "CANCELLED" && (
         <div className="sec">
           <Route d={d} dash={d.status === "AWAITING_TRANSPORT"} />
-          <div className="small muted">Vehicle needed: <Fac f={d.need} />{d.route.long ? " (long trip)" : ""} · harvest {dateShort(d.listing.harvestDate)} · {side === "dealer" ? "you pay for transport" : "the dealer pays for transport"}</div>
+          <div className="small muted">Vehicle needed: <Fac f={d.need} />{d.route.long ? " (long trip)" : ""}{d.needByFarmer ? " (farmer asked for this)" : ""} · harvest {dateShort(d.listing.harvestDate)} · {side === "dealer" ? "you pay for transport" : "the dealer pays for transport"}</div>
         </div>
       )}
 
@@ -127,10 +131,24 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
 
       {d.status === "AWAITING_TRANSPORT" && (
         <div className="sec">
-          <h4>Transport offers <small>{d.transport.windowOpen ? <>window closes in <Countdown to={d.transport.windowEndsAt} /></> : "window closed"} · {side === "dealer" ? "you choose one" : "the dealer chooses"}</small></h4>
+          <h4>Transport offers <small>{d.transport.windowOpen
+            ? <>transporters can offer for <Countdown to={d.transport.windowEndsAt} /> more · {side === "dealer" ? "pick one (you can pick before the time ends)" : "the dealer picks one, since they pay for transport"}</>
+            : offers.length ? (side === "dealer" ? "offers closed · choose one" : "offers closed · the dealer is choosing") : "offers closed"}</small></h4>
+          {side === "dealer" && d.transport.canSetWindow && (
+            <div className="field" style={{ marginBottom: 12 }}>
+              <label>How long should transporters have to send offers?</label>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {d.transport.windowOptions.map((o) => {
+                  const on = (d.transport.windowHours ?? d.transport.defaultHours) === o.hours;
+                  return <button key={o.hours} type="button" className={"btn sm" + (on ? "" : " ghost")} disabled={!o.ok || on} title={o.ok ? undefined : "Too long: the produce would not arrive fresh enough"} onClick={() => setWindow(o.hours)}>{o.hours} h{o.hours === d.transport.defaultHours ? " (suggested)" : ""}</button>;
+                })}
+              </div>
+              <small>{d.transport.windowHours ? `You chose ${d.transport.windowHours} h.` : `The suggested ${d.transport.defaultHours} h started on its own.`} A new choice counts from now. You can change it until the first offer arrives.{d.transport.windowOptions.some((o) => !o.ok) ? " Longer times are off because the produce would not arrive fresh enough." : ""}</small>
+            </div>
+          )}
           {offers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} />)}
           {!offers.length && <p className="small muted" style={{ marginBottom: 8 }}>{d.transport.windowOpen ? "No offers yet. Transporters with a matching vehicle can see this deal." : "No offers arrived in the window."}</p>}
-          {d.transport.canExtend && <div className="note warn" style={{ marginBottom: 8 }}>The offer window has closed{offers.length ? "" : " without offers"}. <button className="btn sm" style={{ marginLeft: 8 }} onClick={extend}>Extend once ({12} h)</button></div>}
+          {d.transport.canExtend && <div className="note warn" style={{ marginBottom: 8 }}>The offer window has closed{offers.length ? "" : " without offers"}. <button className="btn sm" style={{ marginLeft: 8 }} onClick={extend}>Extend once ({d.transport.defaultHours} h)</button></div>}
           {!d.transport.windowOpen && d.transport.windowExtended && !offers.length && <div className="note bad">The extended window also closed without offers. Contact the {side === "dealer" ? "farmer" : "dealer"} or cancel with a reason.</div>}
           {closedOffers.length > 0 && <details><summary className="small muted" style={{ cursor: "pointer" }}>Earlier offers ({closedOffers.length})</summary>{closedOffers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} />)}</details>}
         </div>

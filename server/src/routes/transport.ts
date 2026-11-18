@@ -205,7 +205,7 @@ transportRouter.post("/trips/:id/cancel", async (req, res) => {
   const hours = await setting("transportOfferWindowHours", 12);
   await prisma.$transaction([
     prisma.transportOffer.update({ where: { id: accepted.id }, data: { status: "CANCELLED", cancelReason: p.data.reason } }),
-    prisma.deal.update({ where: { id: d.id }, data: { status: "AWAITING_TRANSPORT", transportWindowEndsAt: new Date(Date.now() + hours * 3600_000), windowExtended: false, windowNotified: false, pickupCode: null, deliveryCode: null, codeAttempts: 0 } }),
+    prisma.deal.update({ where: { id: d.id }, data: { status: "AWAITING_TRANSPORT", transportWindowEndsAt: new Date(Date.now() + hours * 3600_000), windowHours: null, windowExtended: false, windowNotified: false, pickupCode: null, deliveryCode: null, codeAttempts: 0 } }),
   ]);
   const who = req.user!.businessName ?? req.user!.name;
   const text = `${who} cancelled the trip for ${code(d.code)}. Reason: ${p.data.reason}. The deal is open for new transport offers for ${hours} hours.`;

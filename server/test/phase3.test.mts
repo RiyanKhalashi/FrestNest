@@ -27,8 +27,8 @@ const veh = async (reg: string) => (await prisma.vehicle.findUniqueOrThrow({ whe
 const created: string[] = [];
 
 /** Farmer lists, dealer uses Buy Now → a fresh deal waiting for transport. */
-async function newDeal(productName: string, qty: number) {
-  const r = await karim("/listings", { productId: await product(productName), category: "Vegetable", quantityKg: qty, pricePerKg: 20, harvestDate: new Date(Date.now() + 2 * D).toISOString(), scope: "DISTRICT", mode: "BID", bidEndsAt: new Date(Date.now() + 20 * H).toISOString(), buyNowPrice: 25 });
+async function newDeal(productName: string, qty: number, extra: Record<string, unknown> = {}) {
+  const r = await karim("/listings", { productId: await product(productName), category: "Vegetable", quantityKg: qty, pricePerKg: 20, harvestDate: new Date(Date.now() + 2 * D).toISOString(), scope: "DISTRICT", mode: "BID", bidEndsAt: new Date(Date.now() + 20 * H).toISOString(), buyNowPrice: 25, ...extra });
   assert.equal(r.status, 201, JSON.stringify(r.data));
   created.push(r.data.listing.id);
   assert.equal((await hasan(`/market/${r.data.listing.id}/buy-now`, {})).status, 200);
@@ -43,6 +43,44 @@ try {
   await test("matching: 1.5 t potato shows for trucks, not for a 1 t pickup", async () => {
     assert.ok((await boardIds(logistics)).includes(potatoDeal));
     assert.ok(!(await boardIds(mintu)).includes(potatoDeal));
+  });
+
+  await test("transport offer window is 12 h from the deal (no time-zone shift)", async () => {
+    const d = await prisma.deal.findUniqueOrThrow({ where: { id: potatoDeal } });
+    assert.ok(Math.abs((d.transportWindowEndsAt.getTime() - d.createdAt.getTime()) / H - 12) < 0.05);
+  });
+
+  await test("local strawberry: normal vehicle by default; farmer can ask for refrigerated", async () => {
+    const plain = await newDeal("Strawberry", 150, { category: "Fruit" });
+    assert.ok((await boardIds(mintu)).includes(plain));          // normal pickup is enough within district
+    const cold = await newDeal("Strawberry", 150, { category: "Fruit", vehicleNeed: "REFRIGERATED" });
+    assert.ok(!(await boardIds(mintu)).includes(cold));
+    assert.ok((await boardIds(coldline)).includes(cold));
+    assert.equal((await mintu(`/transport/deals/${cold}/offers`, offer(await veh("Bogura-Na 12-4410"), 900))).status, 400);
+    const d = (await hasan("/deals")).data.deals.find((x: any) => x.id === cold);
+    assert.equal(d.need, "REFRIGERATED"); assert.equal(d.needByFarmer, true);
+    // cannot lower it: a "normal" request on a nationwide strawberry stays refrigerated
+    const nat = await karim("/listings", { productId: await product("Strawberry"), category: "Fruit", quantityKg: 100, pricePerKg: 200, harvestDate: new Date(Date.now() + 2 * D).toISOString(), scope: "NATION", vehicleNeed: "NORMAL", mode: "BID", bidEndsAt: new Date(Date.now() + 30 * H).toISOString() });
+    created.push(nat.data.listing.id);
+    assert.equal(nat.data.listing.product.storage, "REFRIGERATED");
+  });
+
+  await test("dealer picks the offer window; unsafe lengths are blocked; locked after the first offer", async () => {
+    // brinjal keeps 5 days, harvested 2 days ago → 24 h + travel would leave too little shelf life
+    const id = await newDeal("Brinjal", 400, { harvestDate: new Date(Date.now() - 2 * D).toISOString() });
+    const d = (await hasan("/deals")).data.deals.find((x: any) => x.id === id);
+    assert.equal(d.transport.canSetWindow, true);
+    assert.deepEqual(d.transport.windowOptions.map((o: any) => [o.hours, o.ok]), [[3, true], [6, true], [12, true], [24, false]]);
+    assert.equal((await hasan(`/deals/${id}/window`, { hours: 24 })).status, 400);
+    assert.equal((await hasan(`/deals/${id}/window`, { hours: 5 })).status, 400);
+    assert.equal((await karim(`/deals/${id}/window`, { hours: 3 })).status, 403);
+    assert.equal((await hasan(`/deals/${id}/window`, { hours: 3 })).status, 200);
+    const row = await prisma.deal.findUniqueOrThrow({ where: { id } });
+    assert.equal(row.windowHours, 3);
+    assert.ok(Math.abs((row.transportWindowEndsAt.getTime() - Date.now()) / H - 3) < 0.05);
+    assert.equal((await mintu(`/transport/deals/${id}/offers`, offer(await veh("Bogura-Na 12-4410"), 900, 1, 2))).status, 201);
+    assert.equal((await hasan(`/deals/${id}/window`, { hours: 6 })).status, 409);
+    assert.equal((await hasan("/deals")).data.deals.find((x: any) => x.id === id).transport.canSetWindow, false);
   });
 
   const smallDeal = await newDeal("Lal shak", 150);

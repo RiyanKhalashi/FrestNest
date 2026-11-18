@@ -150,7 +150,7 @@ function Detail({ l, reload, blocked }: { l: Listing; reload: () => void; blocke
           <dt>Selling</dt><dd>{l.mode === "BID" ? "Open bidding, whole lot" : `Farmer's price ${tk(l.pricePerKg)}/kg · offers with your quantity`}</dd>
           <dt>Pickup</dt><dd>{l.place.upazila}, {l.place.district} <span className="muted">({l.near?.label})</span></dd>
           <dt>Harvest</dt><dd>{dateShort(l.harvestDate)} {l.harvested ? `· ${l.daysLeft} day(s) of shelf life left` : `· keeps about ${l.product.shelfLifeDays} days after harvest`}</dd>
-          <dt>Vehicle needed</dt><dd>{STORAGE_LABEL[l.product.storage]} <span className="muted">· you pay for transport</span></dd>
+          <dt>Vehicle needed</dt><dd>{STORAGE_LABEL[l.product.storage]}{l.product.farmerSet ? " (farmer asked for this)" : ""} <span className="muted">· you pay for transport</span></dd>
           <dt>Visible to</dt><dd>{l.emergency ? `${l.emergency.tierLabel} (step ${l.emergency.tier} of 3)` : SCOPE_LABEL[l.scope]}</dd>
           {l.description && <><dt>Description</dt><dd>{l.description}</dd></>}
         </dl>

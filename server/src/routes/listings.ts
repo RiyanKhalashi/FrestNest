@@ -5,7 +5,7 @@ import fs from "node:fs";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole, requireActive } from "../auth.js";
 import { listingPhotos, keep } from "../uploads.js";
-import { productInfo, suggestScope, deadlineWindow, visibleTo, closeness, DAY, GRACE_MS } from "../rules.js";
+import { productInfo, seasonOf, suggestScope, deadlineWindow, visibleTo, closeness, DAY, GRACE_MS } from "../rules.js";
 import { listingInclude, listingView } from "../views.js";
 import { pingListing, pingMarket } from "../realtime.js";
 import { notifyMany } from "../notify.js";
@@ -32,6 +32,7 @@ const listingSchema = productPart.extend({
   harvestDate: z.coerce.date(),
   description: z.string().trim().max(500).optional(),
   scope,
+  vehicleNeed: storage.optional().nullable(),
   targetDistrictIds: z.array(z.coerce.number().int()).max(20).default([]),
   targetUpazilaIds: z.array(z.coerce.number().int()).max(20).default([]),
   mode: z.enum(["BID", "OWN"]),
@@ -88,6 +89,7 @@ function dataFor(d: ListingInput, ownDistrictId: number, op: "set" | "connect" =
     quantityKg: d.quantityKg, remainingKg: d.quantityKg,
     pricePerKg: d.pricePerKg, harvestDate: d.harvestDate, description: d.description || null,
     scope: d.scope as Scope, mode: d.mode,
+    vehicleNeed: d.vehicleNeed && d.vehicleNeed !== "NORMAL" ? (d.vehicleNeed as StorageNeed) : null,
     bidEndsAt: d.mode === "BID" ? d.bidEndsAt : null,
     minIncrement: d.mode === "BID" ? d.minIncrement ?? 0.5 : null,
     buyNowPrice: d.mode === "BID" ? d.buyNowPrice ?? null : null,
@@ -110,10 +112,11 @@ listingsRouter.post("/preview", requireRole("FARMER"), async (req, res) => {
   if (!p.success) return res.status(400).json({ error: "Need product and harvest date." });
   const r = await resolveProduct(p.data);
   if ("error" in r) return res.status(400).json({ error: r.error });
-  const sug = suggestScope(r.info.shelf, r.info.storage);
+  const sug = suggestScope(r.info.shelf, r.info.longTrip);
   const sc = (p.data.scope ?? sug.scope) as Scope;
-  const info = r.product ? productInfo({ product: r.product }, sc) : r.info;
-  res.json({ info, suggestion: sug, window: await deadlineWindow(p.data.harvestDate, info.shelf, sc) });
+  const info = r.product ? productInfo({ product: r.product }, sc) : productInfo({ customName: p.data.customName, customShelfLife: p.data.customShelfLife, customStorage: p.data.customStorage as StorageNeed }, sc);
+  const s = seasonOf(p.data.harvestDate);
+  res.json({ info, suggestion: sug, season: { name: s.name, months: s.months, risk: s.risk }, window: await deadlineWindow(p.data.harvestDate, info.shelf, sc) });
 });
 
 /** Neighbouring upazilas / districts for the visibility quick-select. */

@@ -92,7 +92,7 @@ function Detail({ d, vehicles, reload, blocked }: { d: Trip; vehicles: Vehicle[]
       <div className="sec"><Route d={d} /></div>
       <div className="sec">
         <dl className="kv">
-          <dt>Vehicle needed</dt><dd><Fac f={d.need} />{d.route.long ? " · long trip" : " · local trip"}</dd>
+          <dt>Vehicle needed</dt><dd><Fac f={d.need} />{d.route.long ? " · long trip" : " · local trip"}{d.needByFarmer ? " · farmer asked for this" : ""}</dd>
           <dt>Harvest</dt><dd>{dateShort(d.listing.harvestDate)} · keeps about {d.listing.shelfLifeDays} days</dd>
           <dt>Your vehicles that fit</dt><dd>{vehicles.filter((v) => d.fittingVehicles?.includes(v.id)).map((v) => v.regNo).join(", ") || "none"}</dd>
           {d.small && <><dt>Why you see this</dt><dd>Small pickups (under 300 kg) go only to transporters based in or next to the pickup upazila.</dd></>}

@@ -118,7 +118,7 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
           <dt>{l.mode === "BID" ? "Base price" : "Asking price"}</dt><dd>{tk(l.pricePerKg)} / kg</dd>
           {l.mode === "OWN" && <><dt>Left to sell</dt><dd>{kg(l.remainingKg)} of {kg(l.quantityKg)}<div className="bar" style={{ marginTop: 5, maxWidth: 260 }}><i style={{ width: (100 * (l.quantityKg - l.remainingKg)) / l.quantityKg + "%" }} /></div></dd></>}
           <dt>Harvest</dt><dd>{dateShort(l.harvestDate)} {l.harvested ? `· ${l.daysLeft} day(s) of shelf life left` : `· keeps about ${l.product.shelfLifeDays} days after`}</dd>
-          <dt>Vehicle</dt><dd>{STORAGE_LABEL[l.product.storage]}</dd>
+          <dt>Vehicle</dt><dd>{STORAGE_LABEL[l.product.storage]}{l.product.farmerSet ? " (your choice)" : ""}</dd>
           <dt>Visible to</dt><dd>{SCOPE_LABEL[l.scope]}{l.scope === "UPAZILA" ? ` (${[l.place.upazila, ...l.targets.upazilas.map((x) => x.name)].join(", ")})` : l.scope === "DISTRICT" ? ` (${[l.place.district, ...l.targets.districts.map((x) => x.name)].join(", ")})` : ""}</dd>
           {b && <><dt>Bidding</dt><dd>Ends {dateTime(b.endsAt)} · raise at least {tk(b.minIncrement)}{b.buyNowPrice ? ` · Buy Now ${tk(b.buyNowPrice)}` : ""}</dd></>}
           {l.own && <><dt>Offers</dt><dd>{l.own.minOrderKg ? `Minimum ${kg(l.own.minOrderKg)} · ` : ""}dealers give you at least {l.own.minResponseHours} h to reply</dd></>}
