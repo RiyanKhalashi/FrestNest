@@ -29,7 +29,8 @@ import { refreshSeasons } from "./rules.js";
 
 const app = express();
 app.set("trust proxy", 1); // behind Render / Vercel proxies
-app.use(cors({ origin: process.env.WEB_ORIGIN, credentials: true }));
+const WEB_ORIGINS = (process.env.WEB_ORIGIN ?? "").split(",").map((o) => o.trim()).filter(Boolean); // comma-separated list allowed
+app.use(cors({ origin: WEB_ORIGINS, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 app.use("/uploads/listings", express.static(path.join(UPLOAD_DIR, "listings"), { maxAge: "7d", fallthrough: false })); // public listing photos only

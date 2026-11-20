@@ -13,7 +13,7 @@ function cookieValue(header: string | undefined, name: string) {
 }
 
 export function startRealtime(server: HttpServer) {
-  io = new Server(server, { cors: { origin: process.env.WEB_ORIGIN, credentials: true }, path: "/socket.io" });
+  io = new Server(server, { cors: { origin: (process.env.WEB_ORIGIN ?? "").split(",").map((o) => o.trim()).filter(Boolean), credentials: true }, path: "/socket.io" });
   io.on("connection", async (socket) => {
     try {
       // production: a 2-minute ticket from /api/auth/socket-token; development: the session cookie
