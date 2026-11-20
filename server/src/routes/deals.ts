@@ -3,12 +3,12 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../auth.js";
-import { productInfo, vehicleBusy, setting, newCode, code, tripNeed, windowOptions } from "../rules.js";
-import { dealInclude, dealView, vehicleLabel } from "../views.js";
+import { productInfo, setting, code, tripNeed, windowOptions } from "../rules.js";
+import { dealInclude, dealView } from "../views.js";
 import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
 import { pingDeal } from "./transport.js";
-import { cancelDeal } from "../dealOps.js";
+import { bookTransport, cancelDeal } from "../dealOps.js";
 
 export const dealsRouter = Router();
 dealsRouter.use(requireAuth, requireRole("FARMER", "DEALER"));
@@ -28,36 +28,31 @@ async function mine(id: string, userId: string) {
 
 /** Dealer confirms one transport offer (dealer pays). */
 dealsRouter.post("/:id/transport/:offerId/accept", requireRole("DEALER"), async (req, res) => {
-  const me = req.user!, id = String(req.params.id), offerId = String(req.params.offerId);
-  const r = await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT id FROM "Deal" WHERE id = ${id} FOR UPDATE`;
-    const d = await tx.deal.findUnique({ where: { id }, include: { transportOffers: { include: { vehicle: true } } } });
-    if (!d || d.dealerId !== me.id) return { ok: false as const, status: 404, error: "Deal not found." };
-    if (d.status !== "AWAITING_TRANSPORT") return { ok: false as const, status: 409, error: "Transport is already arranged for this deal." };
-    const o = d.transportOffers.find((x) => x.id === offerId);
-    if (!o || o.status !== "PENDING") return { ok: false as const, status: 409, error: "This offer is no longer available." };
-    const busy = await vehicleBusy(o.vehicleId, o.pickupAt, o.deliverBy);
-    if (busy) return { ok: false as const, status: 409, error: `That vehicle was just booked for ${busy}. Choose another offer.` };
-    await tx.transportOffer.update({ where: { id: o.id }, data: { status: "ACCEPTED" } });
-    const others = d.transportOffers.filter((x) => x.id !== o.id && x.status === "PENDING");
-    await tx.transportOffer.updateMany({ where: { id: { in: others.map((x) => x.id) } }, data: { status: "NOT_CHOSEN" } });
-    // the same vehicle cannot be offered elsewhere at an overlapping time
-    const clashes = await tx.transportOffer.findMany({ where: { vehicleId: o.vehicleId, status: "PENDING", pickupAt: { lt: o.deliverBy }, deliverBy: { gt: o.pickupAt } }, select: { id: true, dealId: true } });
-    await tx.transportOffer.updateMany({ where: { id: { in: clashes.map((c) => c.id) } }, data: { status: "WITHDRAWN" } });
-    let pickup = newCode(), delivery = newCode();
-    while (delivery === pickup) delivery = newCode();
-    await tx.deal.update({ where: { id }, data: { status: "TRANSPORT_CONFIRMED", pickupCode: pickup, deliveryCode: delivery, codeAttempts: 0 } });
-    return { ok: true as const, d, o, others, clashes };
-  });
+  const me = req.user!;
+  const r = await bookTransport(String(req.params.id), String(req.params.offerId), { dealerId: me.id });
   if (!r.ok) return res.status(r.status).json({ error: r.error });
-  const full = await prisma.deal.findUniqueOrThrow({ where: { id }, include: dealInclude });
-  const name = productInfo(full.listing).name, when = r.o.pickupAt.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
-  await notify(r.o.transporterId, "Offer accepted", `${me.businessName ?? me.name} chose your ${vehicleLabel(r.o.vehicle)} (${r.o.vehicle.regNo}) for ${name} ${code(full.code)}. Pickup ${when} in ${full.listing.upazila.name}. Ask the farmer for the pickup code.`, "/transporter/trips");
-  await notify(full.farmerId, "Transport confirmed", `${name} ${code(full.code)}: pickup ${when}. Give the driver your pickup code only when the produce is loaded.`, "/farmer/sales?l=" + full.listingId);
-  await notifyMany(r.others.map((x) => x.transporterId), "Offer not chosen", `The dealer chose another transport offer for ${code(full.code)}.`, "/transporter/trips");
-  if (r.clashes.length) await notify(r.o.transporterId, "Offers withdrawn", `${r.clashes.length} other offer(s) with ${r.o.vehicle.regNo} at overlapping times were withdrawn, because the vehicle is now booked.`, "/transporter/trips");
-  pingDeal(full, [r.o.transporterId, ...r.others.map((x) => x.transporterId)]); pingTransport();
+  await notify(r.o.transporterId, "Offer accepted", `${me.businessName ?? me.name} chose your ${r.label} for ${r.name} ${code(r.full.code)}. Pickup ${r.when} in ${r.full.listing.upazila.name}. Ask the farmer for the pickup code.`, "/transporter/trips");
   res.json({ ok: true });
+});
+
+/** Dealer makes ONE lower counter-price on a waiting transport offer; the transporter accepts (= booked) or rejects. */
+dealsRouter.post("/:id/transport/:offerId/counter", requireRole("DEALER"), async (req, res) => {
+  const me = req.user!;
+  const p = z.object({ price: z.coerce.number().int("Whole taka").min(100, "At least ৳100"), note: z.string().trim().max(200).optional() }).safeParse(req.body);
+  if (!p.success) return res.status(400).json({ error: "Please check the counter-offer.", fields: z.flattenError(p.error).fieldErrors });
+  const d = await prisma.deal.findUnique({ where: { id: String(req.params.id) }, include: dealInclude });
+  const o = d?.transportOffers.find((x) => x.id === String(req.params.offerId));
+  if (!d || !o || d.dealerId !== me.id) return res.status(404).json({ error: "Offer not found." });
+  if (d.status !== "AWAITING_TRANSPORT" || o.status !== "PENDING") return res.status(409).json({ error: "This offer is no longer open." });
+  if (o.counterState) return res.status(409).json({ error: "You already countered this offer. Each offer gets one counter." });
+  if (p.data.price >= o.price) return res.status(400).json({ error: "Please check the counter-offer.", fields: { price: [`A counter must be lower than the offer (৳${o.price.toLocaleString("en-IN")})`] } });
+  const hours = await setting("transportCounterHours", 2);
+  const expires = new Date(Date.now() + hours * 3600_000);
+  await prisma.transportOffer.update({ where: { id: o.id }, data: { counterPrice: p.data.price, counterNote: p.data.note || null, counterState: "WAITING", counterAt: new Date(), counterExpiresAt: expires } });
+  const name = productInfo(d.listing).name;
+  await notify(o.transporterId, "Counter-offer", `${me.businessName ?? me.name} asks ৳${p.data.price.toLocaleString("en-IN")} instead of ৳${o.price.toLocaleString("en-IN")} for ${name} ${code(d.code)}${p.data.note ? `: “${p.data.note}”` : ""}. Accept to get the trip, or reject to keep your offer. Answer within ${hours} hours.`, "/transporter/trips");
+  pingDeal(d, [o.transporterId]);
+  res.json({ ok: true, expiresAt: expires });
 });
 
 /** The dealer chooses how long transporters can send offers (3/6/12/24 h), counted from now, until the first offer arrives. */

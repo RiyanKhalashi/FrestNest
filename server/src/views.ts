@@ -134,6 +134,8 @@ export async function dealView(d: FullDeal, viewer: User) {
     transporter: { id: o.transporterId, name: o.transporter.businessName ?? o.transporter.name, base: o.transporter.upazila?.name ?? null, rating: rate.get(o.transporterId) ?? null, failures: fails.get(o.transporterId) ?? 0, phone: booked && o.status === "ACCEPTED" && (isFarmer || isDealer) ? o.transporter.phone : null },
     vehicle: { id: o.vehicleId, label: vehicleLabel(o.vehicle), regNo: o.vehicle.regNo, facility: o.vehicle.facility, capacityKg: o.vehicle.capacityKg },
     season: seasonTag(o.vehicle.facility, o.pickupAt), mine: o.transporterId === viewer.id,
+    originalPrice: o.originalPrice,
+    counter: o.counterState ? { price: o.counterPrice!, note: o.counterNote, state: o.counterState, at: o.counterAt, expiresAt: o.counterExpiresAt } : null,
   });
   const visibleOffers = role === "TRANSPORTER" ? d.transportOffers.filter((o) => o.transporterId === viewer.id) : d.transportOffers.filter((o) => o.status !== "WITHDRAWN");
   const pendingCancel = d.cancelRequests.find((c) => c.status === "PENDING");
@@ -164,6 +166,7 @@ export async function dealView(d: FullDeal, viewer: User) {
       windowHours: d.windowHours, defaultHours: win?.def ?? await setting("transportOfferWindowHours", 12),
       // the dealer can pick the window length until the first offer arrives
       canSetWindow: !!win, windowOptions: win?.options ?? [],
+      counterHours: await setting("transportCounterHours", 2),
       offers: visibleOffers.map(offerView),
       confirmed: accepted ? offerView(accepted) : null,
     },

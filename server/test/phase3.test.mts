@@ -189,6 +189,69 @@ try {
     assert.equal((await hasan(`/deals/${d3}/extend`, {})).status, 409);
   });
 
+  // ---- dealer counter-offers on transport offers ----
+  const offerOf = async (dealId: string, reg: string) => (await hasan("/deals")).data.deals.find((x: any) => x.id === dealId).transport.offers.find((o: any) => o.vehicle.regNo === reg);
+  await test("counter: lower price only, one per offer, transporter cannot edit while it waits", async () => {
+    const id = await newDeal("Potato", 1500);
+    assert.equal((await logistics(`/transport/deals/${id}/offers`, offer(await veh("Bogura-Ta 14-1177"), 3200, 50, 54))).status, 201);
+    const o = await offerOf(id, "Bogura-Ta 14-1177");
+    assert.equal((await hasan(`/deals/${id}/transport/${o.id}/counter`, { price: 3300 })).status, 400);      // must be lower
+    assert.equal((await karim(`/deals/${id}/transport/${o.id}/counter`, { price: 2700 })).status, 403);      // farmer cannot counter
+    const r = await hasan(`/deals/${id}/transport/${o.id}/counter`, { price: 2700, note: "Short route" });
+    assert.equal(r.status, 200, JSON.stringify(r.data));
+    assert.equal((await hasan(`/deals/${id}/transport/${o.id}/counter`, { price: 2600 })).status, 409);      // one counter only
+    assert.equal((await logistics(`/transport/offers/${o.id}`, offer(await veh("Bogura-Ta 14-1177"), 3000, 50, 54), "PUT")).status, 409);
+    const seen = await offerOf(id, "Bogura-Ta 14-1177");
+    assert.equal(seen.counter.state, "WAITING"); assert.equal(seen.counter.price, 2700);
+    const farmerView = (await karim("/deals")).data.deals.find((x: any) => x.id === id).transport.offers[0];
+    assert.equal(farmerView.counter.price, 2700);                                                            // farmer sees it
+    assert.ok(Math.abs(new Date(seen.counter.expiresAt).getTime() - Date.now() - 2 * H) < 60_000);           // 2 hours to answer
+    // reject: the original offer stays and can still be chosen
+    assert.equal((await logistics(`/transport/offers/${o.id}/counter/reject`, {})).status, 200);
+    const after = await offerOf(id, "Bogura-Ta 14-1177");
+    assert.equal(after.status, "PENDING"); assert.equal(after.counter.state, "REJECTED"); assert.equal(after.price, 3200);
+    assert.equal((await logistics(`/transport/offers/${o.id}/counter/accept`, {})).status, 409);
+    assert.equal((await hasan(`/deals/${id}/transport/${o.id}/counter`, { price: 2900 })).status, 409);
+    assert.equal((await hasan(`/deals/${id}/transport/${o.id}/accept`, {})).status, 200);
+    assert.equal((await prisma.transportOffer.findUniqueOrThrow({ where: { id: o.id } })).price, 3200);
+  });
+
+  await test("counter accepted by the transporter books the trip at the counter price; first accept wins", async () => {
+    const id = await newDeal("Potato", 1500);
+    assert.equal((await logistics(`/transport/deals/${id}/offers`, offer(await veh("Bogura-Ta 14-0932"), 3200, 60, 64))).status, 201);
+    assert.equal((await coldline(`/transport/deals/${id}/offers`, offer(await veh("Dhaka-Ta 22-7781"), 4500, 60, 64))).status, 201);
+    const a = await offerOf(id, "Bogura-Ta 14-0932"), b = await offerOf(id, "Dhaka-Ta 22-7781");
+    assert.equal((await hasan(`/deals/${id}/transport/${a.id}/counter`, { price: 2700 })).status, 200);
+    assert.equal((await hasan(`/deals/${id}/transport/${b.id}/counter`, { price: 3800 })).status, 200);
+    assert.equal((await coldline(`/transport/offers/${a.id}/counter/accept`, {})).status, 404);              // not their offer
+    assert.equal((await logistics(`/transport/offers/${a.id}/counter/accept`, {})).status, 200);
+    const d = await prisma.deal.findUniqueOrThrow({ where: { id }, include: { transportOffers: true } });
+    assert.equal(d.status, "TRANSPORT_CONFIRMED");
+    const won = d.transportOffers.find((x) => x.id === a.id)!, lost = d.transportOffers.find((x) => x.id === b.id)!;
+    assert.equal(won.status, "ACCEPTED"); assert.equal(won.price, 2700); assert.equal(won.originalPrice, 3200); assert.equal(won.counterState, "ACCEPTED");
+    assert.equal(lost.status, "NOT_CHOSEN"); assert.equal(lost.counterState, "CLOSED");
+    assert.equal((await coldline(`/transport/offers/${b.id}/counter/accept`, {})).status, 409);
+  });
+
+  await test("counter: dealer can still choose the original price; unanswered counters expire", async () => {
+    const id = await newDeal("Potato", 1500);
+    assert.equal((await coldline(`/transport/deals/${id}/offers`, offer(await veh("Dhaka-Ta 22-7781"), 4500, 70, 74))).status, 201);
+    const o = await offerOf(id, "Dhaka-Ta 22-7781");
+    assert.equal((await hasan(`/deals/${id}/transport/${o.id}/counter`, { price: 4000 })).status, 200);
+    await prisma.transportOffer.update({ where: { id: o.id }, data: { counterExpiresAt: new Date(Date.now() - 1000) } });
+    await sweep();
+    const x = await offerOf(id, "Dhaka-Ta 22-7781");
+    assert.equal(x.counter.state, "EXPIRED"); assert.equal(x.status, "PENDING");
+    assert.equal((await coldline(`/transport/offers/${o.id}/counter/accept`, {})).status, 409);
+    const id2 = await newDeal("Potato", 1500);
+    assert.equal((await coldline(`/transport/deals/${id2}/offers`, offer(await veh("Dhaka-Ta 22-7781"), 4400, 80, 84))).status, 201);
+    const o2 = await offerOf(id2, "Dhaka-Ta 22-7781");
+    assert.equal((await hasan(`/deals/${id2}/transport/${o2.id}/counter`, { price: 4000 })).status, 200);
+    assert.equal((await hasan(`/deals/${id2}/transport/${o2.id}/accept`, {})).status, 200);                 // chooses at their price
+    const y = await prisma.transportOffer.findUniqueOrThrow({ where: { id: o2.id } });
+    assert.equal(y.price, 4400); assert.equal(y.counterState, "CLOSED");
+  });
+
   await test("vehicle documents are private", async () => {
     const r = await fetch(API.replace("/api", "") + "/uploads/docs/x.png");
     assert.equal(r.status, 404);

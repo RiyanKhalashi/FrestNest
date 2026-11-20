@@ -10,6 +10,7 @@ import { pingUser, pingTransport } from "../realtime.js";
 import type { User, Vehicle } from "../generated/prisma/client.js";
 import fs from "node:fs";
 import { failurePhoto, keep } from "../uploads.js";
+import { bookTransport } from "../dealOps.js";
 
 export const transportRouter = Router();
 transportRouter.use(requireAuth, requireRole("TRANSPORTER"));
@@ -117,6 +118,7 @@ transportRouter.put("/offers/:id", requireActive, async (req, res) => {
   const o = await myOffer(String(req.params.id), me);
   if (!o) return res.status(404).json({ error: "Offer not found." });
   if (o.status !== "PENDING") return res.status(409).json({ error: "This offer is locked: the dealer has already decided." });
+  if (o.counterState === "WAITING") return res.status(409).json({ error: "The dealer sent a counter-offer. Accept or reject it first, or withdraw your offer." });
   const c = await checkOffer(me, o.deal, p.data, o.id);
   if ("error" in c) return res.status(409).json({ error: c.error });
   if ("fields" in c) return res.status(400).json({ error: "Please check the offer.", fields: c.fields });
@@ -130,8 +132,33 @@ transportRouter.post("/offers/:id/withdraw", async (req, res) => {
   const o = await myOffer(String(req.params.id), req.user!);
   if (!o) return res.status(404).json({ error: "Offer not found." });
   if (o.status !== "PENDING") return res.status(409).json({ error: "Only waiting offers can be withdrawn. To give up a confirmed trip, cancel it with a reason." });
-  await prisma.transportOffer.update({ where: { id: o.id }, data: { status: "WITHDRAWN" } });
+  const counterOpen = o.counterState === "WAITING";
+  await prisma.transportOffer.update({ where: { id: o.id }, data: { status: "WITHDRAWN", ...(counterOpen ? { counterState: "CLOSED" as const } : {}) } });
+  if (counterOpen) await notify(o.deal.dealerId, "Offer withdrawn", `${req.user!.businessName ?? req.user!.name} withdrew their transport offer for ${code(o.deal.code)} instead of answering your counter-offer.`, "/dealer/purchases");
   pingDeal(o.deal);
+  res.json({ ok: true });
+});
+
+/** Transporter accepts the dealer's counter-offer: the trip is booked at the counter price. */
+transportRouter.post("/offers/:id/counter/accept", requireActive, async (req, res) => {
+  const me = req.user!;
+  const o = await myOffer(String(req.params.id), me);
+  if (!o) return res.status(404).json({ error: "Offer not found." });
+  const r = await bookTransport(o.dealId, o.id, { transporterId: me.id, counter: true });
+  if (!r.ok) return res.status(r.status).json({ error: r.error });
+  await notify(r.full.dealerId, "Counter accepted", `${me.businessName ?? me.name} accepted ৳${r.price.toLocaleString("en-IN")} for ${r.name} ${code(r.full.code)}. Transport is confirmed: ${r.label}, pickup ${r.when}. Your delivery code is ready.`, "/dealer/purchases");
+  res.json({ ok: true });
+});
+
+/** Transporter rejects the counter-offer: their original offer stays open for the dealer. */
+transportRouter.post("/offers/:id/counter/reject", async (req, res) => {
+  const me = req.user!;
+  const o = await myOffer(String(req.params.id), me);
+  if (!o) return res.status(404).json({ error: "Offer not found." });
+  if (o.status !== "PENDING" || o.counterState !== "WAITING") return res.status(409).json({ error: "This counter-offer is no longer open." });
+  await prisma.transportOffer.update({ where: { id: o.id }, data: { counterState: "REJECTED" } });
+  await notify(o.deal.dealerId, "Counter rejected", `${me.businessName ?? me.name} said no to ৳${o.counterPrice!.toLocaleString("en-IN")} for ${code(o.deal.code)}. Their offer of ৳${o.price.toLocaleString("en-IN")} is still open.`, "/dealer/purchases");
+  pingDeal(o.deal, [me.id]);
   res.json({ ok: true });
 });
 

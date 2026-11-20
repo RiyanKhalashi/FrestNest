@@ -4,7 +4,7 @@ import { api, ApiError } from "@/lib/api";
 import { tk, tk0, kg, dateShort, dateTime, Countdown, STORAGE_LABEL } from "@/lib/format";
 import type { Deal, TransportOffer } from "@/lib/types";
 import { Modal, FieldErr, useToast } from "./ui";
-import { Route, Track, Fac, SeasonTag, Stars, CodeBox } from "./transport";
+import { Route, Track, Fac, SeasonTag, Stars, CodeBox, CounterStatus } from "./transport";
 import { AutoPreference, EmergencySetup, REASON_LABEL, CONDITION_LABEL } from "./Emergency";
 import { ReportButton } from "./Reporting";
 
@@ -15,7 +15,7 @@ const STATUS: Record<string, [string, string]> = {
   FAILURE_REQUESTED: ["red", "Delivery problem reported"], FAILED: ["red", "Failed: released for emergency sale"],
 };
 
-function OfferLine({ o, d, side, onChoose }: { o: TransportOffer; d: Deal; side: "farmer" | "dealer"; onChoose: (o: TransportOffer) => void }) {
+function OfferLine({ o, d, side, onChoose, onCounter }: { o: TransportOffer; d: Deal; side: "farmer" | "dealer"; onChoose: (o: TransportOffer) => void; onCounter: (o: TransportOffer) => void }) {
   const dead = o.status !== "PENDING" && o.status !== "ACCEPTED";
   return (
     <div className={"offer" + (dead ? " dead" : "")}>
@@ -24,11 +24,15 @@ function OfferLine({ o, d, side, onChoose }: { o: TransportOffer; d: Deal; side:
         <div className="small" style={{ marginTop: 4, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>{o.vehicle.label} <span className="plate">{o.vehicle.regNo}</span> <Fac f={o.vehicle.facility} /> <SeasonTag o={o} /></div>
         <div className="small muted" style={{ marginTop: 3 }}>Pickup {dateTime(o.pickupAt)} · delivery by {dateTime(o.deliverBy)}{o.note ? ` · “${o.note}”` : ""}</div>
         {o.season.tag === "WEATHER_RISK" && <div className="small" style={{ color: "#7c5606", marginTop: 3 }}>{o.season.text}</div>}
+        <CounterStatus o={o} side={side} />
       </div>
       <div style={{ textAlign: "right" }}>
         <div className="num" style={{ font: "600 18px var(--display)" }}>{tk0(o.price)}</div>
         <div className="small muted">{tk(o.price / d.quantityKg)} / kg</div>
-        {side === "dealer" && o.status === "PENDING" && d.status === "AWAITING_TRANSPORT" && <button className="btn sm" style={{ marginTop: 6 }} onClick={() => onChoose(o)}>Choose</button>}
+        {side === "dealer" && o.status === "PENDING" && d.status === "AWAITING_TRANSPORT" && <div className="btns" style={{ marginTop: 6, justifyContent: "flex-end" }}>
+          {!o.counter && <button className="btn ghost sm" onClick={() => onCounter(o)}>Counter</button>}
+          <button className="btn sm" onClick={() => onChoose(o)}>Choose</button>
+        </div>}
         {dead && <span className="tag plain">{o.status === "NOT_CHOSEN" ? "Not chosen" : o.status === "WITHDRAWN" ? "Withdrawn" : "Cancelled"}</span>}
       </div>
     </div>
@@ -60,6 +64,10 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
   const [reason, setReason] = useState("");
   const [err, setErr] = useState("");
   const [choose, setChoose] = useState<TransportOffer | null>(null);
+  const [counter, setCounter] = useState<TransportOffer | null>(null);
+  const [cPrice, setCPrice] = useState("");
+  const [cNote, setCNote] = useState("");
+  const [cFields, setCFields] = useState<Record<string, string[] | undefined>>({});
   const [busy, setBusy] = useState(false);
   const toast = useToast();
   const other = side === "farmer" ? d.dealer : d.farmer;
@@ -84,6 +92,15 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
     setBusy(true);
     try { await api(`/deals/${d.id}/transport/${choose.id}/accept`, { method: "POST" }); setChoose(null); toast("Transport confirmed. Your delivery code is ready."); onChange(); }
     catch (e) { toast(e instanceof ApiError ? e.message : "Failed."); setChoose(null); onChange(); } finally { setBusy(false); }
+  }
+  function openCounter(o: TransportOffer) { setCounter(o); setCPrice(""); setCNote(""); setCFields({}); }
+  async function sendCounter() {
+    if (!counter) return;
+    setBusy(true); setCFields({});
+    try {
+      await api(`/deals/${d.id}/transport/${counter.id}/counter`, { body: { price: +cPrice, note: cNote || undefined } });
+      toast(`Counter sent to ${counter.transporter.name}. They have ${d.transport.counterHours} hours to answer.`); setCounter(null); onChange();
+    } catch (e) { if (e instanceof ApiError) { toast(e.message); setCFields(e.fields); } } finally { setBusy(false); }
   }
   async function setWindow(hours: number) {
     try { await api(`/deals/${d.id}/window`, { body: { hours } }); toast(`Transporters now have ${hours} hours to send offers.`); onChange(); }
@@ -146,11 +163,11 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
               <small>{d.transport.windowHours ? `You chose ${d.transport.windowHours} h.` : `The suggested ${d.transport.defaultHours} h started on its own.`} A new choice counts from now. You can change it until the first offer arrives.{d.transport.windowOptions.some((o) => !o.ok) ? " Longer times are off because the produce would not arrive fresh enough." : ""}</small>
             </div>
           )}
-          {offers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} />)}
+          {offers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} onCounter={openCounter} />)}
           {!offers.length && <p className="small muted" style={{ marginBottom: 8 }}>{d.transport.windowOpen ? "No offers yet. Transporters with a matching vehicle can see this deal." : "No offers arrived in the window."}</p>}
           {d.transport.canExtend && <div className="note warn" style={{ marginBottom: 8 }}>The offer window has closed{offers.length ? "" : " without offers"}. <button className="btn sm" style={{ marginLeft: 8 }} onClick={extend}>Extend once ({d.transport.defaultHours} h)</button></div>}
           {!d.transport.windowOpen && d.transport.windowExtended && !offers.length && <div className="note bad">The extended window also closed without offers. Contact the {side === "dealer" ? "farmer" : "dealer"} or cancel with a reason.</div>}
-          {closedOffers.length > 0 && <details><summary className="small muted" style={{ cursor: "pointer" }}>Earlier offers ({closedOffers.length})</summary>{closedOffers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} />)}</details>}
+          {closedOffers.length > 0 && <details><summary className="small muted" style={{ cursor: "pointer" }}>Earlier offers ({closedOffers.length})</summary>{closedOffers.map((o) => <OfferLine key={o.id} o={o} d={d} side={side} onChoose={setChoose} onCounter={openCounter} />)}</details>}
         </div>
       )}
 
@@ -160,6 +177,7 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
           <div className="small" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
             <b>{c.transporter.name}</b>{c.transporter.phone && <span className="muted">{c.transporter.phone}</span>} · {c.vehicle.label} <span className="plate">{c.vehicle.regNo}</span> <Fac f={c.vehicle.facility} /> · {tk0(c.price)} · pickup {dateTime(c.pickupAt)} · delivery by {dateTime(c.deliverBy)}
           </div>
+          {c.counter?.state === "ACCEPTED" && <div style={{ marginTop: -6, marginBottom: 10 }}><CounterStatus o={c} side={side} /></div>}
           {side === "farmer" && d.pickupCode && <CodeBox label="Your pickup code" code={d.pickupCode} hint="Give it to the driver only after the produce is loaded and weighed. It proves the handover." />}
           {side === "dealer" && d.deliveryCode && <CodeBox label="Your delivery code" code={d.deliveryCode} hint="Give it to the driver only after you have received and checked the produce. It completes the deal." />}
           {side === "farmer" && d.status === "IN_TRANSIT" && <div className="note">Picked up {d.pickedUpAt ? dateTime(d.pickedUpAt) : ""}. The dealer confirms receipt with their code.</div>}
@@ -192,7 +210,18 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
           {choose.season.tag === "WEATHER_RISK" && <div className="note warn" style={{ marginTop: 10 }}><b>Season warning (advice only):</b> {choose.season.text}</div>}
           {choose.season.tag === "COST_SAVING" && <div className="note good" style={{ marginTop: 10 }}>{choose.season.text}</div>}
           {choose.vehicle.facility !== d.need && <p className="small muted" style={{ marginTop: 8 }}>This vehicle has more than the {STORAGE_LABEL[d.need].toLowerCase()} facility this produce needs.</p>}
+          {choose.counter?.state === "WAITING" && <div className="note warn" style={{ marginTop: 10 }}>You asked {tk0(choose.counter.price)} and are waiting for an answer. Choosing now books it at their price, {tk0(choose.price)}, and closes your counter.</div>}
           <p className="small muted" style={{ marginTop: 8 }}>You pay the transporter. Other offers are closed and the transporters are told. Your delivery code appears next.</p>
+        </Modal>
+      )}
+      {counter && (
+        <Modal title={`Counter ${counter.transporter.name}'s offer`} onClose={() => setCounter(null)} actions={<button className="btn" disabled={busy || !cPrice} onClick={sendCounter}>Send counter</button>}>
+          <p>They offer <b>{tk0(counter.price)}</b> for {counter.vehicle.label} <span className="plate">{counter.vehicle.regNo}</span>, pickup {dateTime(counter.pickupAt)}.</p>
+          <div className="row" style={{ marginTop: 12 }}>
+            <div className="field"><label htmlFor={"cp-" + counter.id}>Your price (total ৳)</label><input id={"cp-" + counter.id} type="number" min={100} max={counter.price - 1} step={50} value={cPrice} onChange={(e) => setCPrice(e.target.value)} placeholder={String(Math.round(counter.price * 0.85 / 50) * 50)} /><FieldErr e={cFields.price} />{+cPrice > 0 && <small>{tk(+cPrice / d.quantityKg)} per kg</small>}</div>
+            <div className="field"><label htmlFor={"cn-" + counter.id}>Note <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label><input id={"cn-" + counter.id} value={cNote} maxLength={200} onChange={(e) => setCNote(e.target.value)} placeholder="e.g. Short route, only 25 km" /></div>
+          </div>
+          <p className="small muted">Only the price changes; vehicle and times stay as offered. You get <b>one counter per offer</b>. If they accept, transport is confirmed straight away at your price. If they say no or don&apos;t answer within {d.transport.counterHours} hours, their offer stays and you can still choose it.</p>
         </Modal>
       )}
       {cancel && (

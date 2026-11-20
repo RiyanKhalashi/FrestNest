@@ -8,7 +8,7 @@ import type { Trip, Vehicle } from "@/lib/types";
 import { useLiveEvent } from "@/lib/live";
 import { useSession } from "@/components/Session";
 import { Empty, FieldErr, ProductIcon, useToast } from "@/components/ui";
-import { Route, Fac } from "@/components/transport";
+import { Route, Fac, CounterAnswer, CounterStatus } from "@/components/transport";
 
 interface Board { deals: Trip[]; hidden: { facility: number; local: number }; vehicles: number; districts: { id: number; name: string; upazilas: { id: number; name: string }[] }[]; myDistrictId: number | null }
 
@@ -59,8 +59,10 @@ function OfferForm({ d, vehicles, onDone, blocked }: { d: Trip; vehicles: Vehicl
       {mine && !editing ? (
         <div className="offer">
           <div><h5>{mine.vehicle.label} <span className="plate">{mine.vehicle.regNo}</span> · {tk0(mine.price)}</h5>
-            <div className="small muted">Pickup {dateTime(mine.pickupAt)} · delivery by {dateTime(mine.deliverBy)}</div></div>
-          <div className="btns"><button className="btn ghost sm" onClick={() => setEditing(true)}>Edit</button><button className="btn warn sm" onClick={withdraw}>Withdraw</button></div>
+            <div className="small muted">Pickup {dateTime(mine.pickupAt)} · delivery by {dateTime(mine.deliverBy)}</div>
+            <CounterStatus o={mine} side="transporter" /></div>
+          <div className="btns">{mine.counter?.state !== "WAITING" && <button className="btn ghost sm" onClick={() => setEditing(true)}>Edit</button>}<button className="btn warn sm" onClick={withdraw}>Withdraw</button></div>
+          <div style={{ gridColumn: "1 / -1" }}><CounterAnswer o={mine} onDone={onDone} /></div>
         </div>
       ) : (
         <>
@@ -150,10 +152,10 @@ function Deals() {
             <div className="panel list">
               <h5>{board.deals.length} deal{board.deals.length > 1 ? "s" : ""}</h5>
               {board.deals.map((d) => {
-                const mine = d.transport.offers.some((o) => o.mine && o.status === "PENDING");
+                const my = d.transport.offers.find((o) => o.mine && o.status === "PENDING"), mine = !!my;
                 return (
                   <button key={d.id} className={"item" + (current?.id === d.id ? " on" : "")} onClick={() => router.replace("/transporter/deals?d=" + d.id, { scroll: false })}>
-                    <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={d.listing.product} />{d.listing.product} · {kg(d.quantityKg)}</span>{mine ? <span className="tag gold">Your offer</span> : d.small ? <span className="tag plain">Small · local</span> : <span className="tag green">New</span>}</b>
+                    <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={d.listing.product} />{d.listing.product} · {kg(d.quantityKg)}</span>{my?.counter?.state === "WAITING" ? <span className="tag red">Counter-offer</span> : mine ? <span className="tag gold">Your offer</span> : d.small ? <span className="tag plain">Small · local</span> : <span className="tag green">New</span>}</b>
                     <span>{d.route.from.upazila} → {d.route.to.district ?? d.route.to.name} · {d.need.toLowerCase()} · <Countdown to={d.transport.windowEndsAt} prefix="closes in " done="closed" /></span>
                   </button>
                 );

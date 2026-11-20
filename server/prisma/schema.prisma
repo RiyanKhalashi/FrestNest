@@ -392,6 +392,15 @@ enum TransportOfferStatus {
   CANCELLED  // transporter cancelled after confirmation, or the deal closed
 }
 
+/// A dealer's one counter-price on a transport offer
+enum CounterState {
+  WAITING   // the transporter has not answered yet
+  ACCEPTED  // transporter agreed: the offer was confirmed at the counter price
+  REJECTED  // transporter said no: the original offer still stands
+  EXPIRED   // no answer in time: the original offer still stands
+  CLOSED    // the deal moved on (another offer confirmed, offer withdrawn, deal cancelled)
+}
+
 model TransportOffer {
   id            String               @id @default(cuid())
   dealId        String
@@ -406,10 +415,18 @@ model TransportOffer {
   note          String?
   status        TransportOfferStatus @default(PENDING)
   cancelReason  String?
+  // dealer counter-offer (one per offer, price only)
+  counterPrice     Int?
+  counterNote      String?
+  counterState     CounterState?
+  counterAt        DateTime?
+  counterExpiresAt DateTime?
+  originalPrice    Int?          // the transporter's price, kept when a counter is accepted (price becomes the counter)
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
 
   @@index([dealId, status])
+  @@index([counterState, counterExpiresAt])
   @@index([vehicleId, status])
   @@index([transporterId, status])
 }

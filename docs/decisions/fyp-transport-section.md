@@ -21,3 +21,13 @@ Agreed with user on 2026-11-09. Part of [[fyp-project-overview]]; vehicles defin
 - **No late-pickup functionality** (user removed it 2026-11-09).
 
 Next topic the user wants: **alternative delivery** — they see it as the main unique, real-problem-solving, interactive section of the project.
+
+## Dealer counter-offer on a transport offer (agreed and built 2026-11-20)
+- On a waiting transport offer the dealer can **Choose** it (as before) or **Counter** with a lower total price and an optional note. **Price only**: vehicle and times stay as offered.
+- **One counter per offer.** The counter must be lower than the offer.
+- The transporter **accepts** → transport is confirmed straight away at the counter price (vehicle booked, codes made, other offers "not chosen", their counters closed). Or **rejects** → the original offer stays and the dealer can still choose it. No answer in **2 hours** (admin setting `transportCounterHours`) → the counter expires and the original offer stays.
+- The counter time is always 2 hours. It is **not** cut short by the offer window, because the dealer can still choose offers after the window closes (a change from the first proposal, which tied it to the window).
+- The dealer may counter several transporters at once; the first to accept wins. The dealer can also choose any offer at its original price while a counter is waiting (that closes the counter).
+- While a counter waits, the transporter cannot edit the offer, only accept, reject or withdraw. Accepting re-checks that the vehicle is still free.
+- The farmer sees the counter on the offer but takes no part. Notifications: transporter on a new counter; dealer on accept, reject, expiry or withdrawal.
+- Higher-facility vehicles may offer on a lower need (e.g. a refrigerated truck on a deal that needs only a normal vehicle); the dealer picks between price and freshness. Confirmed with the user on 2026-11-20.

@@ -48,6 +48,9 @@ vehiclesRouter.post("/:id/active", async (req, res) => {
   const v = await prisma.vehicle.findUnique({ where: { id: String(req.params.id) } });
   if (!p.success || !v || v.ownerId !== req.user!.id) return res.status(404).json({ error: "Vehicle not found." });
   await prisma.vehicle.update({ where: { id: v.id }, data: { active: p.data.active } });
-  if (!p.data.active) await prisma.transportOffer.updateMany({ where: { vehicleId: v.id, status: "PENDING" }, data: { status: "WITHDRAWN" } });
+  if (!p.data.active) {
+    await prisma.transportOffer.updateMany({ where: { vehicleId: v.id, status: "PENDING", counterState: "WAITING" }, data: { counterState: "CLOSED" } });
+    await prisma.transportOffer.updateMany({ where: { vehicleId: v.id, status: "PENDING" }, data: { status: "WITHDRAWN" } });
+  }
   res.json({ ok: true });
 });

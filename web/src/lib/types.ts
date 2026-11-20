@@ -37,6 +37,8 @@ export interface TransportOffer {
   transporter: { id: string; name: string; base: string | null; rating: { avg: number; count: number } | null; failures: number; phone: string | null };
   vehicle: { id: string; label: string; regNo: string; facility: Storage; capacityKg: number };
   season: { tag: "COST_SAVING" | "WEATHER_RISK" | null; text: string | null }; mine: boolean;
+  originalPrice: number | null; // the transporter's price before an accepted counter-offer
+  counter: { price: number; note: string | null; state: "WAITING" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CLOSED"; at: string; expiresAt: string } | null;
 }
 export interface Deal {
   id: string; code: string; status: DealStatus; source: "BID" | "BUY_NOW" | "OFFER" | "EMERGENCY";
@@ -50,7 +52,7 @@ export interface Deal {
   need: Storage; needByFarmer: boolean;
   farmer: { id: string; name: string; phone: string | null };
   dealer: { id: string; name: string; district?: string; phone: string | null };
-  transport: { windowEndsAt: string; windowExtended: boolean; windowOpen: boolean; canExtend: boolean; windowHours: number | null; defaultHours: number; canSetWindow: boolean; windowOptions: { hours: number; ok: boolean }[]; offers: TransportOffer[]; confirmed: TransportOffer | null };
+  transport: { windowEndsAt: string; windowExtended: boolean; windowOpen: boolean; canExtend: boolean; windowHours: number | null; defaultHours: number; canSetWindow: boolean; windowOptions: { hours: number; ok: boolean }[]; counterHours: number; offers: TransportOffer[]; confirmed: TransportOffer | null };
   pickupCode: string | null; deliveryCode: string | null; pickedUpAt: string | null; deliveredAt: string | null;
   cancelRequest: { by: string; reason: string; at: string; mine: boolean } | null;
   lastCancelDecision: { status: string; note: string | null } | null;

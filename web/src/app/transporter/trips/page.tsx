@@ -6,7 +6,7 @@ import { tk0, kg, dateTime, Countdown, useNow } from "@/lib/format";
 import type { Trip } from "@/lib/types";
 import { useLiveEvent } from "@/lib/live";
 import { Empty, Modal, useToast } from "@/components/ui";
-import { Route, Fac, Track, SeasonTag, CodeBox } from "@/components/transport";
+import { Route, Fac, Track, SeasonTag, CodeBox, CounterAnswer, CounterStatus } from "@/components/transport";
 import { FailureReport } from "@/components/Emergency";
 
 type Tab = "offers" | "confirmed" | "road" | "done";
@@ -49,9 +49,11 @@ function Waybill({ t, tab, onDone }: { t: Trip; tab: Tab; onDone: () => void }) 
     <div className={"waybill" + (urgent ? " urgent" : "")} style={{ marginBottom: 14 }}>
       <div className="wb-main">
         <div className="wb-top"><span className="wb-id">Trip {t.code} · {tab === "offers" ? "offer sent" : tab === "confirmed" ? "confirmed" : tab === "road" ? "on the road" : t.status === "COMPLETED" && o.status === "ACCEPTED" ? "completed" : o.status.replace("_", " ").toLowerCase()}</span>
-          {tab === "offers" && <span className="tag gold">Dealer is choosing</span>}{tab === "road" && <span className="tag rust">In transit</span>}</div>
+          {tab === "offers" && (o.counter?.state === "WAITING" ? <span className="tag red">Counter-offer: answer it</span> : <span className="tag gold">Dealer is choosing</span>)}{tab === "road" && <span className="tag rust">In transit</span>}</div>
         <Route d={t} dash={tab === "offers"} />
         <div className="wb-meta"><span><b>{t.listing.product} · {kg(t.quantityKg)}</b></span><span>{o.vehicle.label} <span className="plate">{o.vehicle.regNo}</span></span><Fac f={o.vehicle.facility} /><SeasonTag o={o} /><span>{tk0(o.price)}</span></div>
+        {o.counter && o.counter.state !== "WAITING" && <CounterStatus o={o} side="transporter" />}
+        {tab === "offers" && <CounterAnswer o={o} onDone={onDone} />}
         {tab !== "offers" && tab !== "done" && <div className="wb-meta" style={{ marginTop: 4 }}><span>Farmer <b>{t.farmer.name}</b> {t.farmer.phone}</span><span>Dealer <b>{t.dealer.name}</b> {t.dealer.phone}</span></div>}
         {tab !== "offers" && <div style={{ marginTop: 10 }}><Track d={t} /></div>}
         {tab === "confirmed" && <CodeEntry t={t} stage="pickup" onDone={onDone} />}
@@ -62,7 +64,7 @@ function Waybill({ t, tab, onDone }: { t: Trip; tab: Tab; onDone: () => void }) 
         {o.cancelReason && <p className="small muted" style={{ marginTop: 6 }}>You cancelled: {o.cancelReason}</p>}
       </div>
       <div className="wb-stub">
-        {tab === "offers" ? <><small>Window closes in</small><div className="wb-time"><Countdown to={t.transport.windowEndsAt} /></div><Link className="btn ghost sm" style={{ marginTop: 12 }} href={"/transporter/deals?d=" + t.id}>Edit offer</Link></>
+        {tab === "offers" ? <><small>Window closes in</small><div className="wb-time"><Countdown to={t.transport.windowEndsAt} /></div>{o.counter?.state !== "WAITING" && <Link className="btn ghost sm" style={{ marginTop: 12 }} href={"/transporter/deals?d=" + t.id}>Edit offer</Link>}</>
           : tab === "done" ? <><small>{t.deliveredAt ? "Delivered" : "Closed"}</small><div className="wb-time" style={{ fontSize: 16 }}>{t.deliveredAt ? dateTime(t.deliveredAt) : "—"}</div></>
           : <><small>{tab === "confirmed" ? "Pickup" : "Delivery by"}</small><div className="wb-time">{new Date(tab === "confirmed" ? o.pickupAt : o.deliverBy).toLocaleTimeString("en-GB", { hour: "numeric", minute: "2-digit", hour12: true })}</div><small>{new Date(tab === "confirmed" ? o.pickupAt : o.deliverBy).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</small>
             {tab === "confirmed" && <button className="btn warn sm" style={{ marginTop: 12 }} onClick={() => setCancel(true)}>Cancel trip</button>}

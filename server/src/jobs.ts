@@ -3,7 +3,7 @@
 import { prisma } from "./db.js";
 import { productInfo, code, DAY, transportWindowEnd } from "./rules.js";
 import { notify, notifyMany } from "./notify.js";
-import { pingListing, pingMarket, pingTransport } from "./realtime.js";
+import { pingListing, pingMarket, pingTransport, pingUser } from "./realtime.js";
 import { cancelOpenOffers } from "./routes/listings.js";
 import { setupEmergencyDelivery, afterEmergencyDeal, startEmergency, widen, suggest, shelfLeftMs, failureInclude } from "./emergency.js";
 
@@ -67,6 +67,18 @@ async function expireListings() {
 }
 
 /** Transport window ended without offers → tell the dealer once (they can extend it once). */
+/** A dealer's counter-offer that the transporter did not answer in time: the original offer stays. */
+async function expireCounters() {
+  const due = await prisma.transportOffer.findMany({ where: { status: "PENDING", counterState: "WAITING", counterExpiresAt: { lte: new Date() } }, include: { transporter: true, deal: true } });
+  for (const o of due) {
+    const n = await prisma.transportOffer.updateMany({ where: { id: o.id, counterState: "WAITING" }, data: { counterState: "EXPIRED" } });
+    if (!n.count) continue;
+    await notify(o.deal.dealerId, "Counter-offer expired", `${o.transporter.businessName ?? o.transporter.name} did not answer your ৳${o.counterPrice!.toLocaleString("en-IN")} counter for ${code(o.deal.code)}. Their offer of ৳${o.price.toLocaleString("en-IN")} is still open.`, "/dealer/purchases");
+    await notify(o.transporterId, "Counter-offer expired", `The dealer's counter for ${code(o.deal.code)} expired. Your offer of ৳${o.price.toLocaleString("en-IN")} still stands.`, "/transporter/trips");
+    pingUser(o.deal.dealerId, "deal"); pingUser(o.deal.farmerId, "deal"); pingUser(o.transporterId, "deal");
+  }
+}
+
 async function transportWindows() {
   const due = await prisma.deal.findMany({ where: { status: "AWAITING_TRANSPORT", windowNotified: false, transportWindowEndsAt: { lte: new Date() } }, include: { listing: { include: { product: true } }, transportOffers: { where: { status: "PENDING" }, select: { id: true } } } });
   for (const d of due) {
@@ -104,6 +116,7 @@ export function startJobs() {
     try {
       await closeBidding();
       await expireOffers();
+      await expireCounters();
       await transportWindows();
       await failures();
       if (tick++ % 12 === 0) await expireListings(); // about once a minute
