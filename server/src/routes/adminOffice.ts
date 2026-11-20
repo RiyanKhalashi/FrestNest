@@ -18,6 +18,16 @@ const DAY = 86400_000;
 const anyAdmin = (req: Request, res: Response, next: NextFunction) => (req.user?.role === "ADMIN" ? next() : res.status(403).json({ error: "Admins only." }));
 const name = (u: { name: string; businessName?: string | null }) => u.businessName ?? u.name;
 
+/* ------------------------------------------------------------ simple admin mode (demo): 6 menu items, business page */
+r.get("/mode", anyAdmin, async (_req, res) => { res.json({ simple: await setting<boolean>("simpleAdmin", true) }); });
+r.put("/mode", requireSuperAdmin, async (req, res) => {
+  const simple = z.object({ simple: z.boolean() }).safeParse(req.body);
+  if (!simple.success) return res.status(400).json({ error: "Choose on or off." });
+  await prisma.setting.upsert({ where: { key: "simpleAdmin" }, update: { value: simple.data.simple }, create: { key: "simpleAdmin", value: simple.data.simple } });
+  await adminLog(req.user!.id, simple.data.simple ? "Turned on simple admin mode" : "Showed all admin tools");
+  res.json({ simple: simple.data.simple });
+});
+
 /* ------------------------------------------------------------ case locks (see ../locks.ts) */
 r.post("/locks/:key/take", anyAdmin, async (req, res) => { if (await guard(req, res, String(req.params.key))) res.json({ ok: true }); });
 r.post("/locks/:key/release", anyAdmin, async (req, res) => {

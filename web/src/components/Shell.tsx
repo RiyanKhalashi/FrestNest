@@ -8,6 +8,7 @@ import { SessionProvider, useSession } from "./Session";
 import { Sprout } from "./Art";
 import { Bell } from "./Bell";
 import { ToastProvider } from "./ui";
+import { useAdminMode, setAdminMode } from "@/lib/adminMode";
 
 function canSee(u: User, perm?: string) {
   if (!perm) return true;
@@ -33,6 +34,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [navOpen, setNavOpen] = useState(false);
+  const simple = useAdminMode(role === "ADMIN");
   useEffect(() => { setNavOpen(false); }, [path]); // close the mobile menu after navigating
 
   useEffect(() => {
@@ -49,7 +51,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
 
   if (loading || !user || user.role !== role) return <div className="boot">Loading FreshNest…</div>;
 
-  const items = NAV[role].filter((i) => canSee(user, i.perm));
+  const items = NAV[role].filter((i) => canSee(user, i.perm) && (!i.mode || (simple ?? true) === (i.mode === "simple")));
   const place = [user.upazila?.name, user.district?.name].filter(Boolean).join(", ");
 
   async function logout() { await api("/auth/logout", { method: "POST" }); window.location.assign("/login"); } // full reload clears all in-memory state on sign-out
@@ -69,7 +71,12 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
           })}
         </nav>
         {role === "ADMIN" && (
-          <div className="season"><p><b>Your permissions</b>{user.isSuperAdmin ? "Super Admin: everything, including team, settings, products and lifting bans." : user.permissions.map((p) => p[0] + p.slice(1).toLowerCase()).join(" · ") || "None yet"}</p></div>
+          <div className="season"><p>
+            {simple !== false
+              ? <><b>Simple admin mode</b>One admin, the main tools and the business model.</>
+              : <><b>Your permissions</b>{user.isSuperAdmin ? "Super Admin: everything, including team, settings, products and lifting bans." : user.permissions.map((p) => p[0] + p.slice(1).toLowerCase()).join(" · ") || "None yet"}</>}
+            {user.isSuperAdmin && simple !== null && <button className="btn ghost sm" style={{ marginTop: 8 }} onClick={() => setAdminMode(!simple).then(() => router.push("/admin"))}>{simple ? "Show all admin tools" : "Back to simple mode"}</button>}
+          </p></div>
         )}
       </aside>
       <div>

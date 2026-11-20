@@ -1,6 +1,6 @@
 import type { Role, Permission } from "./api";
 
-export interface NavItem { href: string; label: string; code: string; perm?: Permission | "SUPER"; group?: string }
+export interface NavItem { href: string; label: string; code: string; perm?: Permission | "SUPER"; group?: string; mode?: "simple" | "full" } // mode: shown only in simple / full admin mode
 
 // Screen codes match the agreed prototype (F1…, D1…, T1…, A1…)
 export const NAV: Record<Role, NavItem[]> = {
@@ -29,10 +29,11 @@ export const NAV: Record<Role, NavItem[]> = {
     { href: "/admin/failures", label: "Delivery failures", code: "A3", perm: "DEALS", group: "Queues" },
     { href: "/admin/cases", label: "Cases", code: "A4", group: "Queues" },
     { href: "/admin/users", label: "Users", code: "A5", group: "Queues" },
-    { href: "/admin/products", label: "Products & seasons", code: "A6", perm: "SUPER", group: "Platform" },
-    { href: "/admin/announcements", label: "Announcements", code: "A7", perm: "ANNOUNCE", group: "Platform" },
-    { href: "/admin/analytics", label: "Analytics", code: "A8", perm: "ANALYTICS", group: "Platform" },
-    { href: "/admin/team", label: "Admin team & settings", code: "A9", perm: "SUPER", group: "Platform" },
+    { href: "/admin/business", label: "Business", code: "A10", perm: "ANALYTICS", group: "Business model", mode: "simple" },
+    { href: "/admin/products", label: "Products & seasons", code: "A6", perm: "SUPER", group: "Platform", mode: "full" },
+    { href: "/admin/announcements", label: "Announcements", code: "A7", perm: "ANNOUNCE", group: "Platform", mode: "full" },
+    { href: "/admin/analytics", label: "Analytics", code: "A8", perm: "ANALYTICS", group: "Platform", mode: "full" },
+    { href: "/admin/team", label: "Admin team & settings", code: "A9", perm: "SUPER", group: "Platform", mode: "full" },
   ],
 };
 

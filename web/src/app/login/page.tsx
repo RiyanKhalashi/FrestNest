@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api, HOME, ApiError, type User } from "@/lib/api";
 import { AuthArt } from "@/components/AuthArt";
 
-const DEMO: [string, string][] = [["Farmer", "01712345678"], ["Dealer", "01811000001"], ["Transporter", "01911000001"], ["Super Admin", "01700000001"], ["Admin (verify)", "01700000002"]];
+const DEMO: [string, string][] = [["Farmer", "01712345678"], ["Dealer", "01811000001"], ["Transporter", "01911000001"], ["Admin", "01700000001"]];
 
 export default function LoginPage() {
   const [phone, setPhone] = useState("");

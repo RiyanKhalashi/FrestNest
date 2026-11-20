@@ -26,3 +26,10 @@ Admin pages: A1 Overview, A2 Verification, A3 Delivery failures, A4 Cases, A5 Us
 - Top line: Good standing / N warnings in the last 90 days / Suspended until … / Banned, with the reason.
 - History table, newest first: Warning, Suspended (N days, until …), Banned, Lifted by admin, Suspension ended (added automatically when a suspension runs out). It shows the admin's written reason and a "New" tag for 7 days. The admin's name is not shown, only "FreshNest admin".
 - The notification still goes out as before; the profile section is the permanent record. Data comes from AdminLog (targetUserId), endpoint `GET /api/profile/standing`.
+
+## Simple admin mode for the demo (agreed 2026-11-20)
+- Goal: a short, clear admin part in the project demo (about 4 minutes) that still shows the business model.
+- **Simple mode (default on):** one admin (Super Admin, all permissions), **6 menu items**: Overview, Verification, Delivery failures, Cases, Users, **Business**.
+- **Business page** = the business model in one place: upazila market report (with CSV), agri company subscriptions (৳1,500 per upazila per month), and sending sponsored announcements (opted-in farmers only, "Sponsored" label). The farmer's "Agri partner offers" consent switch stays on the profile.
+- **Hidden, not deleted:** admin team & permissions (and case locks, which only matter with several admins), Products & seasons editing, the full Analytics "Platform & operations" charts (key numbers move to Overview), plain announcements page. The Super Admin can switch simple mode off to show everything again, e.g. if an examiner asks about several admins.
+- Demo flow: Overview → approve a transporter's documents → approve a delivery failure (emergency sale) → warn a user in Cases and show it on their profile → Business: upazila report, company subscription, sponsored offer seen by a farmer.
