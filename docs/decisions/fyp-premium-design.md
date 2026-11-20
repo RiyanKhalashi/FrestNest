@@ -15,3 +15,11 @@ Agreed with the user on 2026-11-20, building the same day. Replaces the earlier 
 - Public home page at `/`: hero "From the field to the dealer, before it spoils." + live listing card; nine feature cards (sell your way, codes, right vehicle, transport bargaining, season advice, emergency sale tiers, fair play, live updates, upazila reach); 4 steps; role tabs; **business model section** (upazila reports ৳1,500/upazila/month, sponsored offers with consent); trust numbers; about quote; CTA; footer. Logged-in users see "Open dashboard".
 - Log in / Register: centred card, gradient top edge, grid + field-line background; Register has a Farmer/Dealer/Transporter switch in the role's colour; same fields and rules as before.
 - Dashboards: white sidebar with logo, the user's card, icon menu, active item as a dark pill; top bar; dark gradient welcome card; KPI cards; rounded panels and pill tags. Every screen and feature stays the same; only the look changes.
+- 2026-11-21: a mix with Design 2.0 (ivory background, Lora italic accents, bigger hand-drawn crops, mint glow) was previewed (docs/design/freshnest-mix-preview.html) and **rejected**: keep the premium design as built.
+
+## Soft tints instead of plain white (2026-11-21, final — built)
+- Cultural touches (six seasons, alpona, kantha stitch, truck art) were previewed and **not wanted**.
+- Kept premium v1, but plain white surfaces now use a light role shade:
+  farmer mint-cream `#F8FBF4` on `#EAF2E7`, dealer blue-white `#F6F9FC` on `#E7EEF5`,
+  transporter warm cream `#FFFAF3` on `#F5EBDF`, admin grey-green `#F7FAF8` on `#E8EEEA`.
+- Landing page background `#F6F9F1`, feature cards warm sand, log-in card `#FCFDF9`. Form inputs stay white.
