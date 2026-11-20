@@ -7,6 +7,43 @@ import { api, ApiError, ROLE_LABEL, type User } from "@/lib/api";
 import { useSession } from "./Session";
 import { PlacePicker } from "./PlacePicker";
 
+type Standing = {
+  status: string; suspendedUntil: string | null; reason: string | null; warnings90: number;
+  items: { kind: "WARNING" | "SUSPENDED" | "BANNED" | "LIFTED" | "ENDED"; at: string; reason: string | null; days?: number; until?: string; isNew: boolean }[];
+};
+const KIND: Record<Standing["items"][number]["kind"], [string, string]> = {
+  WARNING: ["gold", "Warning"], SUSPENDED: ["red", "Suspended"], BANNED: ["red", "Banned"], LIFTED: ["green", "Lifted by admin"], ENDED: ["green", "Suspension ended"],
+};
+
+/** Private: admin warnings and suspensions with their reasons. Other people never see this. */
+function AccountStanding() {
+  const [s, setS] = useState<Standing | null>(null);
+  useEffect(() => { api<Standing>("/profile/standing").then(setS).catch(() => {}); }, []);
+  if (!s) return null;
+  const line = s.status === "BANNED" ? ["bad", <><b>Your account is banned.</b>{s.reason ? ` Reason: ${s.reason}.` : ""}</>]
+    : s.status === "SUSPENDED" ? ["bad", <><b>Suspended{s.suspendedUntil ? ` until ${dateShort(s.suspendedUntil)}` : ""}.</b> Active deals continue, but you can&apos;t start new ones.{s.reason ? ` Reason: ${s.reason}.` : ""}</>]
+    : s.warnings90 > 0 ? ["warn", <><b>{s.warnings90} warning{s.warnings90 > 1 ? "s" : ""} in the last 90 days.</b> Repeated problems can lead to suspension.</>]
+    : ["good", <><b>Good standing.</b> {s.items.length ? "No warnings in the last 90 days." : "No warnings. Keep it up."}</>];
+  return (
+    <div className="panel">
+      <h3>Account standing <small>only you can see this</small></h3>
+      <div className="pb"><div className={"note " + line[0]}>{line[1]}</div></div>
+      {s.items.length > 0 && (
+        <table className="ledger">
+          <thead><tr><th>Date</th><th>From FreshNest admin</th><th>Reason</th></tr></thead>
+          <tbody>{s.items.map((x, i) => (
+            <tr key={i}>
+              <td className="small" style={{ whiteSpace: "nowrap" }}>{dateShort(x.at)}</td>
+              <td style={{ whiteSpace: "nowrap" }}><span className={"tag " + KIND[x.kind][0]}>{KIND[x.kind][1]}{x.kind === "SUSPENDED" && x.days ? ` · ${x.days} days` : ""}</span>{x.isNew && <span className="tag blue" style={{ marginLeft: 6 }}>New</span>}</td>
+              <td className="small">{x.reason ?? (x.kind === "SUSPENDED" && x.until ? `Until ${dateShort(x.until)}` : "—")}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 export function ProfilePage({ code }: { code: string }) {
   const { user, setUser } = useSession();
   const u = user!;
@@ -37,9 +74,10 @@ export function ProfilePage({ code }: { code: string }) {
 
   return (
     <>
-      <div className="head"><div><h1>Profile &amp; reviews</h1><p>What others see about you.</p></div><span className="code">Screen {code}</span></div>
+      <div className="head"><div><h1>Profile &amp; reviews</h1><p>Your details, your account standing (private) and the reviews others see.</p></div><span className="code">Screen {code}</span></div>
       <div className="grid g2" style={{ alignItems: "start" }}>
         <div className="grid">
+          {u.role !== "ADMIN" && <AccountStanding />}
           <div className="panel">
             <h3>Your details</h3>
             <div className="pb">

@@ -44,6 +44,38 @@ profileRouter.post("/password", async (req, res) => {
 });
 
 /** Reviews I received (hidden ones are not shown). */
+/** The user's own account standing: current status + admin warnings / suspensions with reasons. Private to the user. */
+profileRouter.get("/standing", async (req, res) => {
+  const me = req.user!;
+  if (me.role === "ADMIN") return res.json({ status: me.status, suspendedUntil: null, reason: null, warnings90: 0, items: [] });
+  const logs = await prisma.adminLog.findMany({
+    where: { targetUserId: me.id, OR: [{ action: { in: ["Warned user", "Banned user", "Lifted suspension", "Lifted ban"] } }, { action: { startsWith: "Suspended user" } }] },
+    orderBy: { createdAt: "asc" }, take: 100,
+  });
+  type Item = { kind: "WARNING" | "SUSPENDED" | "BANNED" | "LIFTED" | "ENDED"; at: Date; reason: string | null; days?: number; until?: Date };
+  const items: Item[] = [];
+  for (let i = 0; i < logs.length; i++) {
+    const l = logs[i];
+    if (l.action === "Warned user") items.push({ kind: "WARNING", at: l.createdAt, reason: l.reason });
+    else if (l.action === "Banned user") items.push({ kind: "BANNED", at: l.createdAt, reason: l.reason });
+    else if (l.action.startsWith("Lifted")) items.push({ kind: "LIFTED", at: l.createdAt, reason: null });
+    else {
+      const days = Number(l.action.match(/(\d+) days/)?.[1] ?? 0), until = new Date(l.createdAt.getTime() + days * 86_400_000);
+      items.push({ kind: "SUSPENDED", at: l.createdAt, reason: l.reason, days, until });
+      // a suspension that ran out by itself (no lift / new action before its end) gets an "ended" line
+      const next = logs[i + 1];
+      if (until.getTime() < Date.now() && (!next || next.createdAt > until)) items.push({ kind: "ENDED", at: until, reason: null });
+    }
+  }
+  items.sort((a, b) => b.at.getTime() - a.at.getTime());
+  const since = Date.now() - 90 * 86_400_000;
+  res.json({
+    status: me.status, suspendedUntil: me.suspendedUntil, reason: me.status === "SUSPENDED" || me.status === "BANNED" ? me.statusReason : null,
+    warnings90: items.filter((x) => x.kind === "WARNING" && x.at.getTime() > since).length,
+    items: items.map((x) => ({ ...x, isNew: ["WARNING", "SUSPENDED", "BANNED"].includes(x.kind) && x.at.getTime() > Date.now() - 7 * 86_400_000 })),
+  });
+});
+
 profileRouter.get("/reviews", async (req, res) => {
   const rs = await prisma.review.findMany({
     where: { toId: req.user!.id, hidden: false }, orderBy: { createdAt: "desc" }, take: 50,
