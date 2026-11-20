@@ -21,8 +21,8 @@
   --clay-tint: #fae7df;
   --sky: #3a6679;
   --sky-tint: #e9f0f2;
-  --display: var(--f-display), 'Fraunces', Georgia, 'Times New Roman', serif;
-  --sans: var(--f-sans), 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --display: var(--f-sans), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  --sans: var(--f-sans), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
   --mono: var(--f-mono), 'IBM Plex Mono', Menlo, Consolas, monospace;
 }
 

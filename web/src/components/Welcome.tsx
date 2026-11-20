@@ -1,19 +1,22 @@
 "use client";
 import { useSession } from "./Session";
-import { FieldScene } from "./Art";
 
+/** Dark gradient welcome card in the role's colour (premium design). */
 export function Welcome({ code, line }: { code: string; line: string }) {
   const { user } = useSession();
   const h = new Date().getHours();
   const greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+  const first = user!.name.split(" ")[0]; // the person, not the business
   return (
-    <div className="head hero">
-      <div style={{ position: "absolute", right: 0, bottom: 0, width: 420, opacity: .9 }}><FieldScene /></div>
-      <div style={{ position: "relative" }}>
-        <h1>{greet}, {user!.name.split(" ")[0]}</h1>
-        <p>{new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · {line}</p>
+    <div className="wel">
+      <div className="row">
+        <div>
+          <small>{new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</small>
+          <h1>{greet}, <span className="g">{first}</span></h1>
+          <p>{line}</p>
+        </div>
+        <span className="code">Screen {code}</span>
       </div>
-      <span className="code" style={{ position: "relative" }}>Screen {code}</span>
     </div>
   );
 }

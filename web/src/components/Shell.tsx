@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { api, HOME, ROLE_LABEL, type Role, type User } from "@/lib/api";
 import { NAV, BRAND_SUB, BODY_CLASS } from "@/lib/nav";
 import { SessionProvider, useSession } from "./Session";
-import { Sprout } from "./Art";
+import { Icon, Logo } from "./Icon";
 import { Bell } from "./Bell";
 import { ToastProvider } from "./ui";
 import { useAdminMode, setAdminMode } from "@/lib/adminMode";
@@ -60,13 +60,14 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
     <div className={"app" + (navOpen ? " nav-open" : "")}>
       <div className="scrim" onClick={() => setNavOpen(false)} />
       <aside className="side" id="side-nav">
-        <div className="brand"><Sprout /><div><b>FreshNest</b><span>{BRAND_SUB[role]}</span></div></div>
+        <Logo href={HOME[role]} />
+        <div className="me"><span className="av">{(user.businessName ?? user.name)[0]}</span><span><b>{user.businessName ?? user.name}</b><small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}{place ? " · " + place : ""}</small></span></div>
         <nav className="nav">
           {items.map((i, idx) => {
             const head = i.group && i.group !== items[idx - 1]?.group ? <div className="grp">{i.group}</div> : null;
             const on = i.href === HOME[role] ? path === i.href : path.startsWith(i.href);
             return (
-              <div key={i.href}>{head}<Link href={i.href} className={on ? "on" : ""}>{i.label} <i>{i.code}</i></Link></div>
+              <div key={i.href}>{head}<Link href={i.href} className={on ? "on" : ""}><Icon name={i.icon ?? "leaf"} />{i.label}</Link></div>
             );
           })}
         </nav>
@@ -84,14 +85,10 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
           <button className="menu-btn" aria-label="Menu" aria-expanded={navOpen} aria-controls="side-nav" onClick={() => setNavOpen((o) => !o)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
-          <span className="proto-note">{ROLE_LABEL[role]}{place ? " · " + place : ""}</span>
+          <span className="proto-note">{BRAND_SUB[role]}</span>
           <div className="sp" />
           <Bell initialUnread={unread} />
-          <div className="who">
-            <div className="avatar">{user.name[0]}</div>
-            <div>{user.businessName ?? user.name}<small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}</small></div>
-          </div>
-          <button className="btn ghost sm" onClick={logout}>Sign out</button>
+          <button className="btn ghost sm" onClick={logout}><Icon name="logout" size={15} />Sign out</button>
         </header>
         <main>
           <StatusBanner u={user} />

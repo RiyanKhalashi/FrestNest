@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 import "@/styles/base.css";
 import "@/styles/transporter.css";
 import "@/styles/admin.css";
 import "./globals.css";
+import "@/styles/theme.css";
+import "@/styles/landing.css";
 
-const display = Fraunces({ variable: "--f-display", subsets: ["latin"], weight: ["500", "600"] });
-const sans = IBM_Plex_Sans({ variable: "--f-sans", subsets: ["latin"], weight: ["400", "500", "600"] });
+// One family for headings and text (premium design, 2026-11-20); mono for codes and number plates
+const sans = Plus_Jakarta_Sans({ variable: "--f-sans", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 const mono = IBM_Plex_Mono({ variable: "--f-mono", subsets: ["latin"], weight: ["400", "500"] });
 
 export const metadata: Metadata = {
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );
