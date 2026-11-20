@@ -1,0 +1,548 @@
+<title>FreshNest Role Looks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500;700&display=swap">
+<style>
+/* Layout: a design board — shared touches strip, then one row per role (notes left, live mock right). Single light look on purpose: the app itself is light. */
+:root {
+  color-scheme: light;
+  --board: #efeee6; --board-ink: #26302a; --board-muted: #6c7067; --board-line: #d9d8cc; --card: #ffffff;
+  --display: 'Fraunces', Georgia, serif;
+  --sans: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', Menlo, monospace;
+  --hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+
+  /* Farmer · Uthan */
+  --f-paper: #f7f1e1; --f-ink: #2b2a1f; --f-paddy: #3d6b2c; --f-paddy-2: #4f8338; --f-mustard: #d9a21b; --f-mustard-tint: #fbefc8; --f-soil: #7b4a2b; --f-soil-tint: #f1e2d3; --f-line: #e4d9bd;
+  /* Dealer · Arot */
+  --d-paper: #edf2f0; --d-ink: #1c2a29; --d-teal: #1f4b4c; --d-teal-2: #2b6264; --d-brass: #b38a3a; --d-brass-tint: #f3e8cf; --d-chalk: #263330; --d-chalk-ink: #f1efe4; --d-line: #d3dfdb;
+  /* Transporter · Road */
+  --t-paper: #f2f0e8; --t-ink: #1e2a22; --t-night: #1d3527; --t-night-2: #274632; --t-rust: #a5532c; --t-rust-tint: #fbefe7; --t-line: #ddd8c9;
+  --ta-red: #c8402a; --ta-yellow: #eebc2b; --ta-teal: #17836f; --ta-cream: #f6ecd8; --ta-blue: #2c5aa0;
+  /* Admin · Office */
+  --a-paper: #f6f6f2; --a-ink: #22282a; --a-slate: #2f5568; --a-slate-tint: #e6eef1; --a-line: #e1e2dc; --a-stamp-ok: #2f7a4a; --a-stamp-warn: #b27a10; --a-stamp-bad: #b0402e;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--board); color: var(--board-ink); font: 14px/1.5 var(--sans); }
+h1, h2, h3, h4, p { margin: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 36px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-variant-numeric: tabular-nums; }
+svg { display: block; }
+.ink { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- intro ---------- */
+.intro { display: grid; gap: 10px; max-width: 760px; }
+.intro .eyebrow { font: 500 11.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--board-muted); }
+.intro h1 { font: 600 40px/1.1 var(--display); letter-spacing: -.015em; text-wrap: balance; }
+.intro p { color: var(--board-muted); font-size: 15px; max-width: 64ch; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.jump a { text-decoration: none; color: var(--board-ink); border: 1px solid var(--board-line); background: var(--card); padding: 6px 12px 6px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.jump a:hover { border-color: var(--board-ink); }
+.jump a:focus-visible { outline: 2px solid var(--board-ink); outline-offset: 2px; }
+.jump i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+
+/* ---------- kantha stitch (shared) ---------- */
+.stitch { height: 2px; background: repeating-linear-gradient(90deg, var(--st, #b9a46a) 0 9px, transparent 9px 15px); border-radius: 2px; }
+.stitch.double { height: 7px; background:
+  repeating-linear-gradient(90deg, var(--st, #b9a46a) 0 9px, transparent 9px 15px) 0 0 / 100% 2px no-repeat,
+  repeating-linear-gradient(90deg, transparent 0 7px, var(--st2, #c86a3c) 7px 16px, transparent 16px 22px) 0 5px / 100% 2px no-repeat; }
+
+/* ---------- shared touches ---------- */
+.shared { margin-top: 40px; }
+.sec-title { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+.sec-title h2 { font: 600 22px var(--display); }
+.sec-title span { color: var(--board-muted); font-size: 13px; }
+.touches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.touch { background: var(--card); border: 1px solid var(--board-line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.touch h3 { font: 600 15px var(--display); }
+.touch p { font-size: 12.5px; color: var(--board-muted); }
+.touch .demo { min-height: 64px; display: grid; align-content: center; gap: 8px; }
+.crops { display: flex; gap: 10px; color: #3b3a2e; }
+.crops svg { width: 34px; height: 34px; }
+.seasons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seasons figure { margin: 0; }
+.seasons svg { width: 100%; height: auto; border-radius: 4px; }
+.seasons figcaption { font-size: 11px; color: var(--board-muted); margin-top: 3px; }
+.empty-demo { border: 1px dashed var(--board-line); border-radius: 6px; padding: 10px; display: flex; gap: 10px; align-items: center; font-size: 12.5px; }
+.empty-demo svg { width: 40px; height: 40px; flex: none; color: #7b4a2b; }
+.empty-demo b { display: block; font-weight: 600; }
+
+/* ---------- role rows ---------- */
+.role { margin-top: 56px; display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 28px; align-items: start; scroll-margin-top: 20px; }
+.notes { display: grid; gap: 14px; position: sticky; top: 20px; }
+.notes .tagline { font: 500 11.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--board-muted); }
+.notes h2 { font: 600 30px/1.1 var(--display); letter-spacing: -.01em; }
+.notes h2 small { display: block; font: 700 22px var(--hand); color: var(--board-muted); letter-spacing: 0; margin-top: 2px; }
+.notes .feel { font-size: 14px; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.swatches span { display: grid; gap: 3px; font: 400 10.5px var(--mono); color: var(--board-muted); width: 52px; }
+.swatches i { height: 30px; border-radius: 4px; border: 1px solid rgba(0,0,0,.08); display: block; }
+.notes ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font-size: 13px; }
+.notes li { padding-left: 18px; position: relative; }
+.notes li::before { content: ""; position: absolute; left: 0; top: 9px; width: 9px; height: 2px; background: currentColor; opacity: .5; border-radius: 2px; }
+
+/* ---------- mock frame ---------- */
+.mock { border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,.12); box-shadow: 0 18px 40px -22px rgba(30,40,30,.35); display: grid; grid-template-columns: 196px minmax(0, 1fr); min-height: 560px; }
+.m-side { padding: 18px 12px; display: flex; flex-direction: column; gap: 4px; }
+.m-brand { display: flex; gap: 9px; align-items: center; padding: 0 8px 14px; }
+.m-brand svg { width: 30px; height: 30px; flex: none; }
+.m-brand b { font: 600 19px/1 var(--display); display: block; }
+.m-brand span { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+.m-nav { display: grid; gap: 2px; }
+.m-nav a { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 4px; text-decoration: none; color: inherit; font-size: 13px; }
+.m-nav a i { font: 400 10px var(--mono); font-style: normal; opacity: .55; }
+.m-foot { margin-top: auto; }
+.m-main { min-width: 0; display: flex; flex-direction: column; }
+.m-top { height: 50px; display: flex; align-items: center; gap: 12px; padding: 0 20px; font-size: 12.5px; }
+.m-top .sp { flex: 1; }
+.m-av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 600 14px var(--display); color: #fff; }
+.m-body { padding: 18px 20px 24px; display: grid; gap: 16px; align-content: start; }
+.bell { width: 30px; height: 30px; border-radius: 4px; display: grid; place-items: center; border: 1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.7); }
+.bell svg { width: 15px; height: 15px; }
+
+/* =========== FARMER · UTHAN =========== */
+.farmer .mock { background: var(--f-paper); color: var(--f-ink); font-size: 15px; }
+.farmer .m-side { background: #efe5c9; color: var(--f-ink); border-right: 1px solid var(--f-line); }
+.farmer .m-brand b { color: var(--f-paddy); }
+.farmer .m-nav a { font-size: 14.5px; padding: 10px 10px; }
+.farmer .m-nav a.on { background: var(--f-paper); color: var(--f-paddy); font-weight: 600; box-shadow: inset 3px 0 0 var(--f-mustard); }
+.farmer .m-top { border-bottom: 1px solid var(--f-line); background: rgba(247,241,225,.9); }
+.farmer .m-av { background: var(--f-paddy); box-shadow: 0 0 0 2px var(--f-mustard-tint); }
+.f-hero { position: relative; border-radius: 8px; overflow: hidden; background: #fbf6e8; border: 1px solid var(--f-line); min-height: 170px; display: grid; align-content: center; padding: 22px 24px; }
+.f-hero .scene { position: absolute; inset: auto 0 0 auto; width: min(560px, 85%); height: auto; }
+.f-hero > div { position: relative; max-width: 420px; }
+.f-hero h3 { font: 600 30px/1.1 var(--display); color: var(--f-ink); }
+.f-hero p { color: #6d6650; margin-top: 6px; font-size: 14px; }
+.f-hero .note { font: 700 21px/1.1 var(--hand); color: var(--f-soil); margin-top: 10px; display: block; transform: rotate(-1.2deg); }
+.f-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.f-stat { background: #fffdf6; border: 1px solid var(--f-line); border-radius: 8px; padding: 14px 16px; display: flex; gap: 14px; align-items: center; }
+.f-stat svg { width: 46px; height: 46px; flex: none; color: var(--f-paddy); }
+.f-stat b { font: 600 34px/1 var(--display); color: var(--f-paddy); display: block; }
+.f-stat span { font-size: 13.5px; color: #6d6650; }
+.f-panel { background: #fffdf6; border: 1px solid var(--f-line); border-radius: 8px; overflow: hidden; }
+.f-panel h4 { font: 600 18px var(--display); color: var(--f-paddy); padding: 14px 16px 10px; }
+.f-panel .stitch { --st: #c9b276; --st2: var(--f-soil); margin: 0 16px; }
+.f-crop { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 16px; }
+.f-crop + .f-crop { border-top: 1px solid #f0e8d2; }
+.f-crop svg { width: 46px; height: 46px; color: #3b3a2e; }
+.f-crop b { font-weight: 600; font-size: 16px; display: block; }
+.f-crop small { color: #6d6650; font-size: 13.5px; }
+.f-btn { background: var(--f-paddy); color: #fff; border: 0; border-radius: 6px; padding: 11px 18px; font: 600 14.5px var(--sans); cursor: pointer; white-space: nowrap; }
+.f-btn.ghost { background: transparent; color: var(--f-paddy); box-shadow: inset 0 0 0 1.5px var(--f-paddy); }
+.f-tag { display: inline-block; font: 600 12px var(--sans); padding: 2px 8px; border-radius: 3px; background: var(--f-mustard-tint); color: #7d5a06; margin-left: 6px; vertical-align: 2px; }
+
+/* =========== DEALER · AROT =========== */
+.dealer .mock { background: var(--d-paper); color: var(--d-ink); font-size: 13px; }
+.dealer .m-side { background: var(--d-teal); color: #dbe7e3; }
+.dealer .m-brand b { color: #f4efe2; }
+.dealer .m-nav a { padding: 7px 10px; font-size: 12.5px; }
+.dealer .m-nav a.on { background: var(--d-teal-2); color: #fff; box-shadow: inset 3px 0 0 var(--d-brass); font-weight: 600; }
+.dealer .m-nav a em { font: 600 10.5px var(--sans); font-style: normal; background: var(--d-brass); color: #1c2a29; padding: 0 6px; border-radius: 3px; }
+.dealer .m-top { border-bottom: 1px solid var(--d-line); background: #f6f9f8; }
+.dealer .m-av { background: var(--d-teal); box-shadow: 0 0 0 2px var(--d-brass-tint); }
+.dealer .m-body { padding: 14px 18px 20px; gap: 12px; }
+.d-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.d-head h3 { font: 600 22px var(--display); }
+.d-head h3::after { content: ""; display: block; width: 40px; height: 3px; background: var(--d-brass); margin-top: 6px; border-radius: 2px; }
+.d-head span { font: 400 11.5px var(--mono); color: #5f6e6b; }
+.d-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--d-line); border-top: 3px solid var(--d-brass); border-radius: 5px; background: #fff; }
+.d-kpis div { padding: 9px 12px; border-right: 1px solid var(--d-line); }
+.d-kpis div:last-child { border-right: 0; }
+.d-kpis span { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #5f6e6b; }
+.d-kpis b { display: block; font: 600 20px/1.2 var(--display); color: var(--d-teal); }
+.board { background: var(--d-chalk); color: var(--d-chalk-ink); border-radius: 6px; padding: 14px 16px 12px; border: 6px solid #6b4f2e; box-shadow: inset 0 0 40px rgba(0,0,0,.35); }
+.board-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font: 700 24px/1 var(--hand); }
+.board-h span { font: 500 17px var(--hand); opacity: .75; }
+.board table { width: 100%; border-collapse: collapse; margin-top: 8px; font: 500 22px/1.15 var(--hand); }
+.board td { padding: 5px 4px; border-bottom: 1px dashed rgba(241,239,228,.22); }
+.board tr:last-child td { border-bottom: 0; }
+.board .p { text-align: right; font-weight: 700; }
+.board .up { color: #a8d88a; } .board .dn { color: #f0a58a; }
+.board .t { text-align: right; font-size: 18px; opacity: .8; }
+.d-table-wrap { background: #fff; border: 1px solid var(--d-line); border-radius: 5px; overflow-x: auto; }
+.d-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.d-table th { text-align: left; font: 500 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #5f6e6b; padding: 7px 10px; background: #f3f7f6; border-bottom: 1px solid var(--d-line); white-space: nowrap; }
+.d-table td { padding: 7px 10px; border-bottom: 1px solid #eaf0ee; white-space: nowrap; }
+.d-table tr:last-child td { border-bottom: 0; }
+.d-table .r { text-align: right; }
+.d-pill { font: 600 10.5px var(--sans); padding: 1px 7px; border-radius: 3px; }
+.d-pill.bid { background: var(--d-brass-tint); color: #7a5a17; }
+.d-pill.fix { background: #e1ecea; color: var(--d-teal); }
+.d-btn { background: var(--d-teal); color: #fff; border: 0; border-radius: 4px; padding: 4px 10px; font: 500 11.5px var(--sans); cursor: pointer; }
+
+/* =========== TRANSPORTER · ROAD =========== */
+.transporter .mock { background: var(--t-paper); color: var(--t-ink); }
+.truckart { height: 12px; background:
+  radial-gradient(circle at 7px 6px, var(--ta-cream) 0 2px, transparent 2.5px) 0 0 / 14px 12px,
+  linear-gradient(90deg, var(--ta-red) 0 25%, var(--ta-yellow) 25% 50%, var(--ta-teal) 50% 75%, var(--ta-blue) 75%) 0 0 / 56px 12px; }
+.truckart.zig { height: 9px; background:
+  linear-gradient(135deg, var(--ta-yellow) 25%, transparent 25%) 0 0 / 12px 9px,
+  linear-gradient(225deg, var(--ta-yellow) 25%, transparent 25%) 0 0 / 12px 9px,
+  var(--ta-red); }
+.transporter .m-side { background: var(--t-night); color: #d9e3d2; padding-top: 0; }
+.transporter .m-side .truckart { margin: 0 -12px 16px; }
+.transporter .m-brand b { color: #f4f1e6; }
+.transporter .m-nav a.on { background: var(--t-night-2); color: #fff; box-shadow: inset 3px 0 0 var(--t-rust); font-weight: 600; }
+.transporter .m-top { border-bottom: 1px solid var(--t-line); background: #f7f5ef; }
+.transporter .m-av { background: var(--t-rust); }
+.t-hero { position: relative; overflow: hidden; border-radius: 6px; background: linear-gradient(180deg, #fbf8f0 0 62%, #ece6d6 62%); border: 1px solid var(--t-line); min-height: 160px; padding: 20px 22px; }
+.t-hero > div { position: relative; max-width: 380px; }
+.t-hero h3 { font: 600 28px/1.1 var(--display); }
+.t-hero h3::after { content: ""; display: block; width: 60px; height: 2px; background: var(--t-rust); margin-top: 8px; }
+.t-hero p { color: #6c6a5d; margin-top: 8px; font-size: 13.5px; }
+.t-hero .road { position: absolute; left: 0; right: 0; bottom: 26px; height: 3px; background: repeating-linear-gradient(90deg, #b5ad97 0 18px, transparent 18px 32px); }
+.t-hero .truck { position: absolute; right: 30px; bottom: 22px; width: 170px; height: auto; }
+.t-hero .truckart { position: absolute; left: 0; right: 0; bottom: 0; }
+.road-div { height: 3px; background: repeating-linear-gradient(90deg, #c3bba6 0 18px, transparent 18px 30px); border-radius: 2px; }
+.waybill { display: grid; grid-template-columns: minmax(0, 1fr) 180px; background: #fff; border: 1px solid var(--t-line); border-radius: 6px; position: relative; }
+.wb-main { padding: 14px 16px; display: grid; gap: 8px; }
+.wb-code { font: 500 11px var(--mono); color: #6c6a5d; letter-spacing: .06em; display: flex; justify-content: space-between; gap: 8px; }
+.wb-route { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; font: 600 17px var(--display); }
+.wb-route .line { height: 2px; background: repeating-linear-gradient(90deg, var(--t-rust) 0 8px, transparent 8px 13px); position: relative; }
+.wb-route .line::after { content: ""; position: absolute; right: -2px; top: -4px; border-left: 8px solid var(--t-rust); border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.wb-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: #555449; }
+.plate { font: 500 12px var(--mono); border: 1.5px solid #3a3a30; border-radius: 3px; padding: 0 6px; background: #fffbe9; color: #222; }
+.wb-stub { border-left: 2px dashed #d4cdbb; padding: 14px; background: #fbf8f0; display: grid; gap: 6px; align-content: center; border-radius: 0 6px 6px 0; }
+.wb-stub small { font-size: 11.5px; color: #6c6a5d; }
+.wb-stub b { font: 600 22px var(--display); color: var(--t-rust); }
+.t-btn { background: var(--t-rust); color: #fff; border: 0; border-radius: 4px; padding: 7px 12px; font: 600 12.5px var(--sans); cursor: pointer; }
+.t-tag { font: 600 11px var(--sans); padding: 2px 8px; border-radius: 3px; background: var(--t-rust-tint); color: var(--t-rust); }
+.t-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.t-veh { background: #fff; border: 1px solid var(--t-line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 4px; font-size: 12.5px; }
+.t-veh b { font-weight: 600; font-size: 13.5px; }
+
+/* =========== ADMIN · OFFICE =========== */
+.admin .mock { background: var(--a-paper); color: var(--a-ink); font-size: 13.5px; }
+.admin .m-side { background: #fcfcf9; border-right: 1px solid var(--a-line); }
+.admin .m-brand b { color: var(--a-ink); }
+.admin .m-brand span { color: var(--a-slate); opacity: 1; }
+.admin .grp { font: 600 9.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #8a8d86; padding: 12px 10px 3px; }
+.admin .m-nav a.on { background: var(--a-slate-tint); color: var(--a-slate); font-weight: 600; box-shadow: inset 3px 0 0 var(--a-slate); }
+.admin .m-top { border-bottom: 1px solid var(--a-line); background: #fff; }
+.admin .m-av { background: var(--a-slate); }
+.a-head h3 { font: 600 24px var(--display); }
+.a-head h3::after { content: ""; display: block; width: 40px; height: 3px; background: var(--a-slate); margin-top: 7px; border-radius: 2px; }
+.a-head p { color: #686c66; margin-top: 6px; }
+.a-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; background: #fff; border: 1px solid var(--a-line); border-radius: 5px; }
+.a-kpis div { padding: 11px 14px; border-right: 1px solid var(--a-line); }
+.a-kpis div:last-child { border-right: 0; }
+.a-kpis span { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #686c66; }
+.a-kpis b { display: block; font: 600 22px/1.2 var(--display); color: var(--a-slate); }
+.a-table-wrap { background: #fff; border: 1px solid var(--a-line); border-radius: 5px; overflow-x: auto; }
+.a-table-wrap h4 { font: 600 15px var(--display); padding: 11px 14px; border-bottom: 1px solid var(--a-line); display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.a-table-wrap h4 small { font: 400 12px var(--sans); color: #686c66; }
+.a-table { width: 100%; border-collapse: collapse; }
+.a-table td { padding: 12px 14px; border-bottom: 1px solid #efefea; vertical-align: middle; }
+.a-table tr:last-child td { border-bottom: 0; }
+.a-table small { display: block; color: #686c66; font-size: 12px; }
+.stamp { display: inline-block; font: 600 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; padding: 6px 9px 5px; border: 2px solid currentColor; border-radius: 4px; box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 3px currentColor; transform: rotate(-4deg); opacity: .88; white-space: nowrap;
+  -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgba(0,0,0,.75) 61%, #000 70%); mask-image: radial-gradient(circle at 30% 40%, #000 60%, rgba(0,0,0,.75) 61%, #000 70%); }
+.stamp.ok { color: var(--a-stamp-ok); }
+.stamp.warn { color: var(--a-stamp-warn); transform: rotate(3deg); }
+.stamp.bad { color: var(--a-stamp-bad); transform: rotate(-2deg); }
+.a-btn { background: #fff; color: var(--a-slate); border: 1px solid #c8d4d9; border-radius: 4px; padding: 5px 11px; font: 500 12px var(--sans); cursor: pointer; }
+.a-btn.solid { background: var(--a-slate); color: #fff; border-color: var(--a-slate); }
+
+/* ---------- closing ---------- */
+.close { margin-top: 56px; background: var(--card); border: 1px solid var(--board-line); border-radius: 6px; padding: 20px 22px; display: grid; gap: 8px; max-width: 760px; }
+.close h2 { font: 600 20px var(--display); }
+.close p { color: var(--board-muted); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1000px) {
+  .touches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .role { grid-template-columns: 1fr; gap: 18px; }
+  .notes { position: static; }
+}
+@media (max-width: 720px) {
+  .intro h1 { font-size: 30px; }
+  .mock { grid-template-columns: 1fr; min-height: 0; }
+  .m-side { flex-direction: row; align-items: center; gap: 8px; padding: 10px 12px; overflow-x: auto; }
+  .m-brand { padding: 0 6px 0 0; }
+  .m-nav { display: flex; gap: 2px; }
+  .m-nav a i, .m-foot, .admin .grp { display: none; }
+  .m-nav a { white-space: nowrap; }
+  .transporter .m-side { padding-top: 10px; }
+  .transporter .m-side .truckart { display: none; }
+  .m-body { padding: 14px; }
+  .f-stats, .t-row { grid-template-columns: 1fr; }
+  .d-kpis, .a-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .d-kpis div:nth-child(2), .a-kpis div:nth-child(2) { border-right: 0; }
+  .d-kpis div:nth-child(-n+2), .a-kpis div:nth-child(-n+2) { border-bottom: 1px solid var(--d-line); }
+  .waybill { grid-template-columns: 1fr; }
+  .wb-stub { border-left: 0; border-top: 2px dashed #d4cdbb; border-radius: 0 0 6px 6px; }
+  .f-crop { grid-template-columns: 44px minmax(0, 1fr); }
+  .f-crop .f-btn { grid-column: 1 / -1; }
+  .f-hero h3, .t-hero h3 { font-size: 24px; }
+  .t-hero .truck { width: 120px; right: 12px; }
+  .m-top .who-name { display: none; }
+}
+@media (max-width: 480px) {
+  .touches { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .t-hero .truck { animation: idle 2.6s ease-in-out infinite; }
+  @keyframes idle { 50% { transform: translateY(-1px); } }
+}
+</style>
+
+<!-- hand-drawn line art: slightly uneven strokes on purpose -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="sprout" viewBox="0 0 32 32"><path class="ink" d="M16 29c.3-5 .1-9-.4-13"/><path class="ink" d="M15.7 16.5c-1-4.6-4.8-7.2-10.2-7 .4 5.3 4.2 8.2 10.2 7z" fill="#cfe0b4"/><path class="ink" d="M16.2 13.8c.9-4.9 4.6-7.9 10.3-7.9-.2 5.6-4 8.6-10.3 7.9z" fill="#e8d48a"/><path class="ink" d="M9 29.2c4.6-.6 9.6-.5 14.3.1"/></symbol>
+    <symbol id="tomato" viewBox="0 0 48 48"><path class="ink" d="M24 13c-9.5-.4-16.2 5.6-16 14.4.2 9 7.2 14.8 16.4 14.6 9-.2 15.8-6.3 15.6-14.9C39.7 18.6 33.2 13.3 24 13z" fill="#f3b8a5"/><path class="ink" d="M24.2 13.2c-2.6-2.2-6-2.3-8.4-.6 2.5 1.4 5 1.8 8.4.6zm.1 0c2.3-2.4 5.8-2.8 8.4-1.2-2.4 1.6-5 2.2-8.4 1.2zM24.1 13c.2-2.8 1-4.9 2.6-6.6"/><path class="ink" d="M14 24.5c.6-2.6 2.2-4.4 4.6-5.3" opacity=".6"/></symbol>
+    <symbol id="potato" viewBox="0 0 48 48"><path class="ink" d="M9.5 27.8c-1.8-7.4 4.8-14 13.6-15.4 8.4-1.3 15.9 2.4 16.6 9.6.7 7.6-5.4 13.5-14.3 14.6-8 1-14.4-2.4-15.9-8.8z" fill="#ecd3a6"/><path class="ink" d="M18 22.4l.4.3M27.6 19.2l.4.2M31 27.5l.3.4M21.4 30.3l.4.1"/></symbol>
+    <symbol id="chili" viewBox="0 0 48 48"><path class="ink" d="M14.2 14.6c3.6 1.2 5.8 4.6 7.3 9.6 2.2 7.3 6.8 12.3 15.6 14.6-9.6 2.6-19.4-1.4-23.4-9.8-2.2-4.6-2.4-9.8.5-14.4z" fill="#b7d79a"/><path class="ink" d="M14.4 14.4c-.4-3 .8-5.5 3.4-7.3M12.4 15.6c1.4-1.6 3.6-1.9 5.2-.7"/></symbol>
+    <symbol id="brinjal" viewBox="0 0 48 48"><path class="ink" d="M18.6 15.3c4.6-1.6 8.4.8 10 5.4 1.4 4 3.5 6.2 7.4 8.4 4.2 2.4 4.6 7.6 1 10.4-3.8 3-10.4 2.2-15.7-2.5-5.6-5-8.6-11.2-7-15.7.8-2.6 2.2-4.8 4.3-6z" fill="#cdb8dc"/><path class="ink" d="M14.6 21.6c.4-4 2.4-6.4 5.6-7.2 2.4-.6 4.6.2 6 1.8M19.4 14.6c-.6-2.6 0-4.8 1.8-6.6"/></symbol>
+    <symbol id="basket" viewBox="0 0 48 48"><path class="ink" d="M8.5 21.5c10.4-.8 20.6-.7 31 .2l-3.2 16c-7.8 1.2-16.4 1.2-24.4 0z" fill="#f1e2d3"/><path class="ink" d="M14.6 21.4c.4-6.8 4.4-11 9.6-11.1 5.4-.1 9.2 4.2 9.6 11.2M13 27.6c7.2.6 14.6.6 22 0M14 32.8c6.6.6 13.4.6 20 0M19.4 21.6l1 16.2M28.6 21.6l-.9 16.2"/></symbol>
+    <symbol id="truck" viewBox="0 0 170 80"><path class="ink" d="M8 58.6l-.4-30.8c13.4-.6 51.6-.9 77.6-.4l.6 31.4" fill="#f6ecd8"/><path class="ink" d="M85.6 36.4c10.6-.4 19.4-.2 26.6.4l11 12.4.3 9.6-37.6.2z" fill="#d6e4dc"/><path class="ink" d="M92 41.6l15.4-.2 6 7.2-21.2.2zM6.8 59c38.6.4 77.6.4 117.6-.2"/><circle class="ink" cx="28" cy="61.6" r="7.6" fill="#fff"/><circle class="ink" cx="103.6" cy="61.4" r="7.6" fill="#fff"/><path d="M8.4 28.6c25-1 52-1 76.6-.2l.2 5.6c-25-.8-51.6-.6-76.6.2z" fill="#c8402a"/><path d="M14 39c3-2 6 2 9 0s6 2 9 0 6 2 9 0 6 2 9 0 6 2 9 0 6 2 9 0 6 2 9 0" stroke="#17836f" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="20" cy="49" r="2.6" fill="#eebc2b"/><circle cx="34" cy="49" r="2.6" fill="#c8402a"/><circle cx="48" cy="49" r="2.6" fill="#2c5aa0"/><circle cx="62" cy="49" r="2.6" fill="#eebc2b"/><circle cx="76" cy="49" r="2.6" fill="#c8402a"/></symbol>
+    <symbol id="bell" viewBox="0 0 24 24"><path class="ink" d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path class="ink" d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="sun" viewBox="0 0 40 40"><circle class="ink" cx="20" cy="20" r="7" fill="#f6d77a"/><path class="ink" d="M20 5v4M20 31v4M5 20h4M31 20h4M9.4 9.4l2.8 2.8M27.8 27.8l2.8 2.8M9.4 30.6l2.8-2.8M27.8 12.2l2.8-2.8"/></symbol>
+    <pattern id="mustardDots" width="10" height="8" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.7" fill="#e3b21f"/><circle cx="8" cy="6.4" r="1.4" fill="#f0c94a"/></pattern>
+    <pattern id="paddyRows" width="8" height="10" patternUnits="userSpaceOnUse"><path d="M2 10c.4-3 .8-5 2-8M5 10c-.2-2.6.2-4.6 1.4-6.6" stroke="#5f9a46" stroke-width="1.2" fill="none" stroke-linecap="round"/></pattern>
+    <pattern id="stubble" width="7" height="9" patternUnits="userSpaceOnUse"><path d="M2 9l.6-5M5 9l-.4-4" stroke="#b8902e" stroke-width="1.2" stroke-linecap="round"/></pattern>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">FreshNest · design preview · not the real app yet</span>
+    <h1>Four roles, four personalities, one marketplace</h1>
+    <p>Each role keeps the same logo, fonts, page layout and meaning colors (green means good, red means a problem). What changes is the palette, the density and one local motif that matches how that person works.</p>
+    <nav class="jump" aria-label="Jump to a role">
+      <a href="#farmer"><i style="background:var(--f-paddy)"></i>Farmer · Uthan</a>
+      <a href="#dealer"><i style="background:var(--d-teal)"></i>Dealer · Arot</a>
+      <a href="#transporter"><i style="background:var(--t-rust)"></i>Transporter · Road</a>
+      <a href="#admin"><i style="background:var(--a-slate)"></i>Admin · Office</a>
+    </nav>
+  </header>
+
+  <section class="shared" aria-labelledby="sh">
+    <div class="sec-title"><h2 id="sh">Shared touches, all roles</h2><span>The human and agri layer that ties the four looks together</span></div>
+    <div class="touches">
+      <article class="touch">
+        <h3>Kantha stitch</h3>
+        <div class="demo"><div class="stitch"></div><div class="stitch double"></div></div>
+        <p>Running-stitch lines from nakshi kantha quilts replace plain rules under section titles. Each role tints them in its own colors.</p>
+      </article>
+      <article class="touch">
+        <h3>Hand-drawn line art</h3>
+        <div class="demo crops">
+          <svg aria-label="Tomato"><use href="#tomato"/></svg><svg aria-label="Potato"><use href="#potato"/></svg><svg aria-label="Green chili"><use href="#chili"/></svg><svg aria-label="Brinjal"><use href="#brinjal"/></svg>
+        </div>
+        <p>Slightly uneven strokes and soft fills, like a sketch in a field notebook. Same set for every role.</p>
+      </article>
+      <article class="touch">
+        <h3>Seasonal banner</h3>
+        <div class="demo seasons">
+          <figure><svg viewBox="0 0 120 64" aria-label="Winter mustard field"><rect width="120" height="64" fill="#fbf6e8"/><path d="M0 40c30-8 70-10 120-4v28H0z" fill="url(#mustardDots)"/><path d="M0 40c30-8 70-10 120-4" stroke="#8a9a4a" fill="none"/><circle cx="96" cy="16" r="6" fill="#f6d77a"/></svg><figcaption>Winter · mustard</figcaption></figure>
+          <figure><svg viewBox="0 0 120 64" aria-label="Monsoon paddy field"><rect width="120" height="64" fill="#eef3ee"/><path d="M14 4l-3 9M40 2l-3 9M70 6l-3 9M100 3l-3 9" stroke="#8fb0bf" stroke-linecap="round"/><path d="M0 38c40-6 80-6 120 0v26H0z" fill="url(#paddyRows)"/><path d="M0 38c40-6 80-6 120 0" stroke="#5f9a46" fill="none"/></svg><figcaption>Monsoon · paddy</figcaption></figure>
+          <figure><svg viewBox="0 0 120 64" aria-label="Summer harvest"><rect width="120" height="64" fill="#fbf3e3"/><path d="M0 42c40-6 80-6 120 0v22H0z" fill="url(#stubble)"/><path d="M0 42c40-6 80-6 120 0" stroke="#b8902e" fill="none"/><path d="M76 42c2-12 8-18 14-18s12 6 14 18z" fill="#e7c46a" stroke="#9a7424"/><circle cx="26" cy="16" r="7" fill="#f2b84b"/></svg><figcaption>Summer · harvest</figcaption></figure>
+        </div>
+        <p>The home banner follows the real season, so the site looks different in December than in July.</p>
+      </article>
+      <article class="touch">
+        <h3>Friendly empty states</h3>
+        <div class="demo"><div class="empty-demo"><svg><use href="#basket"/></svg><div><b>No reviews yet</b>After your first delivery, dealers can rate you here.</div></div></div>
+        <p>A small drawing and one useful sentence about what comes next, never a bare "Nothing yet".</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================= FARMER ================= -->
+  <section class="role farmer" id="farmer" aria-labelledby="fh">
+    <div class="notes">
+      <span class="tagline">Farmer</span>
+      <h2 id="fh">Uthan<small>the home courtyard</small></h2>
+      <p class="feel">Warm, simple, proud of the harvest. It should feel like your own yard, not an office.</p>
+      <div class="swatches"><span><i style="background:var(--f-paddy)"></i>paddy</span><span><i style="background:var(--f-mustard)"></i>mustard</span><span><i style="background:var(--f-soil)"></i>soil</span><span><i style="background:var(--f-paper)"></i>straw</span></div>
+      <ul>
+        <li>Biggest text and buttons of all roles</li>
+        <li>Large crop drawings next to every listing</li>
+        <li>Seasonal field scene and a handwritten note in the welcome</li>
+        <li>Kantha stitch in mustard and soil</li>
+        <li>Plain words: "See bids", not "Manage offers"</li>
+      </ul>
+    </div>
+    <div class="mock" role="img" aria-label="Farmer home mockup">
+      <aside class="m-side">
+        <div class="m-brand"><svg><use href="#sprout"/></svg><div><b>FreshNest</b><span>Farm-gate market</span></div></div>
+        <nav class="m-nav"><a class="on">Home <i>F1</i></a><a>Sell produce <i>F2</i></a><a>My sales <i>F3</i></a><a>Profile <i>F4</i></a></nav>
+        <div class="m-foot"><div class="stitch double" style="--st:#c9b276;--st2:#7b4a2b;margin:0 8px 10px"></div><p style="font:600 20px/1.1 var(--hand);color:var(--f-soil);padding:0 8px">Mustard is in bloom across Bogura</p></div>
+      </aside>
+      <div class="m-main">
+        <div class="m-top"><span>Farmer · Shibganj, Bogura</span><span class="sp"></span><span class="bell" style="color:var(--f-paddy)"><svg><use href="#bell"/></svg></span><span class="m-av">K</span><span class="who-name">Karim Uddin</span></div>
+        <div class="m-body">
+          <div class="f-hero">
+            <svg class="scene" viewBox="0 0 560 170" aria-hidden="true"><path d="M60 170c80-56 240-78 500-60v60z" fill="url(#mustardDots)"/><path d="M60 170c80-56 240-78 500-60" stroke="#8a9a4a" stroke-width="1.5" fill="none"/><path d="M200 170c90-30 220-38 360-28v28z" fill="#e8d48a" opacity=".55"/><g transform="translate(470 20)" style="color:#8a6a22"><use href="#sun" width="44" height="44"/></g><path d="M330 120c0-14 2-22 6-30M336 90c-6-2-9-6-10-11 6 0 9 4 10 11zm0 0c4-4 9-5 13-3-2 5-7 6-13 3" stroke="#3d6b2c" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+            <div>
+              <h3>Good morning, Karim</h3>
+              <p>Friday, 20 November · 2 dealers bid on your tomatoes overnight</p>
+              <span class="note">Cool, dry week ahead. Good for potatoes.</span>
+            </div>
+          </div>
+          <div class="f-stats">
+            <div class="f-stat"><svg><use href="#basket"/></svg><div><b class="num">7</b><span>listings open for buyers</span></div></div>
+            <div class="f-stat"><svg style="color:var(--f-soil)"><use href="#truck" viewBox="0 0 170 80"/></svg><div><b class="num">4</b><span>deals on the way to dealers</span></div></div>
+          </div>
+          <div class="f-panel">
+            <h4>Your produce today</h4>
+            <div class="stitch double"></div>
+            <div class="f-crop"><svg><use href="#tomato"/></svg><div><b>Tomato · 900 kg <span class="f-tag">Bidding</span></b><small>Highest bid ৳38.00/kg from Hasan Traders · ends in 5h 12m</small></div><button class="f-btn">See bids</button></div>
+            <div class="f-crop"><svg><use href="#potato"/></svg><div><b>Potato · 2,000 kg</b><small>Your price ৳22.00/kg · 2 offers waiting for your answer</small></div><button class="f-btn ghost">Answer offers</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DEALER ================= -->
+  <section class="role dealer" id="dealer" aria-labelledby="dh">
+    <div class="notes">
+      <span class="tagline">Dealer</span>
+      <h2 id="dh">Arot<small>the wholesale trading desk</small></h2>
+      <p class="feel">Fast, sharp, numbers-first. A dealer wants to see more listings and live prices at a glance.</p>
+      <div class="swatches"><span><i style="background:var(--d-teal)"></i>teal</span><span><i style="background:var(--d-brass)"></i>brass</span><span><i style="background:var(--d-chalk)"></i>chalk</span><span><i style="background:var(--d-paper)"></i>ledger</span></div>
+      <ul>
+        <li>Densest layout: smaller type, tighter rows</li>
+        <li>Live bids on a chalkboard price board, like a haat</li>
+        <li>Brass accents for money and the active menu item</li>
+        <li>Up and down arrows for price moves</li>
+      </ul>
+    </div>
+    <div class="mock" role="img" aria-label="Dealer marketplace mockup">
+      <aside class="m-side">
+        <div class="m-brand"><svg><use href="#sprout"/></svg><div><b>FreshNest</b><span>Trading desk</span></div></div>
+        <nav class="m-nav"><a>Home <i>D1</i></a><a class="on">Marketplace <em>9</em></a><a>Purchases <i>D3</i></a><a>Profile <i>D4</i></a></nav>
+        <div class="m-foot"><div class="stitch" style="--st:#b38a3a;margin:0 8px 10px"></div><p style="font-size:11.5px;opacity:.75;padding:0 8px">Bogura Sadar · buying 6 products</p></div>
+      </aside>
+      <div class="m-main">
+        <div class="m-top"><span>Dealer · Bogura Sadar</span><span class="sp"></span><span class="bell" style="color:var(--d-teal)"><svg><use href="#bell"/></svg></span><span class="m-av">H</span><span class="who-name">Hasan Traders</span></div>
+        <div class="m-body">
+          <div class="d-head"><h3>Marketplace</h3><span>Screen D2 · 9 listings near you</span></div>
+          <div class="d-kpis">
+            <div><span>Leading bids</span><b class="num">3</b></div>
+            <div><span>Outbid</span><b class="num" style="color:#b0402e">1</b></div>
+            <div><span>Offers out</span><b class="num">2</b></div>
+            <div><span>Bought this week</span><b class="num">3.4 t</b></div>
+          </div>
+          <div class="board" aria-label="Live bid board">
+            <div class="board-h">Today's bids · Bogura<span>updated just now</span></div>
+            <table>
+              <tr><td>Tomato · 900 kg</td><td class="p num up">৳38.00 ▲</td><td class="t">5h 12m</td></tr>
+              <tr><td>Green chili · 500 kg</td><td class="p num dn">৳64.00 ▼</td><td class="t">2h 40m</td></tr>
+              <tr><td>Strawberry · 5,600 kg</td><td class="p num">৳67.00</td><td class="t">7d 7h</td></tr>
+            </table>
+          </div>
+          <div class="d-table-wrap">
+            <table class="d-table">
+              <thead><tr><th>Product</th><th>Farmer</th><th>Upazila</th><th class="r">Qty</th><th>Mode</th><th class="r">Price</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Potato</td><td>Karim Uddin</td><td>Shibganj</td><td class="r num">2,000 kg</td><td><span class="d-pill fix">Own price</span></td><td class="r num">৳22.00</td><td><button class="d-btn">Offer</button></td></tr>
+                <tr><td>Brinjal</td><td>Selina Begum</td><td>Gobindaganj</td><td class="r num">600 kg</td><td><span class="d-pill bid">Bidding</span></td><td class="r num">৳18.50</td><td><button class="d-btn">Bid</button></td></tr>
+                <tr><td>Lal shak</td><td>Jalal Mia</td><td>Mithapukur</td><td class="r num">150 kg</td><td><span class="d-pill fix">Own price</span></td><td class="r num">৳26.00</td><td><button class="d-btn">Offer</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TRANSPORTER ================= -->
+  <section class="role transporter" id="transporter" aria-labelledby="th">
+    <div class="notes">
+      <span class="tagline">Transport provider</span>
+      <h2 id="th">Road<small>on the highway at night</small></h2>
+      <p class="feel">On the move, tough, time-driven. Every screen points to the next pickup or drop.</p>
+      <div class="swatches"><span><i style="background:var(--t-night)"></i>night</span><span><i style="background:var(--t-rust)"></i>rust</span><span><i style="background:linear-gradient(90deg,var(--ta-red) 0 33%,var(--ta-yellow) 33% 66%,var(--ta-teal) 66%)"></i>truck art</span><span><i style="background:var(--t-paper)"></i>dust</span></div>
+      <ul>
+        <li>Keeps today's dark sidebar and rust accent</li>
+        <li>Thin truck-art band, like the painted trucks on Bangladeshi highways</li>
+        <li>Dashed road lines as dividers</li>
+        <li>Trips shown as waybill tickets with a number plate</li>
+      </ul>
+    </div>
+    <div class="mock" role="img" aria-label="Transporter home mockup">
+      <aside class="m-side">
+        <div class="truckart"></div>
+        <div class="m-brand"><svg><use href="#sprout"/></svg><div><b>FreshNest</b><span>Transport desk</span></div></div>
+        <nav class="m-nav"><a class="on">Home <i>T1</i></a><a>Find deals <i>T2</i></a><a>My trips <i>T3</i></a><a>My vehicles <i>T4</i></a><a>Profile <i>T5</i></a></nav>
+        <div class="m-foot"><div class="truckart zig" style="margin:0 -12px"></div></div>
+      </aside>
+      <div class="m-main">
+        <div class="m-top"><span>Transporter · Bogura Sadar</span><span class="sp"></span><span class="bell" style="color:var(--t-rust)"><svg><use href="#bell"/></svg></span><span class="m-av">R</span><span class="who-name">Bogura Logistics</span></div>
+        <div class="m-body">
+          <div class="t-hero">
+            <div class="road"></div>
+            <svg class="truck" viewBox="0 0 170 80" aria-hidden="true" style="color:#2a3a2f"><use href="#truck"/></svg>
+            <div class="truckart zig"></div>
+            <div><h3>Good evening, Rafiq</h3><p>1 truck on the road · next pickup tomorrow 5:00 am · fog likely on the Bogura–Rangpur highway</p></div>
+          </div>
+          <div class="waybill">
+            <div class="wb-main">
+              <div class="wb-code"><span>WAYBILL FN-1003</span><span class="t-tag">On the road</span></div>
+              <div class="wb-route"><span>Gobindaganj</span><span class="line"></span><span>Bogura</span></div>
+              <div class="wb-meta"><span>Tomato · 900 kg</span><span class="plate">Bogura-Ta 14-1177</span><span>Deliver by 18 Nov, 2:53 am</span></div>
+            </div>
+            <div class="wb-stub"><small>Time left</small><b class="num">3h 05m</b><button class="t-btn">Enter delivery code</button></div>
+          </div>
+          <div class="road-div"></div>
+          <div class="t-row">
+            <div class="t-veh"><b>Truck 3 t</b><span class="plate" style="justify-self:start">Bogura-Ta 14-0932</span><span style="color:#2f7a4a">Free today</span></div>
+            <div class="t-veh"><b>Truck 3 t</b><span class="plate" style="justify-self:start">Bogura-Ta 14-1177</span><span style="color:var(--t-rust)">On a trip</span></div>
+            <div class="t-veh"><b>Covered van 2 t</b><span class="plate" style="justify-self:start">Bogura-Ma 11-2245</span><span style="color:#3a6679">Booked 19 Nov</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ADMIN ================= -->
+  <section class="role admin" id="admin" aria-labelledby="ah">
+    <div class="notes">
+      <span class="tagline">Admin</span>
+      <h2 id="ah">Office<small>the quiet desk with the stamp</small></h2>
+      <p class="feel">Calm, careful, trustworthy. Nearly no decoration, so the data and the decisions stand out.</p>
+      <div class="swatches"><span><i style="background:var(--a-slate)"></i>slate</span><span><i style="background:var(--a-paper)"></i>paper</span><span><i style="background:var(--a-stamp-ok)"></i>approve</span><span><i style="background:var(--a-stamp-bad)"></i>reject</span></div>
+      <ul>
+        <li>No farm scenes; only a fine stitch under titles</li>
+        <li>Decisions shown as rubber stamps: Verified, Re-upload, Rejected</li>
+        <li>Grouped menu, compact tables, clear action buttons</li>
+      </ul>
+    </div>
+    <div class="mock" role="img" aria-label="Admin verification mockup">
+      <aside class="m-side">
+        <div class="m-brand"><svg><use href="#sprout"/></svg><div><b>FreshNest</b><span>Admin office</span></div></div>
+        <nav class="m-nav"><span class="grp">Daily work</span><a>Overview <i>A1</i></a><a class="on">Verification <i>A2</i></a><a>Failures <i>A3</i></a><a>Cases <i>A4</i></a><span class="grp">Records</span><a>Users <i>A5</i></a><a>Products <i>A6</i></a></nav>
+        <div class="m-foot"><div class="stitch" style="--st:#9db0b9;margin:0 8px 10px"></div><p style="font-size:11.5px;color:#686c66;padding:0 8px">Super Admin · all permissions</p></div>
+      </aside>
+      <div class="m-main">
+        <div class="m-top"><span>Admin · Bogura Sadar</span><span class="sp"></span><span class="bell" style="color:var(--a-slate)"><svg><use href="#bell"/></svg></span><span class="m-av">N</span><span class="who-name">Nusrat Jahan</span></div>
+        <div class="m-body">
+          <div class="a-head"><h3>Verification</h3><p>Check each trade licence or vehicle paper, then stamp it.</p></div>
+          <div class="a-kpis">
+            <div><span>Waiting</span><b class="num">4</b></div>
+            <div><span>Verified today</span><b class="num">6</b></div>
+            <div><span>Re-upload asked</span><b class="num">1</b></div>
+            <div><span>Open cases</span><b class="num">2</b></div>
+          </div>
+          <div class="a-table-wrap">
+            <h4>Queue <small>oldest first</small></h4>
+            <table class="a-table">
+              <tr><td><b>Rahat Movers</b><small>Transporter · Gabtali, Bogura · trade licence</small></td><td><span class="stamp ok">Verified</span></td><td style="text-align:right"><button class="a-btn">Open</button></td></tr>
+              <tr><td><b>Kawran Bazar Agro</b><small>Dealer · Tejgaon, Dhaka · photo too blurry</small></td><td><span class="stamp warn">Re-upload</span></td><td style="text-align:right"><button class="a-btn">Open</button></td></tr>
+              <tr><td><b>Rangpur Mart</b><small>Dealer · Rangpur Sadar · licence expired 2024</small></td><td><span class="stamp bad">Rejected</span></td><td style="text-align:right"><button class="a-btn">Open</button></td></tr>
+              <tr><td><b>Cold Line BD</b><small>Transporter · refrigerated truck paper</small></td><td><span style="color:#686c66;font-size:12.5px">Waiting</span></td><td style="text-align:right"><button class="a-btn solid">Review</button></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close">
+    <h2>What stays the same everywhere</h2>
+    <p>Logo, fonts, page layout, screen codes, the slide-in menu on phones, and meaning colors (green good, amber waiting, red problem). Someone switching between roles in a demo still knows they're in FreshNest.</p>
+  </section>
+</div>

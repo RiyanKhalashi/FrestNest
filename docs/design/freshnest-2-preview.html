@@ -1,0 +1,482 @@
+<title>FreshNest Design 2.0</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a review board — what we keep/improve, old vs new side by side, then the four roles and a public home page in the new style.
+   Built from the old FreshNest repo's own tokens (ivory, forest, green, mint, foam, Lora + Plus Jakarta Sans). Single light look on purpose: the app is light. */
+:root {
+  color-scheme: light;
+  --ivory: #F8F9F4; --paper: #FFFFFF; --forest: #1B4332; --forest-2: #24573F;
+  --green: #1E7B47;        /* new: button green, 5.3:1 with white (old #27AE60 was 2.9:1) */
+  --green-old: #27AE60; --green-soft: #E3F2E8; --mint: #A8D5BA; --foam: #EBF5EE;
+  --amber: #E67E22; --amber-ink: #A9530C; --amber-soft: #FDF0E2;
+  --slate: #4F5D6B;        /* new: darker body grey for readability (old #5D6D7E) */
+  --slate-old: #5D6D7E; --line: #E4EAE2; --line-2: #EEF2EC;
+  --red: #B42318; --red-soft: #FDECEA; --blue: #2F5D8A; --blue-soft: #E7EEF6;
+  /* role accents (old roleColors: farmer green, transport gold, dealer slate, admin forest) */
+  --r-farmer: #1E7B47; --r-farmer-soft: #E3F2E8;
+  --r-dealer: #2F5D8A; --r-dealer-soft: #E7EEF6;
+  --r-trans: #C25E10;  --r-trans-soft: #FDF0E2;
+  --r-admin: #1B4332;  --r-admin-soft: #E6EEEA;
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  --r-lg: 20px; --r-md: 14px; --r-sm: 10px;
+  --shadow: 0 1px 2px rgba(27,67,50,.05), 0 8px 24px -12px rgba(27,67,50,.18);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ivory); color: var(--forest); font: 14px/1.55 var(--sans);
+  background-image: radial-gradient(circle at 6% 4%, rgba(168,213,186,.30), transparent 30%), radial-gradient(circle at 96% 40%, rgba(230,126,34,.08), transparent 30%); }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3 { font-family: var(--serif); text-wrap: balance; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 40px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+.num { font-variant-numeric: tabular-nums; }
+svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.eyebrow { font: 700 11px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--green); }
+
+/* ---------- intro ---------- */
+.intro { display: grid; gap: 14px; max-width: 780px; }
+.intro h1 { font-size: 42px; line-height: 1.12; font-weight: 700; }
+.intro p { color: var(--slate); font-size: 16px; max-width: 64ch; }
+.kv2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 8px; }
+.box { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 18px 20px; box-shadow: var(--shadow); }
+.box h3 { font-size: 17px; margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
+.box ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13.5px; color: var(--slate); }
+.box li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; }
+.box li b { color: var(--forest); font-weight: 600; }
+.ok { color: var(--green); } .up { color: var(--amber-ink); }
+
+.sec-head { display: grid; gap: 6px; margin-bottom: 18px; }
+.sec-head h2 { font-size: 26px; font-weight: 600; }
+.sec-head p { color: var(--slate); max-width: 70ch; }
+
+/* ---------- tokens ---------- */
+.tokens { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+.sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.sw div { border-radius: var(--r-sm); overflow: hidden; border: 1px solid var(--line); background: var(--paper); font-size: 11.5px; }
+.sw i { display: block; height: 44px; }
+.sw span { display: block; padding: 6px 8px; line-height: 1.35; }
+.sw small { color: var(--slate); display: block; }
+.type .big { font: 700 34px/1.1 var(--serif); }
+.type .mid { font: 600 18px var(--serif); margin-top: 10px; }
+.type .body { color: var(--slate); margin-top: 8px; }
+.roles-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font: 600 12px var(--sans); }
+
+/* ---------- old vs new ---------- */
+.vs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.vs-label { font: 700 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--slate); margin-bottom: 8px; display: flex; gap: 8px; align-items: center; }
+.vs-label b { color: var(--forest); }
+.vs-note { font-size: 12.5px; color: var(--slate); margin-top: 10px; display: grid; gap: 4px; }
+
+/* old recreation (faithful to the old Tailwind classes) */
+.old { position: relative; overflow: hidden; border-radius: 32px; border: 1px solid rgba(255,255,255,.7); background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(235,245,238,.88)); padding: 24px; box-shadow: 0 24px 70px rgba(27,67,50,.08); font-family: var(--sans); }
+.old .blob { position: absolute; right: -60px; top: -50px; width: 190px; height: 190px; border-radius: 50%; background: rgba(39,174,96,.12); filter: blur(40px); }
+.old .pill { display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; border: 1px solid rgba(39,174,96,.15); background: rgba(255,255,255,.8); padding: 7px 14px; font: 600 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--green-old); }
+.old h3 { font: 700 28px/1.15 var(--serif); margin: 14px 0 8px; }
+.old p { color: var(--slate-old); font-size: 15px; }
+.old .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.old .b1 { border-radius: 999px; background: var(--green-old); color: #fff; padding: 11px 18px; font: 600 13px var(--sans); box-shadow: 0 14px 28px rgba(39,174,96,.22); border: 0; }
+.old .b2 { border-radius: 999px; background: #fff; color: var(--forest); padding: 11px 18px; font: 600 13px var(--sans); border: 1px solid rgba(27,67,50,.15); }
+.old .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 18px; }
+.old .st { border-radius: 16px; padding: 14px; border: 1px solid #dcfce7; background: linear-gradient(135deg, #f0fdf4, #fff); display: flex; gap: 10px; align-items: center; }
+.old .st .ic { width: 40px; height: 40px; border-radius: 12px; background: #dcfce7; display: grid; place-items: center; font-size: 20px; }
+.old .st b { font-size: 22px; display: block; line-height: 1.1; }
+.old .st span { font-size: 12.5px; color: var(--slate-old); }
+.old .crop { margin-top: 12px; border-radius: 16px; border: 1px solid #f3f4f6; background: var(--ivory); padding: 12px 14px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.old .crop .e { font-size: 26px; margin-right: 10px; }
+
+/* new style components (also used by the role mocks) */
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow); }
+.hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 22px 24px; background: linear-gradient(135deg, #fff 30%, var(--acc-soft, var(--foam))); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.hero .field { position: absolute; right: 0; bottom: 0; width: min(330px, 55%); height: auto; opacity: .95; }
+.hero > div { position: relative; max-width: 440px; }
+.hero h3 { font: 700 26px/1.15 var(--serif); margin: 8px 0 6px; }
+.hero p { color: var(--slate); font-size: 14px; }
+.hero .eyebrow { color: var(--acc, var(--green)); display: inline-flex; gap: 6px; align-items: center; }
+.btn { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 10px 17px; font: 600 13px var(--sans); border: 1px solid transparent; cursor: pointer; text-decoration: none; transition: transform .15s ease, background .15s ease; }
+.btn:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+.btn.solid { background: var(--acc, var(--green)); color: #fff; }
+.btn.ghost { background: #fff; color: var(--forest); border-color: #D5DED6; }
+.btn.sm { padding: 6px 12px; font-size: 12px; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .btn:hover { transform: translateY(-1px); } }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 10px; }
+.kpi { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; display: flex; gap: 11px; align-items: center; }
+.kpi .ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--acc-soft, var(--foam)); color: var(--acc, var(--green)); flex: none; }
+.kpi b { font: 700 22px/1.1 var(--serif); display: block; color: var(--forest); }
+.kpi span { font-size: 12px; color: var(--slate); }
+.row-item { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 11px 14px; }
+.row-item + .row-item { border-top: 1px solid var(--line-2); }
+.row-item .crop { width: 40px; height: 40px; border-radius: 12px; background: var(--foam); display: grid; place-items: center; }
+.row-item .crop svg { width: 26px; height: 26px; }
+.row-item b { font-weight: 600; display: block; }
+.row-item small { color: var(--slate); font-size: 12.5px; }
+.tag { display: inline-block; font: 600 11px var(--sans); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.t-green { background: var(--green-soft); color: var(--green); } .t-amber { background: var(--amber-soft); color: var(--amber-ink); }
+.t-red { background: var(--red-soft); color: var(--red); } .t-blue { background: var(--blue-soft); color: var(--blue); }
+.card-h { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.card-h h4 { font: 600 16px var(--serif); }
+.card-h a { font-size: 12.5px; color: var(--acc, var(--green)); font-weight: 600; text-decoration: none; }
+.summary { border-radius: var(--r-md); padding: 14px 16px; color: #fff; background: linear-gradient(135deg, var(--forest), var(--forest-2)); }
+.summary small { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.summary b { display: block; font: 700 28px/1.2 var(--serif); margin-top: 4px; }
+.summary span { font-size: 12.5px; opacity: .8; }
+
+/* ---------- role mocks ---------- */
+.role { display: grid; gap: 14px; }
+.role-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.role-head h3 { font-size: 22px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.role-head h3 i { width: 12px; height: 12px; border-radius: 50%; background: var(--acc); display: inline-block; }
+.role-head p { color: var(--slate); font-size: 13.5px; max-width: 62ch; }
+.mock { display: grid; grid-template-columns: 210px minmax(0, 1fr); border-radius: 22px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(27,67,50,.35); background: var(--ivory);
+  background-image: radial-gradient(circle at 90% 0%, var(--acc-soft), transparent 45%); }
+.side { background: linear-gradient(180deg, #fff, var(--foam)); border-right: 1px solid var(--line); padding: 16px 12px; display: flex; flex-direction: column; gap: 14px; }
+.brand { display: flex; gap: 9px; align-items: center; padding: 0 6px; }
+.brand .logo { width: 32px; height: 32px; border-radius: 10px; background: var(--forest); display: grid; place-items: center; color: #CDE8D6; }
+.brand b { font: 700 17px/1 var(--serif); display: block; }
+.brand span { font-size: 10.5px; color: var(--slate); }
+.who { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: var(--r-md); background: rgba(255,255,255,.75); border: 1px solid var(--line-2); }
+.av { width: 34px; height: 34px; border-radius: 50%; background: var(--acc); color: #fff; display: grid; place-items: center; font: 700 14px var(--sans); flex: none; }
+.who b { font-size: 13px; display: block; line-height: 1.2; }
+.who small { font-size: 11px; color: var(--slate); }
+.nav { display: grid; gap: 2px; }
+.nav a { display: flex; gap: 10px; align-items: center; padding: 9px 10px; border-radius: 10px; color: var(--slate); text-decoration: none; font-weight: 500; font-size: 13px; }
+.nav a.on { background: #fff; color: var(--forest); font-weight: 600; box-shadow: 0 1px 2px rgba(27,67,50,.08), inset 3px 0 0 var(--acc); }
+.nav a.on svg { color: var(--acc); }
+.nav .grp { font: 700 10px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #8A968D; padding: 10px 10px 2px; }
+.nav em { margin-left: auto; font: 700 10.5px var(--sans); font-style: normal; background: var(--acc); color: #fff; border-radius: 999px; padding: 1px 7px; }
+.main { padding: 18px 20px 22px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); gap: 14px; align-items: start; }
+.farmer { --acc: var(--r-farmer); --acc-soft: var(--r-farmer-soft); }
+.dealer { --acc: var(--r-dealer); --acc-soft: var(--r-dealer-soft); }
+.trans { --acc: var(--r-trans); --acc-soft: var(--r-trans-soft); }
+.admin { --acc: var(--r-admin); --acc-soft: var(--r-admin-soft); }
+.farmer .hero h3 { font-size: 28px; }
+.farmer .row-item b { font-size: 15px; }
+.dealer .main { gap: 12px; }
+.price { font: 700 16px var(--serif); color: var(--forest); text-align: right; }
+.price small { display: block; font: 500 11.5px var(--sans); color: var(--slate); }
+.route { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; font: 600 15px var(--serif); }
+.route .ln { height: 2px; background: repeating-linear-gradient(90deg, var(--acc) 0 7px, transparent 7px 12px); }
+.plate { font: 600 11.5px ui-monospace, Menlo, monospace; border: 1.5px solid #3a3a30; border-radius: 4px; padding: 0 6px; background: #FFFBEA; color: #222; }
+.stamp { font: 700 10.5px var(--sans); letter-spacing: .12em; text-transform: uppercase; border: 2px solid currentColor; border-radius: 6px; padding: 3px 7px; transform: rotate(-3deg); display: inline-block; }
+table.tb { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tb th { text-align: left; font: 600 10.5px var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--slate); padding: 9px 14px; border-bottom: 1px solid var(--line); background: #FAFCF9; }
+.tb td { padding: 10px 14px; border-bottom: 1px solid var(--line-2); }
+.tb tr:last-child td { border-bottom: 0; }
+.tb .r { text-align: right; }
+.scroll { overflow-x: auto; }
+
+/* ---------- public home ---------- */
+.home { border-radius: 26px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(27,67,50,.35);
+  background: linear-gradient(180deg, #FFFDF8, #F2F8EE); background-image: radial-gradient(circle at 10% 8%, rgba(168,213,186,.45), transparent 34%), radial-gradient(circle at 88% 16%, rgba(230,126,34,.16), transparent 30%), linear-gradient(180deg, #FFFDF8, #F2F8EE); }
+.home-nav { display: flex; align-items: center; gap: 18px; padding: 16px 26px; }
+.home-nav .sp { flex: 1; }
+.home-nav a { color: var(--slate); text-decoration: none; font-weight: 500; font-size: 13.5px; }
+.home-hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 26px; padding: 26px 26px 34px; align-items: center; }
+.home-hero h3 { font: 700 44px/1.08 var(--serif); }
+.home-hero h3 em { font-style: italic; color: var(--green); }
+.home-hero p { color: var(--slate); font-size: 16px; margin-top: 12px; max-width: 46ch; }
+.flow { display: grid; gap: 10px; }
+.flow .card { padding: 14px 16px; display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; }
+.flow .card .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; }
+.flow b { display: block; font-weight: 600; }
+.flow small { color: var(--slate); font-size: 12.5px; }
+.home-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 26px 26px; }
+
+/* ---------- closing ---------- */
+.next { display: grid; gap: 8px; max-width: 780px; }
+.next h2 { font-size: 22px; font-weight: 600; }
+.next p, .next li { color: var(--slate); }
+.next ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .tokens, .vs, .home-hero { grid-template-columns: 1fr; }
+  .cols { grid-template-columns: 1fr; }
+  .home-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .intro h1 { font-size: 30px; }
+  .kv2 { grid-template-columns: 1fr; }
+  .mock { grid-template-columns: 1fr; }
+  .side { flex-direction: row; align-items: center; overflow-x: auto; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .side .who, .side .brand span { display: none; }
+  .nav { display: flex; }
+  .nav a { white-space: nowrap; }
+  .nav .grp, .nav em { display: none; }
+  .main { padding: 14px; }
+  .home-hero h3 { font-size: 32px; }
+  .hero .field { opacity: .35; }
+}
+@media (max-width: 460px) {
+  .kpis { --cols: 1 !important; }
+  .home-strip { grid-template-columns: 1fr; }
+  .row-item { grid-template-columns: 40px minmax(0, 1fr); }
+  .row-item > :last-child { grid-column: 2; }
+}
+</style>
+
+<!-- icons (lucide-style strokes, inline) + crop drawings -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 8H6.2"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.8.8 3 2.6 3.5 5.2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-4.7-7.3"/><path d="m8.5 11.5 3 3L21 5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-gavel" viewBox="0 0 24 24"><path d="m14 5 5 5M11 8l5 5M12.5 6.5 7 12l5 5 5.5-5.5M3 21l6-6"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7.5a3.5 3.5 0 0 0 0-7h-7a3.5 3.5 0 0 1 0-7H16"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.4 8 8 9 4.6-1 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-brief" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 13h18"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12C12 8 9 5.5 4.5 5.5 4.5 10 7.5 12 12 12zM12 10c0-3.5 2.6-6 7-6 0 4-2.8 6-7 6z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="c-tomato" viewBox="0 0 48 48"><path d="M24 13c-9.5-.4-16.2 5.6-16 14.4.2 9 7.2 14.8 16.4 14.6 9-.2 15.8-6.3 15.6-14.9C39.7 18.6 33.2 13.3 24 13z" fill="#F4B6A2" stroke="#1B4332" stroke-width="1.6"/><path d="M24.2 13.2c-2.6-2.2-6-2.3-8.4-.6 2.5 1.4 5 1.8 8.4.6zm.1 0c2.3-2.4 5.8-2.8 8.4-1.2-2.4 1.6-5 2.2-8.4 1.2zM24.1 13c.2-2.8 1-4.9 2.6-6.6" fill="#A8D5BA" stroke="#1B4332" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="c-potato" viewBox="0 0 48 48"><path d="M9.5 27.8c-1.8-7.4 4.8-14 13.6-15.4 8.4-1.3 15.9 2.4 16.6 9.6.7 7.6-5.4 13.5-14.3 14.6-8 1-14.4-2.4-15.9-8.8z" fill="#EBD2A4" stroke="#1B4332" stroke-width="1.6"/><path d="M18 22.4l.4.3M27.6 19.2l.4.2M31 27.5l.3.4M21.4 30.3l.4.1" stroke="#1B4332" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="c-chili" viewBox="0 0 48 48"><path d="M14.2 14.6c3.6 1.2 5.8 4.6 7.3 9.6 2.2 7.3 6.8 12.3 15.6 14.6-9.6 2.6-19.4-1.4-23.4-9.8-2.2-4.6-2.4-9.8.5-14.4z" fill="#B9DDA0" stroke="#1B4332" stroke-width="1.6"/><path d="M14.4 14.4c-.4-3 .8-5.5 3.4-7.3" stroke="#1B4332" stroke-width="1.6" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="c-brinjal" viewBox="0 0 48 48"><path d="M18.6 15.3c4.6-1.6 8.4.8 10 5.4 1.4 4 3.5 6.2 7.4 8.4 4.2 2.4 4.6 7.6 1 10.4-3.8 3-10.4 2.2-15.7-2.5-5.6-5-8.6-11.2-7-15.7.8-2.6 2.2-4.8 4.3-6z" fill="#CDB8DC" stroke="#1B4332" stroke-width="1.6"/><path d="M14.6 21.6c.4-4 2.4-6.4 5.6-7.2 2.4-.6 4.6.2 6 1.8M19.4 14.6c-.6-2.6 0-4.8 1.8-6.6" stroke="#1B4332" stroke-width="1.6" fill="#A8D5BA" stroke-linecap="round"/></symbol>
+  <symbol id="field" viewBox="0 0 330 140"><path d="M0 140c60-46 170-62 330-50v50z" fill="#CFE6D6"/><path d="M80 140c70-28 160-34 250-26v26z" fill="#E7C46A" opacity=".55"/><circle cx="276" cy="38" r="16" fill="#F6D77A" opacity=".9"/><g stroke="#1E7B47" stroke-width="1.8" fill="none" stroke-linecap="round"><path d="M150 122v-18M150 106c-6-1-9-5-10-10 6 0 9 4 10 10zm0 0c4-4 9-5 13-3-2 5-7 6-13 3"/><path d="M190 118v-16M190 104c-5-1-8-4-9-9 5 0 8 4 9 9zm0 0c4-3 8-4 12-2-2 4-6 5-12 2"/><path d="M230 116v-14M230 104c-5-1-7-4-8-8 5 0 7 3 8 8zm0 0c3-3 7-4 10-2-2 4-5 5-10 2"/></g></symbol>
+</defs></svg>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">FreshNest · design preview · built from your old project</span>
+    <h1>Your old FreshNest look, made calmer, clearer and ready for four roles</h1>
+    <p>The old project's warm ivory, forest green, mint glow, Lora headings and soft rounded cards stay. The changes below fix readability, remove the parts that looked template-made, and give each role its own accent.</p>
+    <div class="kv2">
+      <div class="box"><h3><svg class="i ok"><use href="#i-check"/></svg>Kept from the old design</h3><ul>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span><b>Colors:</b> ivory background, forest text, mint and foam tints, amber highlights</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span><b>Fonts:</b> Lora for headings, Plus Jakarta Sans for text</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span><b>Shapes:</b> soft rounded cards, pill buttons, soft shadows</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span><b>Sidebar with icons</b>, avatar, and a color per role</span></li>
+        <li><svg class="i ok"><use href="#i-check"/></svg><span><b>Dark green summary card</b> and the public home page</span></li>
+      </ul></div>
+      <div class="box"><h3><svg class="i up"><use href="#i-bolt"/></svg>Improved</h3><ul>
+        <li><svg class="i up"><use href="#i-bolt"/></svg><span><b>Readable buttons:</b> deeper green, white text passes contrast (old green failed)</span></li>
+        <li><svg class="i up"><use href="#i-bolt"/></svg><span><b>Emoji replaced</b> by the drawn crop icons (and listing photos in the real app)</span></li>
+        <li><svg class="i up"><use href="#i-bolt"/></svg><span><b>Less blur and glow:</b> one soft background glow, no floating, pulsing or blurred blobs</span></li>
+        <li><svg class="i up"><use href="#i-bolt"/></svg><span><b>Corners 20px instead of 32px</b>, so tables and forms don't look like bubbles</span></li>
+        <li><svg class="i up"><use href="#i-bolt"/></svg><span><b>Each role gets its accent</b> on menu, buttons and hero: farmer green, dealer blue, transporter orange, admin forest</span></li>
+      </ul></div>
+    </div>
+  </header>
+
+  <section aria-labelledby="tk">
+    <div class="sec-head"><span class="eyebrow">Tokens</span><h2 id="tk">Palette and type</h2><p>Same family as the old repo's Tailwind config; two values are deepened so text and buttons stay readable.</p></div>
+    <div class="tokens">
+      <div class="box"><div class="sw">
+        <div><i style="background:var(--ivory)"></i><span>Ivory<small>#F8F9F4 · kept</small></span></div>
+        <div><i style="background:var(--forest)"></i><span>Forest<small>#1B4332 · kept</small></span></div>
+        <div><i style="background:var(--green)"></i><span>Green<small>#1E7B47 · deeper</small></span></div>
+        <div><i style="background:var(--mint)"></i><span>Mint<small>#A8D5BA · kept</small></span></div>
+        <div><i style="background:var(--foam)"></i><span>Foam<small>#EBF5EE · kept</small></span></div>
+        <div><i style="background:var(--amber)"></i><span>Amber<small>#E67E22 · kept</small></span></div>
+        <div><i style="background:var(--slate)"></i><span>Slate<small>#4F5D6B · deeper</small></span></div>
+        <div><i style="background:var(--red)"></i><span>Problem<small>#B42318 · new</small></span></div>
+      </div>
+      <div class="roles-row">
+        <span class="chip" style="background:var(--r-farmer-soft);color:var(--r-farmer)">Farmer</span>
+        <span class="chip" style="background:var(--r-dealer-soft);color:var(--r-dealer)">Dealer</span>
+        <span class="chip" style="background:var(--r-trans-soft);color:var(--r-trans)">Transporter</span>
+        <span class="chip" style="background:var(--r-admin-soft);color:var(--r-admin)">Admin</span>
+      </div></div>
+      <div class="box type">
+        <div class="big">Good morning, Karim</div>
+        <div class="mid">Tomato · 900 kg · highest bid ৳38.00</div>
+        <p class="body">Plus Jakarta Sans for everything you read and fill in: labels, tables, buttons and messages. Lora only for page titles, card titles and big numbers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="vs">
+    <div class="sec-head"><span class="eyebrow">Side by side</span><h2 id="vs">Farmer home: old vs new</h2><p>The same card, rebuilt. Left is a recreation from the old repo's own classes.</p></div>
+    <div class="vs">
+      <div>
+        <div class="vs-label"><b>Old</b> · from maishamoon/FreshNest</div>
+        <div class="old">
+          <div class="blob"></div>
+          <span class="pill">🌱 Farmer workspace</span>
+          <h3>Welcome back, Karim.</h3>
+          <p>Track your produce, transport requests and deals in one place.</p>
+          <div class="btns"><button class="b1">Add produce →</button><button class="b2">Transport requests</button></div>
+          <div class="stats">
+            <div class="st"><div class="ic">📦</div><div><b>7</b><span>Listed produce</span></div></div>
+            <div class="st"><div class="ic">🤝</div><div><b>4</b><span>Active deals</span></div></div>
+          </div>
+          <div class="crop"><span><span class="e">🍅</span><b>Tomato</b></span><span>৳38/kg</span></div>
+        </div>
+        <div class="vs-note"><span>Button text on #27AE60 is hard to read (2.9:1). Emoji look different on every phone. Big blur and 32px corners feel like a template.</span></div>
+      </div>
+      <div class="farmer">
+        <div class="vs-label"><b>New</b> · FreshNest 2.0</div>
+        <div class="grid" style="display:grid;gap:12px">
+          <div class="hero">
+            <svg class="field" aria-hidden="true"><use href="#field"/></svg>
+            <div>
+              <span class="eyebrow"><svg class="i" style="width:14px;height:14px"><use href="#i-sprout"/></svg>Farmer · Shibganj, Bogura</span>
+              <h3>Good morning, Karim</h3>
+              <p>2 dealers bid on your tomatoes overnight.</p>
+              <div class="btns"><a class="btn solid" href="#farmer">See bids <svg class="i" style="width:15px;height:15px"><use href="#i-arrow"/></svg></a><a class="btn ghost" href="#farmer">Sell produce</a></div>
+            </div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="ic"><svg class="i"><use href="#i-box"/></svg></div><div><b class="num">7</b><span>listings open</span></div></div>
+            <div class="kpi"><div class="ic"><svg class="i"><use href="#i-truck"/></svg></div><div><b class="num">4</b><span>deals on the way</span></div></div>
+          </div>
+          <div class="card"><div class="row-item"><div class="crop"><svg><use href="#c-tomato"/></svg></div><div><b>Tomato · 900 kg</b><small>Highest bid ৳38.00 · ends in 5h 12m</small></div><span class="tag t-amber">Bidding</span></div></div>
+        </div>
+        <div class="vs-note"><span>Same warmth, readable button, real crop drawing, one soft glow, the farmer's own place and today's news in the greeting.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rl">
+    <div class="sec-head"><span class="eyebrow">All four roles</span><h2 id="rl">One family, four accents</h2><p>Same layout, fonts and components everywhere. Only the accent color and what each home page puts first change.</p></div>
+    <div style="display:grid;gap:40px">
+
+      <article class="role farmer" id="farmer">
+        <div class="role-head"><h3><i></i>Farmer</h3><p>Green. Largest text, crop drawings on every listing, one main action per card.</p></div>
+        <div class="mock">
+          <aside class="side">
+            <div class="brand"><div class="logo"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>FreshNest</b><span>Farm-gate market</span></div></div>
+            <div class="who"><div class="av">K</div><div><b>Karim Uddin</b><small>Farmer · Shibganj</small></div></div>
+            <nav class="nav"><a class="on"><svg class="i"><use href="#i-home"/></svg>Home</a><a><svg class="i"><use href="#i-plus"/></svg>Sell produce</a><a><svg class="i"><use href="#i-box"/></svg>My sales <em>2</em></a><a><svg class="i"><use href="#i-user"/></svg>Profile &amp; reviews</a></nav>
+          </aside>
+          <div class="main">
+            <div class="hero"><svg class="field" aria-hidden="true"><use href="#field"/></svg><div><span class="eyebrow">Friday, 20 November</span><h3>Good morning, Karim</h3><p>2 dealers bid on your tomatoes overnight. Cool, dry week: good for potatoes.</p><div class="btns"><a class="btn solid" href="#farmer">See bids</a><a class="btn ghost" href="#farmer">Sell produce</a></div></div></div>
+            <div class="cols">
+              <div class="card"><div class="card-h"><h4>Your produce today</h4><a href="#farmer">My sales</a></div>
+                <div class="row-item"><div class="crop"><svg><use href="#c-tomato"/></svg></div><div><b>Tomato · 900 kg</b><small>Highest bid ৳38.00 from Hasan Traders · 5h 12m left</small></div><span class="tag t-amber">Bidding</span></div>
+                <div class="row-item"><div class="crop"><svg><use href="#c-potato"/></svg></div><div><b>Potato · 2,000 kg</b><small>Your price ৳22.00/kg · 2 offers to answer</small></div><span class="tag t-blue">2 offers</span></div>
+                <div class="row-item"><div class="crop"><svg><use href="#c-chili"/></svg></div><div><b>Green chili · 500 kg</b><small>Sold to Joypurhat Fresh · truck confirmed</small></div><span class="tag t-green">Pickup tomorrow</span></div>
+              </div>
+              <div style="display:grid;gap:10px">
+                <div class="summary"><small>This month</small><b class="num">৳1,24,600</b><span>earned from 6 completed deals</span></div>
+                <div class="kpis" style="--cols:1"><div class="kpi"><div class="ic"><svg class="i"><use href="#i-check"/></svg></div><div><b>4.8 ★</b><span>from 9 dealer reviews</span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="role dealer" id="dealer">
+        <div class="role-head"><h3><i></i>Dealer</h3><p>Blue. Denser lists, prices on the right, live bid movement at a glance.</p></div>
+        <div class="mock">
+          <aside class="side">
+            <div class="brand"><div class="logo"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>FreshNest</b><span>Trading desk</span></div></div>
+            <div class="who"><div class="av">H</div><div><b>Hasan Traders</b><small>Dealer · Bogura Sadar</small></div></div>
+            <nav class="nav"><a><svg class="i"><use href="#i-home"/></svg>Home</a><a class="on"><svg class="i"><use href="#i-cart"/></svg>Marketplace <em>9</em></a><a><svg class="i"><use href="#i-box"/></svg>My purchases</a><a><svg class="i"><use href="#i-user"/></svg>Profile &amp; reviews</a></nav>
+          </aside>
+          <div class="main">
+            <div class="kpis" style="--cols:4">
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-gavel"/></svg></div><div><b class="num">3</b><span>leading bids</span></div></div>
+              <div class="kpi"><div class="ic" style="background:var(--red-soft);color:var(--red)"><svg class="i"><use href="#i-alert"/></svg></div><div><b class="num">1</b><span>outbid</span></div></div>
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-route"/></svg></div><div><b class="num">2</b><span>transport offers</span></div></div>
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-box"/></svg></div><div><b class="num">3.4 t</b><span>bought this week</span></div></div>
+            </div>
+            <div class="card"><div class="card-h"><h4>Near you · 9 listings</h4><a href="#dealer">Nearest first</a></div>
+              <div class="row-item"><div class="crop"><svg><use href="#c-tomato"/></svg></div><div><b>Tomato · 900 kg</b><small>Karim Uddin · Shibganj · bidding · 5h 12m</small></div><div class="price num">৳38.00 <small style="color:var(--green)">you lead ▲</small></div></div>
+              <div class="row-item"><div class="crop"><svg><use href="#c-chili"/></svg></div><div><b>Green chili · 500 kg</b><small>Jalal Mia · Mithapukur · bidding · 2h 40m</small></div><div class="price num">৳64.00 <small style="color:var(--red)">outbid ▼</small></div></div>
+              <div class="row-item"><div class="crop"><svg><use href="#c-brinjal"/></svg></div><div><b>Brinjal · 600 kg</b><small>Selina Begum · Gobindaganj · own price</small></div><div class="price num">৳18.50 <small>per kg</small></div></div>
+              <div class="row-item"><div class="crop"><svg><use href="#c-potato"/></svg></div><div><b>Potato · 2,000 kg</b><small>Karim Uddin · Shibganj · own price</small></div><div class="price num">৳22.00 <small>per kg</small></div></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="role trans" id="transporter">
+        <div class="role-head"><h3><i></i>Transporter</h3><p>Orange (the old project's transport gold, deepened). Route first, number plate and time on every trip.</p></div>
+        <div class="mock">
+          <aside class="side">
+            <div class="brand"><div class="logo"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>FreshNest</b><span>Transport desk</span></div></div>
+            <div class="who"><div class="av">R</div><div><b>Bogura Logistics</b><small>Transporter · 3 vehicles</small></div></div>
+            <nav class="nav"><a class="on"><svg class="i"><use href="#i-home"/></svg>Home</a><a><svg class="i"><use href="#i-route"/></svg>Find deals <em>3</em></a><a><svg class="i"><use href="#i-truck"/></svg>My trips</a><a><svg class="i"><use href="#i-box"/></svg>My vehicles</a><a><svg class="i"><use href="#i-user"/></svg>Profile &amp; reviews</a></nav>
+          </aside>
+          <div class="main">
+            <div class="cols">
+              <div class="card" style="padding:16px;display:grid;gap:10px">
+                <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="eyebrow" style="color:var(--acc)">Trip FN-1003 · on the road</span><span class="tag t-amber">3h 05m left</span></div>
+                <div class="route"><span>Gobindaganj</span><span class="ln"></span><span>Bogura</span></div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--slate);align-items:center"><span>Tomato · 900 kg</span><span class="plate">Bogura-Ta 14-1177</span><span>Deliver by 2:53 am</span></div>
+                <div class="btns" style="margin-top:4px"><a class="btn solid" href="#transporter">Enter delivery code</a><a class="btn ghost" href="#transporter">Report a problem</a></div>
+              </div>
+              <div class="summary" style="background:linear-gradient(135deg,#7A3A0B,#A9530C)"><small>Earned this month</small><b class="num">৳3,100</b><span>1 trip completed · 2 offers waiting</span></div>
+            </div>
+            <div class="card"><div class="card-h"><h4>Your vehicles</h4><a href="#transporter">Manage</a></div>
+              <div class="row-item"><div class="crop" style="background:var(--acc-soft);color:var(--acc)"><svg class="i"><use href="#i-truck"/></svg></div><div><b>Truck 3 t · Normal</b><small><span class="plate">Bogura-Ta 14-0932</span></small></div><span class="tag t-green">Free today</span></div>
+              <div class="row-item"><div class="crop" style="background:var(--acc-soft);color:var(--acc)"><svg class="i"><use href="#i-truck"/></svg></div><div><b>Covered van 2 t · Ventilated</b><small><span class="plate">Bogura-Ma 11-2245</span></small></div><span class="tag t-blue">Booked 19 Nov</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="role admin" id="admin">
+        <div class="role-head"><h3><i></i>Admin</h3><p>Forest. Calm and plain: what needs action first, decisions shown as stamps, the business model one click away.</p></div>
+        <div class="mock">
+          <aside class="side">
+            <div class="brand"><div class="logo"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>FreshNest</b><span>Admin office</span></div></div>
+            <div class="who"><div class="av">N</div><div><b>Nusrat Jahan</b><small>Admin</small></div></div>
+            <nav class="nav"><a class="on"><svg class="i"><use href="#i-home"/></svg>Overview</a><span class="grp">Queues</span><a><svg class="i"><use href="#i-shield"/></svg>Verification <em>2</em></a><a><svg class="i"><use href="#i-alert"/></svg>Delivery failures</a><a><svg class="i"><use href="#i-gavel"/></svg>Cases</a><a><svg class="i"><use href="#i-users"/></svg>Users</a><span class="grp">Business model</span><a><svg class="i"><use href="#i-brief"/></svg>Business</a></nav>
+          </aside>
+          <div class="main">
+            <div class="kpis" style="--cols:4">
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-shield"/></svg></div><div><b class="num">2</b><span>waiting verification</span></div></div>
+              <div class="kpi"><div class="ic" style="background:var(--red-soft);color:var(--red)"><svg class="i"><use href="#i-alert"/></svg></div><div><b class="num">1</b><span>delivery failure</span></div></div>
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-check"/></svg></div><div><b class="num">93%</b><span>delivered on time</span></div></div>
+              <div class="kpi"><div class="ic"><svg class="i"><use href="#i-brief"/></svg></div><div><b class="num">৳31,500</b><span>company subscriptions / month</span></div></div>
+            </div>
+            <div class="card scroll"><div class="card-h"><h4>Verification queue</h4><a href="#admin">Open all</a></div>
+              <table class="tb"><thead><tr><th>Who</th><th>Document</th><th>Decision</th><th class="r"></th></tr></thead><tbody>
+                <tr><td><b>Rahat Movers</b><br><small style="color:var(--slate)">Transporter · Gabtali</small></td><td>Trade licence</td><td><span class="stamp" style="color:var(--green)">Verified</span></td><td class="r"><a class="btn ghost sm" href="#admin">Open</a></td></tr>
+                <tr><td><b>Kawran Bazar Agro</b><br><small style="color:var(--slate)">Dealer · Tejgaon</small></td><td>Photo too blurry</td><td><span class="stamp" style="color:var(--amber-ink);transform:rotate(2deg)">Re-upload</span></td><td class="r"><a class="btn ghost sm" href="#admin">Open</a></td></tr>
+                <tr><td><b>Cold Line BD</b><br><small style="color:var(--slate)">Transporter · refrigerated truck</small></td><td>Vehicle paper</td><td><span class="tag t-blue">Waiting</span></td><td class="r"><a class="btn solid sm" href="#admin">Review</a></td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="hm">
+    <div class="sec-head"><span class="eyebrow">New page</span><h2 id="hm">Public home page</h2><p>The old project had one; FreshNest today goes straight to sign in. A short home page gives the demo a proper start: what it is, who it's for, and how a deal flows.</p></div>
+    <div class="home">
+      <div class="home-nav"><div class="brand"><div class="logo"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>FreshNest</b></div></div><span class="sp"></span><a href="#hm">How it works</a><a href="#hm">For companies</a><a class="btn ghost sm" href="#hm">Sign in</a><a class="btn solid sm" href="#hm">Join</a></div>
+      <div class="home-hero">
+        <div>
+          <span class="eyebrow">Farm-gate marketplace · Bangladesh</span>
+          <h3>From the field to the dealer, <em>before it spoils</em>.</h3>
+          <p>Farmers sell straight from the field, dealers bid or offer, transporters carry it, and if a truck breaks down on the way, the produce is sold nearby instead of rotting.</p>
+          <div class="btns"><a class="btn solid" href="#hm">I'm a farmer</a><a class="btn ghost" href="#hm">I'm a dealer</a><a class="btn ghost" href="#hm">I have a truck</a></div>
+        </div>
+        <div class="flow">
+          <div class="card"><div class="ic" style="background:var(--r-farmer-soft);color:var(--r-farmer)"><svg class="i"><use href="#i-sprout"/></svg></div><div><b>1 · Karim lists 900 kg tomato</b><small>Shibganj, Bogura · bidding for 20 hours</small></div></div>
+          <div class="card"><div class="ic" style="background:var(--r-dealer-soft);color:var(--r-dealer)"><svg class="i"><use href="#i-gavel"/></svg></div><div><b>2 · Hasan Traders wins at ৳38/kg</b><small>highest bid wins automatically</small></div></div>
+          <div class="card"><div class="ic" style="background:var(--r-trans-soft);color:var(--r-trans)"><svg class="i"><use href="#i-truck"/></svg></div><div><b>3 · Bogura Logistics carries it</b><small>pickup and delivery codes prove each handover</small></div></div>
+        </div>
+      </div>
+      <div class="home-strip">
+        <div class="kpi"><div class="ic"><svg class="i"><use href="#i-users"/></svg></div><div><b class="num">386</b><span>farmers, dealers, transporters</span></div></div>
+        <div class="kpi"><div class="ic"><svg class="i"><use href="#i-check"/></svg></div><div><b class="num">93%</b><span>delivered on time</span></div></div>
+        <div class="kpi"><div class="ic"><svg class="i"><use href="#i-alert"/></svg></div><div><b class="num">2,987 kg</b><span>saved by emergency sales</span></div></div>
+        <div class="kpi"><div class="ic"><svg class="i"><use href="#i-route"/></svg></div><div><b class="num">42</b><span>upazilas covered</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="next" aria-labelledby="nx">
+    <h2 id="nx">If you like it, building it means</h2>
+    <ol>
+      <li>Swap the app's colors and fonts for these (one shared stylesheet), keep every screen and feature as is.</li>
+      <li>Add icons to the sidebar, the avatar card and the role accent.</li>
+      <li>Restyle cards, buttons, tags and the hero; replace the old gold underline look.</li>
+      <li>Add the public home page as the first screen of the demo.</li>
+    </ol>
+  </section>
+</div>
