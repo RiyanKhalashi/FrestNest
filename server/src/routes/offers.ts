@@ -7,6 +7,7 @@ import { visibleTo, productInfo, deadlineWindow, code, transportWindowEnd } from
 import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
 import type { Prisma } from "../generated/prisma/client.js";
+import { qtyText, priceText } from "../units.js";
 
 export const offersRouter = Router();
 offersRouter.use(requireAuth);
@@ -33,15 +34,15 @@ offersRouter.post("/listing/:id", requireRole("DEALER"), requireActive, async (r
   const l = await prisma.listing.findFirst({ where: { AND: [{ id }, visibleTo(me)] }, include: { product: true } });
   if (!l) return res.status(404).json({ error: "Listing not found in your area." });
   if (l.mode !== "OWN" || l.status !== "OPEN") return res.status(409).json({ error: "This listing is not taking offers." });
-  if (d.quantityKg > l.remainingKg) return res.status(400).json({ error: `Only ${l.remainingKg} kg is left.`, fields: { quantityKg: [`At most ${l.remainingKg} kg`] } });
-  if (l.minOrderKg && d.quantityKg < Math.min(l.minOrderKg, l.remainingKg)) return res.status(400).json({ error: `The farmer's minimum order is ${l.minOrderKg} kg.`, fields: { quantityKg: [`At least ${l.minOrderKg} kg`] } });
+  if (d.quantityKg > l.remainingKg) return res.status(400).json({ error: `Only ${qtyText(l.remainingKg, l.unit)} is left.`, fields: { quantityKg: [`At most ${qtyText(l.remainingKg, l.unit)}`] } });
+  if (l.minOrderKg && d.quantityKg < Math.min(l.minOrderKg, l.remainingKg)) return res.status(400).json({ error: `The farmer's minimum order is ${qtyText(l.minOrderKg, l.unit)}.`, fields: { quantityKg: [`At least ${qtyText(l.minOrderKg, l.unit)}`] } });
   if (l.minResponseHours && d.replyHours < l.minResponseHours) return res.status(400).json({ error: `The farmer needs at least ${l.minResponseHours} hours to reply.`, fields: { replyHours: [`At least ${l.minResponseHours} h`] } });
   const win = await offerLimits(l);
   const expiresAt = new Date(Math.min(Date.now() + d.replyHours * H, Math.max(win.latestSafe.getTime(), Date.now() + (l.minResponseHours ?? 2) * H)));
   const existing = await prisma.offer.findFirst({ where: { listingId: id, dealerId: me.id, status: { in: ["PENDING", "COUNTERED"] } } });
   if (existing) return res.status(409).json({ error: "You already have an active offer on this listing. Edit or withdraw it instead." });
   await prisma.offer.create({ data: { listingId: id, dealerId: me.id, quantityKg: d.quantityKg, pricePerKg: d.pricePerKg, expiresAt, note: d.note || null } });
-  await notify(l.farmerId, "New offer", `${me.businessName ?? me.name} offers ${d.quantityKg} kg of ${productInfo(l).name} at ৳${d.pricePerKg.toFixed(2)}/kg. Reply within ${d.replyHours} h.`, "/farmer/sales?l=" + id);
+  await notify(l.farmerId, "New offer", `${me.businessName ?? me.name} offers ${qtyText(d.quantityKg, l.unit)} of ${productInfo(l).name} at ${priceText(d.pricePerKg, l.unit)}. Reply within ${d.replyHours} h.`, "/farmer/sales?l=" + id);
   pingListing(id);
   res.status(201).json({ ok: true });
 });
@@ -59,10 +60,10 @@ offersRouter.put("/:offerId", requireRole("DEALER"), requireActive, async (req, 
   if (!o) return res.status(404).json({ error: "Offer not found." });
   if (o.status !== "PENDING") return res.status(409).json({ error: "The farmer has already answered; the offer is locked." });
   const l = o.listing, d = p.data;
-  if (d.quantityKg > l.remainingKg) return res.status(400).json({ error: `Only ${l.remainingKg} kg is left.` });
+  if (d.quantityKg > l.remainingKg) return res.status(400).json({ error: `Only ${qtyText(l.remainingKg, l.unit)} is left.` });
   if (l.minResponseHours && d.replyHours < l.minResponseHours) return res.status(400).json({ error: `The farmer needs at least ${l.minResponseHours} hours to reply.` });
   await prisma.offer.update({ where: { id: o.id }, data: { quantityKg: d.quantityKg, pricePerKg: d.pricePerKg, note: d.note || null, expiresAt: new Date(Date.now() + d.replyHours * H) } });
-  await notify(l.farmerId, "Offer changed", `${req.user!.businessName ?? req.user!.name} changed their offer: ${d.quantityKg} kg at ৳${d.pricePerKg.toFixed(2)}/kg.`, "/farmer/sales?l=" + l.id);
+  await notify(l.farmerId, "Offer changed", `${req.user!.businessName ?? req.user!.name} changed their offer: ${qtyText(d.quantityKg, l.unit)} at ${priceText(d.pricePerKg, l.unit)}.`, "/farmer/sales?l=" + l.id);
   pingListing(l.id);
   res.json({ ok: true });
 });
@@ -91,7 +92,7 @@ async function acceptOffer(offerId: string, by: "farmer" | "dealer") {
     if (l.status !== "OPEN") return { ok: false as const, status: 409, error: "The listing is closed." };
     const qty = by === "dealer" && o.counterQtyKg ? o.counterQtyKg : o.quantityKg;
     const price = by === "dealer" && o.counterPrice ? o.counterPrice : o.pricePerKg;
-    if (qty > l.remainingKg) return { status: 409, error: `Only ${l.remainingKg} kg is left.` } as const;
+    if (qty > l.remainingKg) return { status: 409, error: `Only ${qtyText(l.remainingKg, l.unit)} is left.` } as const;
     const remaining = l.remainingKg - qty;
     await tx.offer.update({ where: { id: o.id }, data: { status: "ACCEPTED" } });
     const deal = await tx.deal.create({ data: { listingId: l.id, farmerId: l.farmerId, dealerId: o.dealerId, offerId: o.id, quantityKg: qty, pricePerKg: price, source: "OFFER", transportWindowEndsAt: await transportWindowEnd() } });
@@ -105,7 +106,7 @@ async function acceptOffer(offerId: string, by: "farmer" | "dealer") {
 
 async function afterAccept(r: Extract<Awaited<ReturnType<typeof acceptOffer>>, { ok: true }>) {
   const name = productInfo(r.l).name;
-  const text = `${r.qty} kg of ${name} at ৳${r.price.toFixed(2)}/kg (৳${Math.round(r.qty * r.price).toLocaleString("en-IN")}). Deal ${code(r.deal.code)} is waiting for transport offers.`;
+  const text = `${qtyText(r.qty, r.l.unit)} of ${name} at ${priceText(r.price, r.l.unit)} (৳${Math.round(r.qty * r.price).toLocaleString("en-IN")}). Deal ${code(r.deal.code)} is waiting for transport offers.`;
   await notify(r.o.dealerId, "Deal confirmed", text, "/dealer/purchases");
   await notify(r.l.farmerId, "Deal confirmed", text, "/farmer/sales?l=" + r.l.id);
   await notifyMany(r.conflicts.map((c) => c.dealerId), "Offer closed", `${name} ${code(r.l.code)}: not enough quantity left for your offer.`, "/dealer/purchases");
@@ -145,9 +146,9 @@ offersRouter.post("/:offerId/counter", requireRole("FARMER"), async (req, res) =
   if (o.status !== "PENDING") return res.status(409).json({ error: "You can counter only once, while the offer is waiting." });
   if (o.expiresAt <= new Date()) return res.status(409).json({ error: "This offer has expired." });
   const qty = p.data.quantityKg ?? o.quantityKg;
-  if (qty > o.listing.remainingKg) return res.status(400).json({ error: `Only ${o.listing.remainingKg} kg is left.` });
+  if (qty > o.listing.remainingKg) return res.status(400).json({ error: `Only ${qtyText(o.listing.remainingKg, o.listing.unit)} is left.` });
   await prisma.offer.update({ where: { id: o.id }, data: { status: "COUNTERED", counterPrice: p.data.pricePerKg, counterQtyKg: qty } });
-  await notify(o.dealerId, "Counter-offer", `${req.user!.name} asks ৳${p.data.pricePerKg.toFixed(2)}/kg for ${qty} kg of ${productInfo(o.listing).name}. Answer before your offer time ends.`, "/dealer/purchases");
+  await notify(o.dealerId, "Counter-offer", `${req.user!.name} asks ${priceText(p.data.pricePerKg, o.listing.unit)} for ${qtyText(qty, o.listing.unit)} of ${productInfo(o.listing).name}. Answer before your offer time ends.`, "/dealer/purchases");
   pingListing(o.listingId);
   res.json({ ok: true });
 });
@@ -179,11 +180,11 @@ offersRouter.get("/mine", requireRole("DEALER"), async (req, res) => {
   res.json({
     offers: offers.map((o) => ({
       id: o.id, status: o.status, quantityKg: o.quantityKg, pricePerKg: Number(o.pricePerKg), counterQtyKg: o.counterQtyKg, counterPrice: o.counterPrice === null ? null : Number(o.counterPrice),
-      expiresAt: o.expiresAt, at: o.createdAt, listing: { id: o.listing.id, code: code(o.listing.code), product: productInfo(o.listing).name, farmer: o.listing.farmer.name, place: o.listing.upazila.name + ", " + o.listing.upazila.district.name, remainingKg: o.listing.remainingKg, minResponseHours: o.listing.minResponseHours },
+      expiresAt: o.expiresAt, at: o.createdAt, listing: { id: o.listing.id, code: code(o.listing.code), product: productInfo(o.listing).name, unit: o.listing.unit, farmer: o.listing.farmer.name, place: o.listing.upazila.name + ", " + o.listing.upazila.district.name, remainingKg: o.listing.remainingKg, minResponseHours: o.listing.minResponseHours },
     })),
     bids: bidListings.map((l) => {
       const mine = l.bids.filter((b) => b.dealerId === me.id)[0];
-      return { listingId: l.id, code: code(l.code), product: productInfo(l).name, quantityKg: l.quantityKg, farmer: l.farmer.name, place: l.upazila.name + ", " + l.upazila.district.name, status: l.status, endsAt: l.bidEndsAt, top: Number(l.bids[0].pricePerKg), myBest: Number(mine.pricePerKg), leading: l.bids[0].dealerId === me.id };
+      return { listingId: l.id, code: code(l.code), product: productInfo(l).name, quantityKg: l.quantityKg, unit: l.unit, farmer: l.farmer.name, place: l.upazila.name + ", " + l.upazila.district.name, status: l.status, endsAt: l.bidEndsAt, top: Number(l.bids[0].pricePerKg), myBest: Number(mine.pricePerKg), leading: l.bids[0].dealerId === me.id };
     }),
   });
 });

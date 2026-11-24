@@ -2,15 +2,16 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { tk, kg, dateShort, Countdown } from "@/lib/format";
+import { dateShort, Countdown } from "@/lib/format";
+import { qty, per, type Unit } from "@/lib/units";
 import type { Deal, OfferStatus } from "@/lib/types";
 import { OFFER_TAG } from "@/lib/types";
 import { useLiveEvent } from "@/lib/live";
 import { DealCard } from "@/components/DealCard";
 import { Empty } from "@/components/ui";
 
-interface MyOffer { id: string; status: OfferStatus; quantityKg: number; pricePerKg: number; counterQtyKg: number | null; counterPrice: number | null; expiresAt: string; at: string; listing: { id: string; code: string; product: string; farmer: string; place: string } }
-interface MyBid { listingId: string; code: string; product: string; quantityKg: number; farmer: string; place: string; status: string; endsAt: string; top: number; myBest: number; leading: boolean }
+interface MyOffer { id: string; status: OfferStatus; quantityKg: number; pricePerKg: number; counterQtyKg: number | null; counterPrice: number | null; expiresAt: string; at: string; listing: { id: string; code: string; product: string; farmer: string; place: string; unit: Unit } }
+interface MyBid { listingId: string; code: string; product: string; quantityKg: number; unit: Unit; farmer: string; place: string; status: string; endsAt: string; top: number; myBest: number; leading: boolean }
 
 export default function Page() {
   const [tab, setTab] = useState<"deals" | "bids" | "offers">("deals");
@@ -45,9 +46,9 @@ export default function Page() {
             <thead><tr><th>Listing</th><th>Farmer</th><th className="right">Highest</th><th className="right">Your bid</th><th>Status</th><th>Ends</th><th /></tr></thead>
             <tbody>{mine.bids.map((b) => (
               <tr key={b.listingId}>
-                <td><b>{b.product} · {kg(b.quantityKg)}</b><br /><span className="small muted">{b.code}</span></td>
+                <td><b>{b.product} · {qty(b.quantityKg, b.unit)}</b><br /><span className="small muted">{b.code}</span></td>
                 <td>{b.farmer}<br /><span className="small muted">{b.place}</span></td>
-                <td className="right num">{tk(b.top)}</td><td className="right num">{tk(b.myBest)}</td>
+                <td className="right num">{per(b.top, b.unit)}</td><td className="right num">{per(b.myBest, b.unit)}</td>
                 <td>{b.status === "OPEN" ? (b.leading ? <span className="tag green">You lead</span> : <span className="tag red">Outbid</span>) : b.leading ? <span className="tag blue">Won</span> : <span className="tag plain">Closed</span>}</td>
                 <td className="small">{b.status === "OPEN" ? <Countdown to={b.endsAt} /> : dateShort(b.endsAt)}</td>
                 <td className="right">{b.status === "OPEN" && <Link className="btn ghost sm" href={"/dealer/market?l=" + b.listingId}>{b.leading ? "View" : "Bid again"}</Link>}</td>
@@ -62,7 +63,7 @@ export default function Page() {
               <tr key={o.id}>
                 <td><b>{o.listing.product}</b><br /><span className="small muted">{o.listing.code}</span></td>
                 <td>{o.listing.farmer}<br /><span className="small muted">{o.listing.place}</span></td>
-                <td className="right num">{kg(o.quantityKg)} × {tk(o.pricePerKg)}{o.status === "COUNTERED" && <div className="small">Counter: {tk(o.counterPrice)}</div>}</td>
+                <td className="right num">{qty(o.quantityKg, o.listing.unit)} × {per(o.pricePerKg, o.listing.unit)}{o.status === "COUNTERED" && <div className="small">Counter: {per(o.counterPrice, o.listing.unit)}</div>}</td>
                 <td><span className={"tag " + OFFER_TAG[o.status][0]}>{OFFER_TAG[o.status][1]}</span></td>
                 <td className="small">{o.status === "PENDING" || o.status === "COUNTERED" ? <Countdown to={o.expiresAt} /> : "—"}</td>
                 <td className="right">{(o.status === "PENDING" || o.status === "COUNTERED") && <Link className="btn ghost sm" href={"/dealer/market?l=" + o.listing.id}>{o.status === "COUNTERED" ? "Answer" : "View"}</Link>}</td>

@@ -134,6 +134,7 @@ model Product {
   storage      StorageNeed @default(NORMAL)
   // true = needs a ventilated vehicle only for long (nationwide) trips
   ventilatedForLongTrips Boolean @default(false)
+  defaultUnit  Unit        @default(KG) // suggested listing unit, e.g. potato → MON
   active       Boolean     @default(true)
   createdAt    DateTime    @default(now())
   listings     Listing[]
@@ -178,6 +179,13 @@ enum Scope {
   NATION
 }
 
+/// Display unit a farmer chose for a listing. Everything is stored in kg; this only changes how it is shown.
+enum Unit {
+  KG
+  MON // 40 kg
+  TON // 1,000 kg
+}
+
 enum SellMode {
   BID   // open bidding, whole lot, highest bid wins automatically
   OWN   // farmer's own price, dealers send quantity + price offers
@@ -210,6 +218,7 @@ model Listing {
   quantityKg  Int
   remainingKg Int
   pricePerKg  Decimal  @db.Decimal(10, 2) // base price (BID) or asking price (OWN)
+  unit        Unit     @default(KG) // shown to farmer and dealers; amounts stay in kg
   harvestDate DateTime
   description String?
   photos      String[]

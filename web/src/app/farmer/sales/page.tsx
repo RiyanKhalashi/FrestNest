@@ -3,17 +3,18 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
-import { tk, tk0, kg, dateShort, dateTime, ago, Countdown, toLocalInput, STORAGE_LABEL, SCOPE_LABEL } from "@/lib/format";
+import { tk0, dateShort, dateTime, ago, Countdown, toLocalInput, STORAGE_LABEL, SCOPE_LABEL } from "@/lib/format";
 import type { Deal, Listing, Offer } from "@/lib/types";
 import { STATUS_TAG, OFFER_TAG } from "@/lib/types";
 import { useListingLive, useLiveEvent } from "@/lib/live";
 import { Empty, FieldErr, Modal, ProductIcon, useToast } from "@/components/ui";
 import { DealCard } from "@/components/DealCard";
+import { qty, price as pr, per, UNIT_LABEL, toPerKg, fromPerKg, type Unit } from "@/lib/units";
 
-function OfferRow({ o, onDone }: { o: Offer; onDone: () => void }) {
+function OfferRow({ o, u, onDone }: { o: Offer; u: Unit; onDone: () => void }) {
   const toast = useToast();
   const [counter, setCounter] = useState(false);
-  const [cp, setCp] = useState(String(o.pricePerKg));
+  const [cp, setCp] = useState(String(fromPerKg(o.pricePerKg, u)));
   const [busy, setBusy] = useState(false);
   const act = async (path: string, body: unknown, msg: string) => {
     setBusy(true);
@@ -24,8 +25,8 @@ function OfferRow({ o, onDone }: { o: Offer; onDone: () => void }) {
     <div className={"offer" + (["PENDING", "COUNTERED"].includes(o.status) ? "" : " dead")}>
       <div>
         <h5>{o.dealer.name} <span className="muted small" style={{ fontWeight: 400 }}>· {o.dealer.place}</span> <span className={"tag " + OFFER_TAG[o.status][0]} style={{ marginLeft: 6 }}>{OFFER_TAG[o.status][1]}</span></h5>
-        <div className="small" style={{ marginTop: 3 }}><b className="num">{kg(o.quantityKg)}</b> at <b className="num">{tk(o.pricePerKg)}</b>/kg = {tk0(o.total)}{o.note ? <span className="muted"> · “{o.note}”</span> : null}</div>
-        {o.status === "COUNTERED" && <div className="small" style={{ marginTop: 3 }}>You countered: {kg(o.counterQtyKg ?? o.quantityKg)} at {tk(o.counterPrice)}/kg. Waiting for the dealer.</div>}
+        <div className="small" style={{ marginTop: 3 }}><b className="num">{qty(o.quantityKg, u)}</b> at <b className="num">{per(o.pricePerKg, u)}</b> = {tk0(o.total)}{o.note ? <span className="muted"> · “{o.note}”</span> : null}</div>
+        {o.status === "COUNTERED" && <div className="small" style={{ marginTop: 3 }}>You countered: {qty(o.counterQtyKg ?? o.quantityKg, u)} at {per(o.counterPrice, u)}. Waiting for the dealer.</div>}
         {["PENDING", "COUNTERED"].includes(o.status) && <div className="small muted"><Countdown to={o.expiresAt} prefix="Expires in " done="Expired" /> ({dateTime(o.expiresAt)})</div>}
         {!["PENDING", "COUNTERED"].includes(o.status) && <div className="small muted">{ago(o.at)}</div>}
       </div>
@@ -38,8 +39,8 @@ function OfferRow({ o, onDone }: { o: Offer; onDone: () => void }) {
       )}
       {open && counter && (
         <div className="counter">
-          <span className="small">Your price (৳/kg)</span><input type="number" step="0.5" value={cp} onChange={(e) => setCp(e.target.value)} />
-          <button className="btn sm" disabled={busy || !+cp} onClick={() => act("counter", { pricePerKg: +cp }, "Counter-offer sent. You can counter only once.")}>Send counter-offer</button>
+          <span className="small">Your price (৳/{UNIT_LABEL[u]})</span><input type="number" step={u === "KG" ? 0.5 : 1} value={cp} onChange={(e) => setCp(e.target.value)} />
+          <button className="btn sm" disabled={busy || !+cp} onClick={() => act("counter", { pricePerKg: toPerKg(+cp, u) }, "Counter-offer sent. You can counter only once.")}>Send counter-offer</button>
           <span className="small muted">Only one counter per offer.</span>
         </div>
       )}
@@ -51,14 +52,14 @@ function Relist({ l, onDone }: { l: Listing; onDone: () => void }) {
   const toast = useToast();
   const [mode, setMode] = useState<"BID" | "OWN">("BID");
   const [end, setEnd] = useState(() => toLocalInput(new Date(Date.now() + (l.scope === "NATION" ? 25 : 13) * 3600_000)));
-  const [price, setPrice] = useState(String(l.pricePerKg));
+  const [price, setPrice] = useState(String(fromPerKg(l.pricePerKg, l.unit)));
   const [reply, setReply] = useState("6");
   const [err, setErr] = useState<Record<string, string[] | undefined>>({});
   const [msg, setMsg] = useState("");
   async function go() {
     setErr({}); setMsg("");
     try {
-      const r = await api<{ warning?: string }>(`/listings/${l.id}/relist`, { body: mode === "BID" ? { mode, bidEndsAt: new Date(end).toISOString(), pricePerKg: +price } : { mode, minResponseHours: +reply, pricePerKg: +price } });
+      const r = await api<{ warning?: string }>(`/listings/${l.id}/relist`, { body: mode === "BID" ? { mode, bidEndsAt: new Date(end).toISOString(), pricePerKg: toPerKg(+price, l.unit) } : { mode, minResponseHours: +reply, pricePerKg: toPerKg(+price, l.unit) } });
       toast("Listing is open again. " + (r.warning ?? "")); onDone();
     } catch (e) { if (e instanceof ApiError) { setMsg(e.message); setErr(e.fields); } }
   }
@@ -71,7 +72,7 @@ function Relist({ l, onDone }: { l: Listing; onDone: () => void }) {
         <div><input type="radio" name="rm" id="rm2" checked={mode === "OWN"} onChange={() => setMode("OWN")} /><label htmlFor="rm2"><b>Switch to my own price</b><small>Dealers send offers</small></label></div>
       </div>
       <div className="row">
-        <div className="field"><label htmlFor="rp">{mode === "BID" ? "Base price" : "Asking price"} (৳/kg)</label><input id="rp" type="number" step="0.5" value={price} onChange={(e) => setPrice(e.target.value)} /></div>
+        <div className="field"><label htmlFor="rp">{mode === "BID" ? "Base price" : "Asking price"} (৳/{UNIT_LABEL[l.unit]})</label><input id="rp" type="number" step={l.unit === "KG" ? 0.5 : 1} value={price} onChange={(e) => setPrice(e.target.value)} /></div>
         {mode === "BID"
           ? <div className="field"><label htmlFor="re">Bidding ends</label><input id="re" type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} /><FieldErr e={err.bidEndsAt} /></div>
           : <div className="field"><label htmlFor="rr">Dealers must give me at least</label><select id="rr" value={reply} onChange={(e) => setReply(e.target.value)}><option value="2">2 hours</option><option value="6">6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></div>}
@@ -94,7 +95,7 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
   return (
     <div className="panel">
       <div className="dhead">
-        <div className="ttl"><ProductIcon name={l.product.name} size={44} /><div><h2>{l.product.name} · {kg(l.quantityKg)}</h2><p className="muted">{l.code} · {l.mode === "BID" ? "Open bidding" : "Own price"} · {SCOPE_LABEL[l.scope]}</p></div></div>
+        <div className="ttl"><ProductIcon name={l.product.name} size={44} /><div><h2>{l.product.name} · {qty(l.quantityKg, l.unit)}</h2><p className="muted">{l.code} · {l.mode === "BID" ? "Open bidding" : "Own price"} · {SCOPE_LABEL[l.scope]}</p></div></div>
         <div style={{ textAlign: "right" }}>
           <span className={"tag " + STATUS_TAG[l.status][0]}>{STATUS_TAG[l.status][1]}</span>
           {l.status === "OPEN" && b && <div className="small muted" style={{ marginTop: 6 }}><Countdown to={b.endsAt} prefix="Bidding ends in " done="Bidding ended" /></div>}
@@ -115,13 +116,13 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
 
       <div className="sec">
         <dl className="kv">
-          <dt>{l.mode === "BID" ? "Base price" : "Asking price"}</dt><dd>{tk(l.pricePerKg)} / kg</dd>
-          {l.mode === "OWN" && <><dt>Left to sell</dt><dd>{kg(l.remainingKg)} of {kg(l.quantityKg)}<div className="bar" style={{ marginTop: 5, maxWidth: 260 }}><i style={{ width: (100 * (l.quantityKg - l.remainingKg)) / l.quantityKg + "%" }} /></div></dd></>}
+          <dt>{l.mode === "BID" ? "Base price" : "Asking price"}</dt><dd>{per(l.pricePerKg, l.unit)}{l.unit !== "KG" ? <span className="muted small"> · {qty(l.quantityKg)} in total</span> : null}</dd>
+          {l.mode === "OWN" && <><dt>Left to sell</dt><dd>{qty(l.remainingKg, l.unit)} of {qty(l.quantityKg, l.unit)}<div className="bar" style={{ marginTop: 5, maxWidth: 260 }}><i style={{ width: (100 * (l.quantityKg - l.remainingKg)) / l.quantityKg + "%" }} /></div></dd></>}
           <dt>Harvest</dt><dd>{dateShort(l.harvestDate)} {l.harvested ? `· ${l.daysLeft} day(s) of shelf life left` : `· keeps about ${l.product.shelfLifeDays} days after`}</dd>
           <dt>Vehicle</dt><dd>{STORAGE_LABEL[l.product.storage]}{l.product.farmerSet ? " (your choice)" : ""}</dd>
           <dt>Visible to</dt><dd>{SCOPE_LABEL[l.scope]}{l.scope === "UPAZILA" ? ` (${[l.place.upazila, ...l.targets.upazilas.map((x) => x.name)].join(", ")})` : l.scope === "DISTRICT" ? ` (${[l.place.district, ...l.targets.districts.map((x) => x.name)].join(", ")})` : ""}</dd>
-          {b && <><dt>Bidding</dt><dd>Ends {dateTime(b.endsAt)} · raise at least {tk(b.minIncrement)}{b.buyNowPrice ? ` · Buy Now ${tk(b.buyNowPrice)}` : ""}</dd></>}
-          {l.own && <><dt>Offers</dt><dd>{l.own.minOrderKg ? `Minimum ${kg(l.own.minOrderKg)} · ` : ""}dealers give you at least {l.own.minResponseHours} h to reply</dd></>}
+          {b && <><dt>Bidding</dt><dd>Ends {dateTime(b.endsAt)} · raise at least {per(b.minIncrement, l.unit)}{b.buyNowPrice ? ` · Buy Now ${per(b.buyNowPrice, l.unit)}` : ""}</dd></>}
+          {l.own && <><dt>Offers</dt><dd>{l.own.minOrderKg ? `Minimum ${qty(l.own.minOrderKg, l.unit)} · ` : ""}dealers give you at least {l.own.minResponseHours} h to reply</dd></>}
           {l.description && <><dt>Description</dt><dd>{l.description}</dd></>}
         </dl>
         {l.canEdit && (
@@ -138,11 +139,11 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
       {b && (
         <div className="sec flush">
           <h4>Bids <small>{b.count} bid{b.count === 1 ? "" : "s"} from {b.bidders} dealer{b.bidders === 1 ? "" : "s"} · the highest wins automatically</small></h4>
-          {b.top !== null && <div style={{ padding: "8px 16px 0" }}><span className="small muted">Highest bid</span><div className="num" style={{ font: "600 28px var(--display)", color: "var(--forest)" }}>{tk(b.top)} <span className="small muted" style={{ fontFamily: "var(--sans)" }}>/ kg · {tk0(b.top * l.quantityKg)} total</span></div></div>}
+          {b.top !== null && <div style={{ padding: "8px 16px 0" }}><span className="small muted">Highest bid</span><div className="num" style={{ font: "600 28px var(--display)", color: "var(--forest)" }}>{pr(b.top, l.unit)} <span className="small muted" style={{ fontFamily: "var(--sans)" }}>/ {UNIT_LABEL[l.unit]} · {tk0(b.top * l.quantityKg)} total</span></div></div>}
           {l.bids.length ? (
             <table className="ledger" style={{ marginTop: 8 }}>
               <thead><tr><th>Dealer</th><th className="right">Bid / kg</th><th className="right">Total</th><th>Placed</th></tr></thead>
-              <tbody>{l.bids.map((x, i) => <tr key={x.id} className={i === 0 ? "top-row" : ""}><td><b>{x.who}</b></td><td className="right num">{tk(x.pricePerKg)}</td><td className="right num">{tk0(x.total)}</td><td className="small">{ago(x.at)}</td></tr>)}</tbody>
+              <tbody>{l.bids.map((x, i) => <tr key={x.id} className={i === 0 ? "top-row" : ""}><td><b>{x.who}</b></td><td className="right num">{per(x.pricePerKg, l.unit)}</td><td className="right num">{tk0(x.total)}</td><td className="small">{ago(x.at)}</td></tr>)}</tbody>
             </table>
           ) : <p className="muted" style={{ padding: "8px 16px 16px" }}>No bids yet. Dealers in your visibility area can see this listing.</p>}
         </div>
@@ -151,9 +152,9 @@ function Detail({ l, deals, reload }: { l: Listing; deals: Deal[]; reload: () =>
       {l.mode === "OWN" && (
         <div className="sec">
           <h4>Offers <small>{pending.length} waiting for you</small></h4>
-          {pending.map((o) => <OfferRow key={o.id} o={o} onDone={reload} />)}
+          {pending.map((o) => <OfferRow key={o.id} o={o} u={l.unit} onDone={reload} />)}
           {!pending.length && <p className="muted small" style={{ marginBottom: 8 }}>No open offers right now.</p>}
-          {closed.length > 0 && <details><summary className="small muted" style={{ cursor: "pointer", marginBottom: 8 }}>Earlier offers ({closed.length})</summary>{closed.map((o) => <OfferRow key={o.id} o={o} onDone={reload} />)}</details>}
+          {closed.length > 0 && <details><summary className="small muted" style={{ cursor: "pointer", marginBottom: 8 }}>Earlier offers ({closed.length})</summary>{closed.map((o) => <OfferRow key={o.id} o={o} u={l.unit} onDone={reload} />)}</details>}
         </div>
       )}
 
@@ -212,9 +213,9 @@ function Sales() {
                 <h5>{g} · {xs.length}</h5>
                 {xs.map((l) => (
                   <button key={l.id} className={"item" + (l.id === current?.id ? " on" : "")} onClick={() => router.replace("/farmer/sales?l=" + l.id, { scroll: false })}>
-                    <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={l.product.name} />{l.product.name} · {kg(l.mode === "OWN" && l.status === "OPEN" ? l.remainingKg : l.quantityKg)}{l.mode === "OWN" && l.status === "OPEN" && l.remainingKg < l.quantityKg ? " left" : ""}</span>
+                    <b><span className="nm" style={{ display: "flex", gap: 9, alignItems: "center" }}><ProductIcon name={l.product.name} />{l.product.name} · {qty(l.mode === "OWN" && l.status === "OPEN" ? l.remainingKg : l.quantityKg, l.unit)}{l.mode === "OWN" && l.status === "OPEN" && l.remainingKg < l.quantityKg ? " left" : ""}</span>
                       {failed(l) ? <span className="tag red">Delivery failed</span> : l.emergency && l.status === "OPEN" ? <span className="tag red">Emergency</span> : waiting(l) > 0 ? <span className="tag gold">{waiting(l)} offer{waiting(l) > 1 ? "s" : ""}</span> : l.urgent && l.status === "OPEN" ? <span className="tag red">{l.daysLeft}d left</span> : <span className={"tag " + STATUS_TAG[l.status][0]}>{STATUS_TAG[l.status][1]}</span>}</b>
-                    <span>{l.code} · {l.mode === "BID" ? (l.bidding?.top ? `highest ${tk(l.bidding.top)}` : "no bids yet") : `asking ${tk(l.pricePerKg)}`}{l.status === "OPEN" && l.bidding ? <> · <Countdown to={l.bidding.endsAt} prefix="ends in " /></> : null}</span>
+                    <span>{l.code} · {l.mode === "BID" ? (l.bidding?.top ? `highest ${per(l.bidding.top, l.unit)}` : "no bids yet") : `asking ${per(l.pricePerKg, l.unit)}`}{l.status === "OPEN" && l.bidding ? <> · <Countdown to={l.bidding.endsAt} prefix="ends in " /></> : null}</span>
                   </button>
                 ))}
               </div>

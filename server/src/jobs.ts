@@ -6,6 +6,7 @@ import { notify, notifyMany } from "./notify.js";
 import { pingListing, pingMarket, pingTransport, pingUser } from "./realtime.js";
 import { cancelOpenOffers } from "./routes/listings.js";
 import { setupEmergencyDelivery, afterEmergencyDeal, startEmergency, widen, suggest, shelfLeftMs, failureInclude } from "./emergency.js";
+import { qtyText, priceText } from "./units.js";
 
 /** Bidding ended → highest bid wins automatically; no bids → NO_SALE (farmer may relist once). */
 async function closeBidding() {
@@ -31,8 +32,8 @@ async function closeBidding() {
       await notify(r.l.farmerId, "Bidding ended without bids", `${name} ${code(r.l.code)} got no bids. You can relist once: extend the time, lower the price, or switch to your own price.`, "/farmer/sales?l=" + id);
     } else {
       const price = Number(r.deal.pricePerKg), total = Math.round(price * r.deal.quantityKg).toLocaleString("en-IN");
-      await notify(r.deal.dealerId, "You won the bidding", `${name} ${code(r.l.code)}: ${r.deal.quantityKg} kg at ৳${price.toFixed(2)}/kg (৳${total}). Deal ${code(r.deal.code)} is waiting for transport offers.`, "/dealer/purchases");
-      await notify(r.l.farmerId, "Bidding won", `${name} ${code(r.l.code)} sold at ৳${price.toFixed(2)}/kg (৳${total}). Deal ${code(r.deal.code)}.`, "/farmer/sales?l=" + id);
+      await notify(r.deal.dealerId, "You won the bidding", `${name} ${code(r.l.code)}: ${qtyText(r.deal.quantityKg, r.l.unit)} at ${priceText(price, r.l.unit)} (৳${total}). Deal ${code(r.deal.code)} is waiting for transport offers.`, "/dealer/purchases");
+      await notify(r.l.farmerId, "Bidding won", `${name} ${code(r.l.code)} sold at ${priceText(price, r.l.unit)} (৳${total}). Deal ${code(r.deal.code)}.`, "/farmer/sales?l=" + id);
       await notifyMany(r.l.bids.map((b) => b.dealerId).filter((d) => d !== r.deal!.dealerId), "Bidding ended", `${name} ${code(r.l.code)} went to a higher bid.`, "/dealer/purchases");
       if ("setup" in r) await afterEmergencyDeal(r.deal.id, r.setup ?? null);
     }

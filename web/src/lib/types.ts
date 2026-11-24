@@ -1,15 +1,16 @@
+import type { Unit } from "./units";
 // Shapes returned by the API (see server/src/views.ts)
 export type Scope = "UPAZILA" | "DISTRICT" | "NATION";
 export type Storage = "NORMAL" | "VENTILATED" | "REFRIGERATED";
 export type ListingStatus = "OPEN" | "SOLD" | "NO_SALE" | "WITHDRAWN" | "EXPIRED";
 export type OfferStatus = "PENDING" | "COUNTERED" | "ACCEPTED" | "REJECTED" | "WITHDRAWN" | "EXPIRED" | "CANCELLED";
 
-export interface Product { id: number; nameEn: string; nameBn: string; category: string; shelfLifeDays: number; storage: Storage; ventilatedForLongTrips: boolean }
+export interface Product { id: number; nameEn: string; nameBn: string; category: string; shelfLifeDays: number; storage: Storage; ventilatedForLongTrips: boolean; defaultUnit: Unit }
 
 export interface Listing {
   id: string; code: string; status: ListingStatus; mode: "BID" | "OWN"; scope: Scope;
   product: { id: number | null; name: string; nameBn: string | null; shelfLifeDays: number; storage: Storage; suggested: Storage; farmerSet: boolean; longTrip: Storage; vehicleNeed: Storage | null; custom: boolean; category: string };
-  quantityKg: number; remainingKg: number; pricePerKg: number;
+  quantityKg: number; remainingKg: number; pricePerKg: number; unit: Unit;
   harvestDate: string; harvested: boolean; expiresAt: string; daysLeft: number | null; urgent: boolean;
   description: string | null; photos: string[];
   place: { upazila: string; upazilaId: number; district: string; districtId: number };
@@ -45,7 +46,7 @@ export interface Deal {
   handover: boolean; emergencyAuto: boolean;
   emergencyFrom: { note: string | null; sameVehicle: boolean; originalDeal: string | null } | null;
   failure: null | { id: string; status: "PENDING" | "APPROVED" | "REJECTED"; at: string; where: string; note: string | null; reason: string; condition: string; usableKg: number; canMove: boolean; decisionNote: string | null; emergency: { id: string; code: string; status: string; tier: number | null; endsAt: string | null } | null };
-  quantityKg: number; pricePerKg: number; total: number; at: string;
+  quantityKg: number; pricePerKg: number; unit: Unit; total: number; at: string;
   cancelReason: string | null; cancelledBy: string | null; cancelledAt: string | null;
   listing: { id: string; code: string; product: string; storage: Storage; harvestDate: string; place: string; shelfLifeDays: number };
   route: { from: { upazila: string; district: string; village: string | null }; to: { name: string; upazila: string | null; district: string | null }; long: boolean };

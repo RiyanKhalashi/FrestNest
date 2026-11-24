@@ -192,6 +192,18 @@ try {
     assert.equal(b.status, 403);
   });
 
+  await test("listing unit: stored in kg, shown in mon (listing, errors, notifications)", async () => {
+    const r = await karim("/listings", { ...base, productId: potato, quantityKg: 2000, pricePerKg: 22, unit: "MON", scope: "NATION", mode: "OWN", minResponseHours: 2 });
+    assert.equal(r.status, 201, JSON.stringify(r.data)); const id = r.data.listing.id; created.push(id);
+    const l = (await hasan("/listings/" + id)).data.listing;
+    assert.equal(l.unit, "MON"); assert.equal(l.quantityKg, 2000); assert.equal(l.pricePerKg, 22);
+    const over = await hasan(`/offers/listing/${id}`, { quantityKg: 2400, pricePerKg: 21, replyHours: 2 });
+    assert.equal(over.status, 400); assert.match(over.data.error, /50 mon/);
+    assert.equal((await hasan(`/offers/listing/${id}`, { quantityKg: 400, pricePerKg: 21, replyHours: 2 })).status, 201);
+    const n = await prisma.notification.findFirst({ where: { user: { phone: "01712345678" }, title: "New offer" }, orderBy: { createdAt: "desc" } });
+    assert.match(n!.body, /10 mon of Potato at ৳840\/mon/);
+  });
+
   console.log(`\n${pass} passed`);
 } finally {
   // clean up everything this test created

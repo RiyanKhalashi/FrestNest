@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { tk, tk0, kg, Countdown } from "@/lib/format";
+import { tk0, Countdown } from "@/lib/format";
+import { qty, per } from "@/lib/units";
 import type { Deal, Listing } from "@/lib/types";
 import { useLiveEvent } from "@/lib/live";
 import { Welcome } from "@/components/Welcome";
@@ -30,7 +31,7 @@ export default function Page() {
 
   const todo: { tag: [string, string]; text: React.ReactNode; href: string; btn: string }[] = [
     ...deals.filter((d) => d.status === "FAILED" && !d.failure?.emergency).map((d) => ({ tag: ["red", "Delivery failed"] as [string, string], text: <><b>{d.listing.product} {d.code}</b>: the vehicle is stuck in {d.failure?.where}<br /><span className="muted small">Set up the emergency sale so {d.failure?.usableKg} kg does not go to waste</span></>, href: "/farmer/sales?l=" + d.listing.id, btn: "Set up sale" })),
-    ...offers.map(({ l, o }) => ({ tag: ["gold", "Offer"] as [string, string], text: <><b>{o.dealer.name}</b> offers {kg(o.quantityKg)} of {l.product.name} at {tk(o.pricePerKg)}/kg<br /><span className="muted small"><Countdown to={o.expiresAt} prefix="Reply within " done="Reply time is over" /></span></>, href: "/farmer/sales?l=" + l.id, btn: "Answer" })),
+    ...offers.map(({ l, o }) => ({ tag: ["gold", "Offer"] as [string, string], text: <><b>{o.dealer.name}</b> offers {qty(o.quantityKg, l.unit)} of {l.product.name} at {per(o.pricePerKg, l.unit)}<br /><span className="muted small"><Countdown to={o.expiresAt} prefix="Reply within " done="Reply time is over" /></span></>, href: "/farmer/sales?l=" + l.id, btn: "Answer" })),
     ...noSale.map((l) => ({ tag: ["gold", "No bids"] as [string, string], text: <><b>{l.product.name} {l.code}</b> got no bids<br /><span className="muted small">Relist once with more time, a lower price or your own price</span></>, href: "/farmer/sales?l=" + l.id, btn: "Relist" })),
     ...urgent.map((l) => ({ tag: ["red", "Shelf life"] as [string, string], text: <><b>{l.product.name} {l.code}</b> has {l.daysLeft} day(s) left<br /><span className="muted small">Consider a lower price or a smaller area next time</span></>, href: "/farmer/sales?l=" + l.id, btn: "Open" })),
   ];
@@ -54,7 +55,7 @@ export default function Page() {
           <h3>Live now</h3>
           {open.length ? <table className="ledger"><tbody>{open.slice(0, 6).map((l) => (
             <tr key={l.id} className="click" onClick={() => router.push("/farmer/sales?l=" + l.id)}>
-              <td style={{ display: "flex", gap: 8, alignItems: "center" }}><ProductIcon name={l.product.name} /><div><b>{l.product.name}</b><br /><span className="small muted">{l.mode === "BID" ? (l.bidding?.top ? `highest ${tk(l.bidding.top)}` : "no bids yet") : `${kg(l.remainingKg)} left`}</span></div></td>
+              <td style={{ display: "flex", gap: 8, alignItems: "center" }}><ProductIcon name={l.product.name} /><div><b>{l.product.name}</b><br /><span className="small muted">{l.mode === "BID" ? (l.bidding?.top ? `highest ${per(l.bidding.top, l.unit)}` : "no bids yet") : `${qty(l.remainingKg, l.unit)} left`}</span></div></td>
               <td className="right small">{l.bidding ? <Countdown to={l.bidding.endsAt} /> : null}</td>
             </tr>))}</tbody></table> : <p className="pb muted">No open listings.</p>}
         </div>

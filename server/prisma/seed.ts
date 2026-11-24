@@ -66,6 +66,8 @@ async function main() {
   for (const [nameEn, nameBn, category, shelfLifeDays, storage, ventilatedForLongTrips] of PRODUCTS) {
     await prisma.product.upsert({ where: { nameEn }, update: {}, create: { nameEn, nameBn, category, shelfLifeDays, storage, ventilatedForLongTrips } });
   }
+  // suggested listing unit (docs/decisions/fyp-units.md): staples traded by the mon
+  await prisma.product.updateMany({ where: { nameEn: { in: ["Potato", "Mango"] } }, data: { defaultUnit: "MON" } });
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
   for (const u of USERS) {
     const district = await prisma.district.findUniqueOrThrow({ where: { name: u.district } });

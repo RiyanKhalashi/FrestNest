@@ -3,14 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { tk, tk0, kg, Countdown } from "@/lib/format";
+import { tk0, Countdown } from "@/lib/format";
+import { qty, per, type Unit } from "@/lib/units";
 import type { Deal, Listing } from "@/lib/types";
 import { useLiveEvent } from "@/lib/live";
 import { Welcome } from "@/components/Welcome";
 import { ProductIcon } from "@/components/ui";
 
-interface MyBid { listingId: string; code: string; product: string; quantityKg: number; status: string; endsAt: string; top: number; myBest: number; leading: boolean }
-interface MyOffer { id: string; status: string; counterPrice: number | null; expiresAt: string; listing: { id: string; product: string; farmer: string } }
+interface MyBid { listingId: string; code: string; product: string; quantityKg: number; unit: Unit; status: string; endsAt: string; top: number; myBest: number; leading: boolean }
+interface MyOffer { id: string; status: string; counterPrice: number | null; expiresAt: string; listing: { id: string; product: string; farmer: string; unit: Unit } }
 
 export default function Page() {
   const [market, setMarket] = useState<Listing[]>([]);
@@ -45,16 +46,16 @@ export default function Page() {
         <div className="panel">
           <h3>Needs your attention</h3>
           {outbid.length + countered.length ? <table className="ledger"><tbody>
-            {outbid.map((b) => <tr key={b.listingId}><td style={{ width: 90 }}><span className="tag red">Outbid</span></td><td><b>{b.product} · {kg(b.quantityKg)}</b> · highest {tk(b.top)}, yours {tk(b.myBest)}<br /><span className="small muted"><Countdown to={b.endsAt} prefix="Ends in " done="Ended" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + b.listingId}>Bid again</Link></td></tr>)}
-            {countered.map((o) => <tr key={o.id}><td><span className="tag blue">Counter</span></td><td><b>{o.listing.farmer}</b> asks {tk(o.counterPrice)}/kg for {o.listing.product}<br /><span className="small muted"><Countdown to={o.expiresAt} prefix="Answer within " done="Answer time is over" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + o.listing.id}>Answer</Link></td></tr>)}
+            {outbid.map((b) => <tr key={b.listingId}><td style={{ width: 90 }}><span className="tag red">Outbid</span></td><td><b>{b.product} · {qty(b.quantityKg, b.unit)}</b> · highest {per(b.top, b.unit)}, yours {per(b.myBest, b.unit)}<br /><span className="small muted"><Countdown to={b.endsAt} prefix="Ends in " done="Ended" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + b.listingId}>Bid again</Link></td></tr>)}
+            {countered.map((o) => <tr key={o.id}><td><span className="tag blue">Counter</span></td><td><b>{o.listing.farmer}</b> asks {per(o.counterPrice, o.listing.unit)} for {o.listing.product}<br /><span className="small muted"><Countdown to={o.expiresAt} prefix="Answer within " done="Answer time is over" /></span></td><td className="right"><Link className="btn ghost sm" href={"/dealer/market?l=" + o.listing.id}>Answer</Link></td></tr>)}
           </tbody></table> : <p className="pb muted">All caught up.</p>}
         </div>
         <div className="panel">
           <h3>Nearest listings <Link className="small" href="/dealer/market">Marketplace</Link></h3>
           {market.length ? <table className="ledger"><tbody>{market.slice(0, 6).map((l) => (
             <tr key={l.id} className="click" onClick={() => router.push("/dealer/market?l=" + l.id)}>
-              <td style={{ display: "flex", gap: 8, alignItems: "center" }}><ProductIcon name={l.product.name} /><div><b>{l.product.name} · {kg(l.mode === "OWN" ? l.remainingKg : l.quantityKg)}</b><br /><span className="small muted">{l.place.upazila} · {l.near?.label}</span></div></td>
-              <td className="right small">{l.mode === "BID" ? tk(l.bidding?.top ?? l.pricePerKg) : tk(l.pricePerKg)}</td>
+              <td style={{ display: "flex", gap: 8, alignItems: "center" }}><ProductIcon name={l.product.name} /><div><b>{l.product.name} · {qty(l.mode === "OWN" ? l.remainingKg : l.quantityKg, l.unit)}</b><br /><span className="small muted">{l.place.upazila} · {l.near?.label}</span></div></td>
+              <td className="right small">{per(l.mode === "BID" ? l.bidding?.top ?? l.pricePerKg : l.pricePerKg, l.unit)}</td>
             </tr>))}</tbody></table> : <p className="pb muted">Nothing in your area right now.</p>}
         </div>
       </div>

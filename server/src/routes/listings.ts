@@ -29,6 +29,7 @@ const productPart = z.object({
 const listingSchema = productPart.extend({
   quantityKg: z.coerce.number().int("Whole kg only").positive().max(1_000_000),
   pricePerKg: price,
+  unit: z.enum(["KG", "MON", "TON"]).default("KG"),
   harvestDate: z.coerce.date(),
   description: z.string().trim().max(500).optional(),
   scope,
@@ -87,7 +88,7 @@ function dataFor(d: ListingInput, ownDistrictId: number, op: "set" | "connect" =
     customStorage: d.productId ? null : (d.customStorage as StorageNeed),
     category: d.category,
     quantityKg: d.quantityKg, remainingKg: d.quantityKg,
-    pricePerKg: d.pricePerKg, harvestDate: d.harvestDate, description: d.description || null,
+    pricePerKg: d.pricePerKg, unit: d.unit, harvestDate: d.harvestDate, description: d.description || null,
     scope: d.scope as Scope, mode: d.mode,
     vehicleNeed: d.vehicleNeed && d.vehicleNeed !== "NORMAL" ? (d.vehicleNeed as StorageNeed) : null,
     bidEndsAt: d.mode === "BID" ? d.bidEndsAt : null,

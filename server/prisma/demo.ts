@@ -38,7 +38,7 @@ async function main() {
 
   // 2. Karim · potato · own price nationwide, one pending offer from Kawran Bazar
   const pt = await prisma.listing.create({ data: {
-    farmerId: karim.id, productId: potato.id, category: "Vegetable", quantityKg: 2000, remainingKg: 2000, pricePerKg: 22, harvestDate: day6am(-1),
+    farmerId: karim.id, productId: potato.id, category: "Vegetable", quantityKg: 2000, remainingKg: 2000, pricePerKg: 22, unit: "MON", harvestDate: day6am(-1),
     upazilaId: karim.upazilaId!, scope: "NATION", mode: "OWN", minOrderKg: 200, minResponseHours: 6, description: "Diamond variety, cured for 10 days.",
   } });
   await prisma.offer.create({ data: { listingId: pt.id, dealerId: kawran.id, quantityKg: 800, pricePerKg: 21, expiresAt: at(9 * H), note: "Can collect on Saturday." } });

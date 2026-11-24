@@ -62,7 +62,7 @@ export function listingView(l: FullListing, viewer: User, near?: [number, string
   return {
     id: l.id, code: code(l.code), status: l.status, mode: l.mode, scope: l.scope,
     product: { id: l.productId, name: info.name, nameBn: info.nameBn, shelfLifeDays: info.shelf, storage: info.storage, suggested: info.suggested, farmerSet: info.farmerSet, longTrip: info.longTrip, vehicleNeed: l.vehicleNeed, custom: info.custom, category: l.category },
-    quantityKg: l.quantityKg, remainingKg: l.remainingKg, pricePerKg: money(l.pricePerKg),
+    quantityKg: l.quantityKg, remainingKg: l.remainingKg, pricePerKg: money(l.pricePerKg), unit: l.unit,
     harvestDate: l.harvestDate, harvested, expiresAt, daysLeft, urgent: daysLeft !== null && daysLeft <= Math.max(1, Math.ceil(info.shelf * 0.4)),
     description: l.description, photos: l.photos,
     place: { upazila: l.upazila.name, upazilaId: l.upazilaId, district: l.upazila.district.name, districtId: l.upazila.districtId },
@@ -148,7 +148,7 @@ export async function dealView(d: FullDeal, viewer: User) {
   const info = productInfo(d.listing, long ? "NATION" : "DISTRICT");
   return {
     id: d.id, code: code(d.code), status: d.status, source: d.source,
-    quantityKg: d.quantityKg, pricePerKg: money(d.pricePerKg), total: Math.round(Number(d.pricePerKg) * d.quantityKg),
+    quantityKg: d.quantityKg, pricePerKg: money(d.pricePerKg), unit: d.listing.unit, total: Math.round(Number(d.pricePerKg) * d.quantityKg),
     at: d.createdAt, cancelReason: d.cancelReason, cancelledBy: d.cancelledBy, cancelledAt: d.cancelledAt,
     listing: { id: d.listingId, code: code(d.listing.code), product: info.name, storage: need, harvestDate: d.listing.harvestDate, place: d.listing.upazila.name + ", " + d.listing.upazila.district.name, shelfLifeDays: info.shelf },
     route: {

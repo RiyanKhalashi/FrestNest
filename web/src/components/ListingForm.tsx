@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
-import { tk, tk0, kg, dateTime, toLocalInput, STORAGE_LABEL, SCOPE_LABEL } from "@/lib/format";
+import { tk0, kg, dateTime, toLocalInput, STORAGE_LABEL, SCOPE_LABEL } from "@/lib/format";
+import { UNITS, UNIT_LABEL, UNIT_HINT, qty as qtyU, per, toKg, toPerKg, fromKg, fromPerKg, type Unit } from "@/lib/units";
 import type { Listing, Product, Scope, Storage } from "@/lib/types";
 
 const STORAGES: Storage[] = ["NORMAL", "VENTILATED", "REFRIGERATED"];
@@ -23,8 +24,11 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   const [category, setCategory] = useState(edit?.product.category ?? "Vegetable");
   const [productId, setProductId] = useState<number | "custom" | 0>(edit ? (edit.product.custom ? "custom" : edit.product.id ?? 0) : 0);
   const [custom, setCustom] = useState({ name: edit?.product.custom ? edit.product.name : "", shelf: edit?.product.custom ? String(edit.product.shelfLifeDays) : "", storage: (edit?.product.custom ? edit.product.longTrip : "NORMAL") as Storage });
-  const [qty, setQty] = useState(edit ? String(edit.quantityKg) : "");
-  const [price, setPrice] = useState(edit ? String(edit.pricePerKg) : "");
+  // all amounts below are typed in the listing's unit (kg, mon or ton) and converted to kg on submit
+  const [unit, setUnit] = useState<Unit>(edit?.unit ?? "KG");
+  const [unitTouched, setUnitTouched] = useState(!!edit);
+  const [qty, setQty] = useState(edit ? String(fromKg(edit.quantityKg, edit.unit)) : "");
+  const [price, setPrice] = useState(edit ? String(fromPerKg(edit.pricePerKg, edit.unit)) : "");
   const [harvest, setHarvest] = useState(edit ? edit.harvestDate.slice(0, 10) : tomorrow());
   const [description, setDescription] = useState(edit?.description ?? "");
   const [photos, setPhotos] = useState<File[]>([]);
@@ -36,9 +40,9 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   const [mode, setMode] = useState<"BID" | "OWN">(edit?.mode ?? "BID");
   const [bidEnd, setBidEnd] = useState(edit?.bidding ? toLocalInput(new Date(edit.bidding.endsAt)) : "");
   const [bidEndTouched, setBidEndTouched] = useState(!!edit);
-  const [inc, setInc] = useState(edit?.bidding ? String(edit.bidding.minIncrement) : "0.5");
-  const [buyNow, setBuyNow] = useState(edit?.bidding?.buyNowPrice ? String(edit.bidding.buyNowPrice) : "");
-  const [minOrder, setMinOrder] = useState(edit?.own?.minOrderKg ? String(edit.own.minOrderKg) : "");
+  const [inc, setInc] = useState(edit?.bidding ? String(fromPerKg(edit.bidding.minIncrement, edit.unit)) : "0.5");
+  const [buyNow, setBuyNow] = useState(edit?.bidding?.buyNowPrice ? String(fromPerKg(edit.bidding.buyNowPrice, edit.unit)) : "");
+  const [minOrder, setMinOrder] = useState(edit?.own?.minOrderKg ? String(fromKg(edit.own.minOrderKg, edit.unit)) : "");
   const [minReply, setMinReply] = useState(String(edit?.own?.minResponseHours ?? 6));
   const [preview, setPreview] = useState<Preview | null>(null);
   const [fields, setFields] = useState<Record<string, string[] | undefined>>({});
@@ -69,6 +73,21 @@ export function ListingForm({ edit }: { edit?: Listing }) {
   }, [productBody, harvest, scope, category, scopeTouched, bidEndTouched]);
 
   const list = products.filter((p) => p.category === category);
+  /** switch unit and convert what the farmer already typed, so the real amount stays the same */
+  function changeUnit(u: Unit, touched = true) {
+    if (u === unit) return;
+    const q = (v: string) => (v ? String(fromKg(toKg(+v, unit), u)) : v), p = (v: string) => (v ? String(fromPerKg(toPerKg(+v, unit), u)) : v);
+    setQty(q(qty)); setMinOrder(q(minOrder)); setPrice(p(price)); setBuyNow(p(buyNow));
+    setInc(p(inc) || (u === "KG" ? "0.5" : String(fromPerKg(0.5, u))));
+    setUnit(u); if (touched) setUnitTouched(true);
+  }
+  // a product's suggested unit (e.g. potato → mon) until the farmer picks one
+  useEffect(() => {
+    const p = products.find((x) => x.id === productId);
+    if (p && !unitTouched) changeUnit(p.defaultUnit ?? "KG", false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId, products]);
+  const U = UNIT_LABEL[unit];
   const w = preview?.window;
   const end = bidEnd ? new Date(bidEnd) : null;
   const endState = !w || !end ? null : end.getTime() < new Date(w.min).getTime() - 15 * 60_000 ? "short" : end > new Date(w.latestSafe) ? "late" : "ok";
@@ -82,9 +101,9 @@ export function ListingForm({ edit }: { edit?: Listing }) {
     setBusy(true); setError(""); setFields({});
     const data = {
       ...(productBody ?? {}), category,
-      quantityKg: +qty, pricePerKg: +price, harvestDate: harvest + "T06:00:00", description: description || undefined,
+      quantityKg: toKg(+qty, unit), pricePerKg: toPerKg(+price, unit), unit, harvestDate: harvest + "T06:00:00", description: description || undefined,
       scope: scope ?? "DISTRICT", vehicleNeed: vRaised ? vEff : null, targetUpazilaIds: tUp, targetDistrictIds: tDist, mode,
-      ...(mode === "BID" ? { bidEndsAt: end?.toISOString(), minIncrement: +inc || 0.5, buyNowPrice: buyNow ? +buyNow : null } : { minOrderKg: minOrder ? +minOrder : null, minResponseHours: +minReply }),
+      ...(mode === "BID" ? { bidEndsAt: end?.toISOString(), minIncrement: toPerKg(+inc, unit) || 0.5, buyNowPrice: buyNow ? toPerKg(+buyNow, unit) : null } : { minOrderKg: minOrder ? toKg(+minOrder, unit) : null, minResponseHours: +minReply }),
     };
     try {
       let r: { listing: Listing; warning?: string };
@@ -138,9 +157,14 @@ export function ListingForm({ edit }: { edit?: Listing }) {
 
         <div className="step"><b>2</b><div>
           <h4>Quantity, price and harvest</h4>
+          <div className="field"><label>Sell by</label>
+            <div className="unit-pick" role="radiogroup" aria-label="Unit">
+              {UNITS.map((u) => <button type="button" key={u} role="radio" aria-checked={unit === u} className={unit === u ? "on" : ""} onClick={() => changeUnit(u)}><b>{UNIT_LABEL[u]}</b><small>{UNIT_HINT[u]}</small></button>)}
+            </div>
+            <small>Dealers see and bid in the unit you choose.</small></div>
           <div className="row3">
-            <div className="field"><label htmlFor="q">Quantity (kg)</label><input id="q" type="number" min={1} value={qty} onChange={(e) => setQty(e.target.value)} className={fields.quantityKg ? "bad" : ""} /><FieldErr e={fields.quantityKg} /></div>
-            <div className="field"><label htmlFor="p">{mode === "BID" ? "Base price (৳/kg)" : "Asking price (৳/kg)"}</label><input id="p" type="number" min={0} step="0.5" value={price} onChange={(e) => setPrice(e.target.value)} className={fields.pricePerKg ? "bad" : ""} /><FieldErr e={fields.pricePerKg} />{mode === "BID" && <small>Bids cannot go below this</small>}</div>
+            <div className="field"><label htmlFor="q">Quantity ({U})</label><input id="q" type="number" min={0} step={unit === "KG" ? 1 : 0.01} value={qty} onChange={(e) => setQty(e.target.value)} className={fields.quantityKg ? "bad" : ""} /><FieldErr e={fields.quantityKg} /></div>
+            <div className="field"><label htmlFor="p">{mode === "BID" ? `Base price (৳/${U})` : `Asking price (৳/${U})`}</label><input id="p" type="number" min={0} step={unit === "KG" ? 0.5 : 1} value={price} onChange={(e) => setPrice(e.target.value)} className={fields.pricePerKg ? "bad" : ""} /><FieldErr e={fields.pricePerKg} />{mode === "BID" && <small>Bids cannot go below this</small>}</div>
             <div className="field"><label htmlFor="h">Harvest date</label><input id="h" type="date" value={harvest} onChange={(e) => setHarvest(e.target.value)} className={fields.harvestDate ? "bad" : ""} /><FieldErr e={fields.harvestDate} /><small>You can list before harvesting</small></div>
           </div>
           <div className="field"><label htmlFor="d">Description <span className="muted" style={{ fontWeight: 400 }}>(optional)</span></label><textarea id="d" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Variety, size, how it is packed…" /></div>
@@ -206,8 +230,8 @@ export function ListingForm({ edit }: { edit?: Listing }) {
             <>
               <div className="row3">
                 <div className="field"><label htmlFor="be">Bidding ends</label><input id="be" type="datetime-local" value={bidEnd} onChange={(e) => { setBidEnd(e.target.value); setBidEndTouched(true); }} className={fields.bidEndsAt ? "bad" : ""} /><FieldErr e={fields.bidEndsAt} /></div>
-                <div className="field"><label htmlFor="inc">Minimum raise (৳/kg)</label><input id="inc" type="number" min={0.5} step="0.5" value={inc} onChange={(e) => setInc(e.target.value)} /><FieldErr e={fields.minIncrement} /></div>
-                <div className="field"><label htmlFor="bn">Buy Now price (৳/kg) <span className="muted" style={{ fontWeight: 400 }}>optional</span></label><input id="bn" type="number" min={0} step="0.5" value={buyNow} onChange={(e) => setBuyNow(e.target.value)} className={fields.buyNowPrice ? "bad" : ""} /><FieldErr e={fields.buyNowPrice} /><small>A dealer paying this gets the whole lot at once</small></div>
+                <div className="field"><label htmlFor="inc">Minimum raise (৳/{U})</label><input id="inc" type="number" min={unit === "KG" ? 0.5 : 1} step={unit === "KG" ? 0.5 : 1} value={inc} onChange={(e) => setInc(e.target.value)} /><FieldErr e={fields.minIncrement} /></div>
+                <div className="field"><label htmlFor="bn">Buy Now price (৳/{U}) <span className="muted" style={{ fontWeight: 400 }}>optional</span></label><input id="bn" type="number" min={0} step={unit === "KG" ? 0.5 : 1} value={buyNow} onChange={(e) => setBuyNow(e.target.value)} className={fields.buyNowPrice ? "bad" : ""} /><FieldErr e={fields.buyNowPrice} /><small>A dealer paying this gets the whole lot at once</small></div>
               </div>
               {w && (
                 <div className={"note " + (endState === "ok" ? "good" : endState === "late" ? "warn" : endState === "short" ? "bad" : "")} style={{ marginBottom: 12 }}>
@@ -221,7 +245,7 @@ export function ListingForm({ edit }: { edit?: Listing }) {
             </>
           ) : (
             <div className="row">
-              <div className="field"><label htmlFor="mo">Minimum order (kg) <span className="muted" style={{ fontWeight: 400 }}>optional</span></label><input id="mo" type="number" min={1} value={minOrder} onChange={(e) => setMinOrder(e.target.value)} /><FieldErr e={fields.minOrderKg} /></div>
+              <div className="field"><label htmlFor="mo">Minimum order ({U}) <span className="muted" style={{ fontWeight: 400 }}>optional</span></label><input id="mo" type="number" min={1} value={minOrder} onChange={(e) => setMinOrder(e.target.value)} /><FieldErr e={fields.minOrderKg} /></div>
               <div className="field"><label htmlFor="mr">Dealers must give me at least</label><select id="mr" value={minReply} onChange={(e) => setMinReply(e.target.value)}><option value="2">2 hours to reply</option><option value="6">6 hours to reply</option><option value="12">12 hours to reply</option><option value="24">24 hours to reply</option></select><FieldErr e={fields.minResponseHours} /></div>
             </div>
           )}
@@ -233,15 +257,15 @@ export function ListingForm({ edit }: { edit?: Listing }) {
         <div className="pb">
           <dl className="kv" style={{ gridTemplateColumns: "110px 1fr" }}>
             <dt>Product</dt><dd>{preview?.info.name ?? "—"}</dd>
-            <dt>Quantity</dt><dd>{qty ? kg(+qty) : "—"}</dd>
-            <dt>{mode === "BID" ? "Base price" : "Asking"}</dt><dd>{price ? tk(+price) + " / kg" : "—"}</dd>
+            <dt>Quantity</dt><dd>{qty ? qtyU(toKg(+qty, unit), unit) : "—"}{qty && unit !== "KG" ? <small className="muted"> · {kg(toKg(+qty, unit))}</small> : null}</dd>
+            <dt>{mode === "BID" ? "Base price" : "Asking"}</dt><dd>{price ? per(toPerKg(+price, unit), unit) : "—"}</dd>
             <dt>Value</dt><dd>{total ? tk0(total) : "—"}</dd>
             <dt>Harvest</dt><dd>{harvest ? new Date(harvest).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—"}</dd>
             <dt>Visible to</dt><dd>{scope ? SCOPE_LABEL[scope] : "—"}{scope === "UPAZILA" && tUp.length ? ` + ${tUp.length} upazila${tUp.length > 1 ? "s" : ""}` : ""}{scope === "DISTRICT" && tDist.length ? ` + ${tDist.length} district${tDist.length > 1 ? "s" : ""}` : ""}</dd>
             <dt>Vehicle</dt><dd>{vEff ? STORAGE_LABEL[vEff] + (vRaised ? " (your choice)" : "") : "—"}</dd>
             <dt>Selling</dt><dd>{mode === "BID" ? "Open bidding" : "Own price + offers"}</dd>
             {mode === "BID" && end && <><dt>Ends</dt><dd>{dateTime(end)}</dd></>}
-            {mode === "BID" && buyNow && <><dt>Buy Now</dt><dd>{tk(+buyNow)} / kg</dd></>}
+            {mode === "BID" && buyNow && <><dt>Buy Now</dt><dd>{per(toPerKg(+buyNow, unit), unit)}</dd></>}
           </dl>
           <button className="btn" style={{ width: "100%", marginTop: 16 }} disabled={busy || !productBody || !qty || !price} onClick={submit}>{busy ? "Saving…" : edit ? "Save changes" : "Publish listing"}</button>
           <p className="small muted" style={{ marginTop: 8 }}>You can edit or withdraw it until the first bid or offer arrives.</p>

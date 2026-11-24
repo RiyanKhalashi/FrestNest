@@ -35,7 +35,8 @@ h1, h2, h3, h4 { letter-spacing: -.02em; }
 
 /* ---------- app frame: sidebar ---------- */
 @media (min-width: 1025px) { .app { grid-template-columns: 248px 1fr; } }
-.side, .tp .side, .ad .side { background: var(--card); color: var(--ink); border-right: 1px solid var(--line); padding: 20px 14px; gap: 18px; }
+/* blended edge: no divider line, the card colour melts into the page tint on the right */
+.side, .tp .side, .ad .side { background: linear-gradient(90deg, var(--card) 0%, var(--card) 62%, color-mix(in srgb, var(--card) 45%, var(--paper)) 88%, var(--paper) 100%); color: var(--ink); border-right: 0; padding: 20px 14px; gap: 18px; }
 .side .fn-logo { padding: 0 6px; font-size: 18px; }
 .side .fn-logo .mk { width: 34px; height: 34px; border-radius: 10px; }
 .me { display: flex; gap: 11px; align-items: center; padding: 12px; border-radius: 16px; background: var(--acc-soft); }
@@ -197,3 +198,10 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--f
 /* ---------- soft role tint instead of plain white (2026-11-21) ---------- */
 .panel, .bell, .menu-btn, .offer, .optin, .choice label, .checks label, .roles, .chips label { background: var(--card); }
 .ledger td { background: transparent; }
+
+/* listing unit picker (kg / mon / ton) */
+.unit-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+.unit-pick button { display: grid; gap: 1px; text-align: left; min-width: 120px; padding: 9px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font: inherit; }
+.unit-pick button b { font-size: 15px; }
+.unit-pick button small { font-size: 12px; color: var(--muted); }
+.unit-pick button.on { border-color: var(--acc); background: var(--acc-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 14%, transparent); }

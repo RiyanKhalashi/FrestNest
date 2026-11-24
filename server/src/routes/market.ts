@@ -9,6 +9,7 @@ import { pingListing, pingMarket, pingTransport } from "../realtime.js";
 import { notify, notifyMany } from "../notify.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import { setupEmergencyDelivery, afterEmergencyDeal } from "../emergency.js";
+import { qtyText, priceText } from "../units.js";
 
 export const marketRouter = Router();
 marketRouter.use(requireAuth, requireRole("DEALER"));
@@ -69,8 +70,8 @@ marketRouter.post("/:id/bid", requireActive, async (req, res) => {
   });
   if (!r.ok) return res.status(r.status).json({ error: r.error });
   const name = productInfo(r.l).name;
-  await notify(r.l.farmerId, "New bid", `${name} ${code(r.l.code)}: new highest bid ৳${price.toFixed(2)}/kg.`, "/farmer/sales?l=" + id);
-  if (r.prevTop && r.prevTop.dealerId !== me.id) await notify(r.prevTop.dealerId, "You were outbid", `${name} ${code(r.l.code)}: highest bid is now ৳${price.toFixed(2)}/kg.`, "/dealer/market?l=" + id);
+  await notify(r.l.farmerId, "New bid", `${name} ${code(r.l.code)}: new highest bid ${priceText(price, r.l.unit)}.`, "/farmer/sales?l=" + id);
+  if (r.prevTop && r.prevTop.dealerId !== me.id) await notify(r.prevTop.dealerId, "You were outbid", `${name} ${code(r.l.code)}: highest bid is now ${priceText(price, r.l.unit)}.`, "/dealer/market?l=" + id);
   pingListing(id);
   res.json({ ok: true });
 });
@@ -91,7 +92,7 @@ marketRouter.post("/:id/buy-now", requireActive, async (req, res) => {
   });
   if (!r.ok) return res.status(r.status).json({ error: r.error });
   const name = productInfo(r.l).name, total = Math.round(Number(r.l.buyNowPrice) * r.l.quantityKg);
-  await notify(r.l.farmerId, "Sold with Buy Now", `${me.businessName ?? me.name} bought all ${r.l.quantityKg} kg of ${name} at ৳${money(r.l.buyNowPrice)}/kg (৳${total.toLocaleString("en-IN")}). Deal ${code(r.deal.code)}.`, "/farmer/sales?l=" + id);
+  await notify(r.l.farmerId, "Sold with Buy Now", `${me.businessName ?? me.name} bought all ${qtyText(r.l.quantityKg, r.l.unit)} of ${name} at ${priceText(Number(r.l.buyNowPrice), r.l.unit)} (৳${total.toLocaleString("en-IN")}). Deal ${code(r.deal.code)}.`, "/farmer/sales?l=" + id);
   await notifyMany(r.l.bids.map((b) => b.dealerId).filter((d) => d !== me.id), "Bidding closed", `${name} ${code(r.l.code)} was bought with Buy Now.`, "/dealer/market");
   if (r.setup) await afterEmergencyDeal(r.deal.id, r.setup);
   pingListing(id); pingMarket(); pingTransport();

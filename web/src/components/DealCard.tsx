@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { tk, tk0, kg, dateShort, dateTime, Countdown, STORAGE_LABEL } from "@/lib/format";
+import { qty, per } from "@/lib/units";
 import type { Deal, TransportOffer } from "@/lib/types";
 import { Modal, FieldErr, useToast } from "./ui";
 import { Route, Track, Fac, SeasonTag, Stars, CodeBox, CounterStatus } from "./transport";
@@ -115,12 +116,12 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
     <div className="panel" style={{ marginBottom: 14, opacity: d.status === "CANCELLED" ? 0.7 : 1 }}>
       <div className="dhead">
         <div>
-          <h2 style={{ fontSize: 18 }}>{d.code} · {d.listing.product} · {kg(d.quantityKg)} <span className={"tag " + st[0]} style={{ marginLeft: 6, verticalAlign: 3 }}>{st[1]}</span></h2>
+          <h2 style={{ fontSize: 18 }}>{d.code} · {d.listing.product} · {qty(d.quantityKg, d.unit)}{d.unit !== "KG" ? ` (${kg(d.quantityKg)})` : ""} <span className={"tag " + st[0]} style={{ marginLeft: 6, verticalAlign: 3 }}>{st[1]}</span></h2>
           <p className="small muted">{side === "farmer" ? "Buyer" : "Farmer"}: <b style={{ color: "var(--ink)" }}>{other.name}</b>{other.phone ? " · " + other.phone : ""} · {SOURCE[d.source]} · {dateShort(d.at)}</p>
         </div>
         <div style={{ textAlign: "right" }}>
           <div className="num" style={{ font: "600 20px var(--display)" }}>{tk0(d.total)}</div>
-          <div className="small muted">{tk(d.pricePerKg)} / kg</div>
+          <div className="small muted">{per(d.pricePerKg, d.unit)}</div>
         </div>
       </div>
 
