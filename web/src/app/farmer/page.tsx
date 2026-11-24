@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -40,10 +41,10 @@ export default function Page() {
     <>
       <Welcome code="F1" line="Your listings, deals and deliveries in one place." />
       <div className="stats">
-        <div><span>Open listings</span><b className="num">{open.length}</b><small>{open.filter((l) => l.mode === "BID").length} bidding · {open.filter((l) => l.mode === "OWN").length} own price</small></div>
-        <div><span>Offers waiting</span><b className="num">{offers.length}</b><small>{offers.length ? "answer before they expire" : "nothing to answer"}</small></div>
-        <div><span>Active deals</span><b className="num">{active.length}</b><small>{active.filter((d) => d.status === "AWAITING_TRANSPORT").length} waiting for transport · {active.filter((d) => d.pickupCode).length} pickup code ready</small></div>
-        <div><span>Sold this month</span><b className="num">{tk0(month)}</b><small>{deals.filter((d) => d.status !== "CANCELLED").length} deals in total</small></div>
+        <div><i className="si"><Icon name="leaf" /></i><span>Open listings</span><b className="num">{open.length}</b><small>{open.filter((l) => l.mode === "BID").length} bidding · {open.filter((l) => l.mode === "OWN").length} own price</small></div>
+        <div><i className="si"><Icon name="bell" /></i><span>Offers waiting</span><b className="num">{offers.length}</b><small>{offers.length ? "answer before they expire" : "nothing to answer"}</small></div>
+        <div><i className="si"><Icon name="truck" /></i><span>Active deals</span><b className="num">{active.length}</b><small>{active.filter((d) => d.status === "AWAITING_TRANSPORT").length} waiting for transport · {active.filter((d) => d.pickupCode).length} pickup code ready</small></div>
+        <div><i className="si"><Icon name="chart" /></i><span>Sold this month</span><b className="num">{tk0(month)}</b><small>{deals.filter((d) => d.status !== "CANCELLED").length} deals in total</small></div>
       </div>
       <div className="grid g-main">
         <div className="panel">

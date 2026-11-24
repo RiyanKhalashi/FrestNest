@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -40,17 +41,17 @@ export default function Page() {
     <>
       <Welcome code="A1" line={simple ? "Keep the marketplace safe and fair" : `${online} admin${online === 1 ? "" : "s"} online`} />
       <div className="stats">
-        <div><span>Waiting verification</span><b className="num">{c.verifyUsers + c.verifyVehicles}</b><small>{c.verifyUsers} accounts · {c.verifyVehicles} vehicles</small></div>
-        <div><span>Delivery failures</span><b className="num">{c.failures}</b><small>{c.escalated} escalated</small></div>
-        <div><span>Open cases</span><b className="num">{c.cancelReqs + c.reports + c.reviewReports + c.codes}</b><small>{c.cancelReqs} cancel · {c.reports} reports · {c.reviewReports} reviews</small></div>
-        <div><span>Saved by emergency sales</span><b className="num">{kg(c.savedKgThisMonth)}</b><small>this month</small></div>
+        <div><i className="si"><Icon name="shield" /></i><span>Waiting verification</span><b className="num">{c.verifyUsers + c.verifyVehicles}</b><small>{c.verifyUsers} accounts · {c.verifyVehicles} vehicles</small></div>
+        <div><i className="si"><Icon name="alert" /></i><span>Delivery failures</span><b className="num">{c.failures}</b><small>{c.escalated} escalated</small></div>
+        <div><i className="si"><Icon name="list" /></i><span>Open cases</span><b className="num">{c.cancelReqs + c.reports + c.reviewReports + c.codes}</b><small>{c.cancelReqs} cancel · {c.reports} reports · {c.reviewReports} reviews</small></div>
+        <div><i className="si"><Icon name="leaf" /></i><span>Saved by emergency sales</span><b className="num">{kg(c.savedKgThisMonth)}</b><small>this month</small></div>
       </div>
       {k && <div className="panel" style={{ marginBottom: 18 }}><h3>Platform at a glance {simple && <Link className="small" href="/admin/business">Business</Link>}</h3>
-        <div className="stats" style={{ margin: 0, border: 0, borderRadius: 0 }}>
-          <div><span>Deals completed</span><b className="num">{k.deals.toLocaleString("en-IN")}</b><small>last 12 weeks · {k.bidShare}% through bidding</small></div>
-          <div><span>Active users</span><b className="num">{k.users.toLocaleString("en-IN")}</b><small>farmers, dealers, transporters</small></div>
-          <div><span>Delivered on time</span><b className="num">{k.onTime ?? "—"}%</b><small>last 3 months</small></div>
-          <div><span>Deals cancelled</span><b className="num">{k.cancelRate}%</b><small>last 30 days</small></div>
+        <div className="stats alt" style={{ margin: 0, border: 0, borderRadius: 0 }}>
+          <div><i className="si"><Icon name="check" /></i><span>Deals completed</span><b className="num">{k.deals.toLocaleString("en-IN")}</b><small>last 12 weeks · {k.bidShare}% through bidding</small></div>
+          <div><i className="si"><Icon name="users" /></i><span>Active users</span><b className="num">{k.users.toLocaleString("en-IN")}</b><small>farmers, dealers, transporters</small></div>
+          <div><i className="si"><Icon name="truck" /></i><span>Delivered on time</span><b className="num">{k.onTime ?? "—"}%</b><small>last 3 months</small></div>
+          <div><i className="si"><Icon name="alert" /></i><span>Deals cancelled</span><b className="num">{k.cancelRate}%</b><small>last 30 days</small></div>
         </div>
       </div>}
       <div className="grid g-main">

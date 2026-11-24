@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,10 +38,10 @@ export default function Page() {
     <>
       <Welcome code="D1" line="Buy fresh produce straight from farmers." />
       <div className="stats">
-        <div><span>In the market</span><b className="num">{market.length}</b><small>{market.filter((l) => l.near && l.near.rank <= 1).length} in or next to your upazila</small></div>
-        <div><span>Leading bids</span><b className="num">{leading.length}</b><small>{outbid.length} outbid</small></div>
-        <div><span>Active deals</span><b className="num">{active.length}</b><small>{tk0(spent)} · {active.filter((d) => d.status === "AWAITING_TRANSPORT" && d.transport.offers.some((o) => o.status === "PENDING")).length} with transport offers to choose</small></div>
-        <div><span>Counter-offers</span><b className="num">{countered.length}</b><small>{countered.length ? "answer before they expire" : "none waiting"}</small></div>
+        <div><i className="si"><Icon name="cart" /></i><span>In the market</span><b className="num">{market.length}</b><small>{market.filter((l) => l.near && l.near.rank <= 1).length} in or next to your upazila</small></div>
+        <div><i className="si"><Icon name="gavel" /></i><span>Leading bids</span><b className="num">{leading.length}</b><small>{outbid.length} outbid</small></div>
+        <div><i className="si"><Icon name="truck" /></i><span>Active deals</span><b className="num">{active.length}</b><small>{tk0(spent)} · {active.filter((d) => d.status === "AWAITING_TRANSPORT" && d.transport.offers.some((o) => o.status === "PENDING")).length} with transport offers to choose</small></div>
+        <div><i className="si"><Icon name="swap" /></i><span>Counter-offers</span><b className="num">{countered.length}</b><small>{countered.length ? "answer before they expire" : "none waiting"}</small></div>
       </div>
       <div className="grid g-main">
         <div className="panel">

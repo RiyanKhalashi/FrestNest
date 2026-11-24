@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@/components/Icon";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -39,10 +40,10 @@ export default function Page() {
     <>
       <Welcome code="T1" line={`${vs.filter((v) => v.status === "APPROVED").length} approved vehicle${vs.length === 1 ? "" : "s"}`} />
       <div className="stats">
-        <div><span>On the road now</span><b className="num">{road.length}</b><small>{road[0] ? `${road[0].code} · deliver by ${dateTime(mine(road[0])!.deliverBy)}` : "nothing in transit"}</small></div>
-        <div><span>Confirmed pickups</span><b className="num">{confirmed.length}</b><small>{confirmed[0] ? `next ${dateTime(mine(confirmed[0])!.pickupAt)}` : "none booked"}</small></div>
-        <div><span>Offers waiting</span><b className="num">{waiting.length}</b><small>{open} new deal{open === 1 ? "" : "s"} you can offer on</small></div>
-        <div><span>Earned this month</span><b className="num">{tk0(earned)}</b><small>{done.length} trip{done.length === 1 ? "" : "s"} completed</small></div>
+        <div><i className="si"><Icon name="route" /></i><span>On the road now</span><b className="num">{road.length}</b><small>{road[0] ? `${road[0].code} · deliver by ${dateTime(mine(road[0])!.deliverBy)}` : "nothing in transit"}</small></div>
+        <div><i className="si"><Icon name="check" /></i><span>Confirmed pickups</span><b className="num">{confirmed.length}</b><small>{confirmed[0] ? `next ${dateTime(mine(confirmed[0])!.pickupAt)}` : "none booked"}</small></div>
+        <div><i className="si"><Icon name="bell" /></i><span>Offers waiting</span><b className="num">{waiting.length}</b><small>{open} new deal{open === 1 ? "" : "s"} you can offer on</small></div>
+        <div><i className="si"><Icon name="chart" /></i><span>Earned this month</span><b className="num">{tk0(earned)}</b><small>{done.length} trip{done.length === 1 ? "" : "s"} completed</small></div>
       </div>
       <div className="grid g-main">
         <div className="panel">

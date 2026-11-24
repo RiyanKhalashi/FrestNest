@@ -62,7 +62,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
       <div className="scrim" onClick={() => setNavOpen(false)} />
       <aside className="side" id="side-nav">
         <Logo href={HOME[role]} />
-        <div className="me"><Avatar user={user} label={user.businessName ?? user.name} /><span><b>{user.businessName ?? user.name}</b><small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}{place ? " · " + place : ""}</small></span></div>
+        <div className="me"><Avatar user={user} size={48} label={user.businessName ?? user.name} /><span><b>{user.businessName ?? user.name}</b><small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}{place ? " · " + place : ""}</small></span></div>
         <nav className="nav">
           {items.map((i, idx) => {
             const head = i.group && i.group !== items[idx - 1]?.group ? <div className="grp">{i.group}</div> : null;
@@ -79,6 +79,13 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
               : <><b>Your permissions</b>{user.isSuperAdmin ? "Super Admin: everything, including team, settings, products and lifting bans." : user.permissions.map((p) => p[0] + p.slice(1).toLowerCase()).join(" · ") || "None yet"}</>}
             {user.isSuperAdmin && simple !== null && <button className="btn ghost sm" style={{ marginTop: 8 }} onClick={() => setAdminMode(!simple).then(() => router.push("/admin"))}>{simple ? "Show all admin tools" : "Back to simple mode"}</button>}
           </p></div>
+        )}
+        {role === "ADMIN" && (
+          <svg className="side-wave" viewBox="0 0 248 170" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 70C60 40 120 90 180 70S240 40 248 50V170H0Z" fill="#0F5A55" opacity=".55" />
+            <path d="M0 105C70 80 130 120 200 100S240 85 248 92V170H0Z" fill="#12A594" opacity=".45" />
+            <path d="M0 140C80 120 150 150 248 128V170H0Z" fill="#4FD8C4" opacity=".35" />
+          </svg>
         )}
       </aside>
       <div>

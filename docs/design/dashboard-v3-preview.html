@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard v3 Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+/* FreshNest dashboard v3: prototype inspired by three reference mockups (deep role sidebar with a faded scene,
+   light hero banner with the scene on the right, icon stat cards, thumbnails, quick actions). Preview only. */
+:root {
+  --ink: #12231A; --body: #3B4A41; --muted: #6B7A71; --line: #E3E9E1; --card: #FFFFFF; --radius: 20px;
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+/* role themes */
+[data-role="farmer"] { --side-a: #072F18; --side-b: #0D4D29; --side-pos: 100%; --acc: #1E9E57; --acc-3: #11733C; --acc-2: #7BD88F; --acc-soft: #E6F6EA; --page: #F3F8F1; --hero-a: #E9F7E6; --hero-b: #D3EFCB; --hero-ink: #0F3D24; --hl: #1E9E57; --pill-ink: #0B3B20; --banner: url(../../web/public/art/v3/farmer-banner.webp); --sideart: url(../../web/public/art/v3/farmer-side.webp); }
+[data-role="dealer"] { --side-a: #3E1D04; --side-b: #6D3607; --side-pos: 50%; --side-h: calc(264px * 1152 / 928); --side-size: 100% auto; --acc: #E2711D; --acc-3: #B9530A; --acc-2: #F6A04D; --acc-soft: #FDEEDF; --page: #FBF6F0; --hero-a: #FFF1E1; --hero-b: #FBDDBC; --hero-ink: #2E1A0B; --hl: #D9650F; --pill-ink: #fff; --banner: url(../../web/public/art/v3/dealer-banner.webp); --sideart: url(../../web/public/art/v3/dealer-side.webp); }
+[data-role="admin"] { --side-a: #04211F; --side-b: #0A3A3B; --acc: #12A594; --acc-2: #4FD8C4; --acc-3: #0B766B; --acc-soft: #DDF5F2; --page: #F0F5F5; --hero-a: #ECF8F6; --hero-b: #BDEAE2; --hero-ink: #08302E; --hl: #0E8F83; --pill-ink: #fff; --banner: none; --sideart: none; }
+[data-role="transporter"] { --side-a: #011D38; --side-b: #012B52; --side-pos: 87%; --acc: #2B7BE4; --acc-3: #1A55AE; --acc-2: #8FC3FF; --acc-soft: #E6F0FD; --page: #F2F6FB; --hero-a: #DCEEFF; --hero-b: #A7D6FE; --hero-ink: #0B2A55; --hl: #1D66C9; --pill-ink: #fff; --banner: url(../../web/public/art/v3/transporter-banner.webp); --banner-pos: 100% 50%; --sideart: url(../../web/public/art/v3/transporter-side.webp); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font: 14.5px/1.55 var(--font); color: var(--ink); background: var(--page); -webkit-font-smoothing: antialiased; transition: background .25s; }
+button { font: inherit; cursor: pointer; }
+svg.lucide { width: 18px; height: 18px; stroke-width: 2; }
+
+/* preview switcher (not part of the design) */
+.switch { position: fixed; z-index: 50; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; background: #111; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+.switch button { border: 0; background: transparent; color: #cfd6d1; padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+.switch button.on { background: #fff; color: #111; }
+
+.app { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+
+/* ---------- sidebar ---------- */
+.side { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; gap: 22px; padding: 26px 16px 18px; color: #fff;
+  background: linear-gradient(180deg, var(--side-a), var(--side-b)); }
+.side::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--side-h, min(620px, 70vh)); pointer-events: none;
+  background: var(--sideart) var(--side-pos, 100%) 100% / var(--side-size, auto 100%) no-repeat;
+  -webkit-mask-image: linear-gradient(to top, #000 82%, transparent); mask-image: linear-gradient(to top, #000 82%, transparent); }
+.side > * { position: relative; z-index: 1; }
+.logo { display: flex; align-items: center; gap: 12px; padding: 0 8px; font: 800 22px var(--font); letter-spacing: -.02em; }
+.logo .mk { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 30% 30%, #9BE77C, #1E9E57); box-shadow: 0 0 0 3px rgba(255,255,255,.15); }
+.logo .mk svg { color: #fff; width: 22px; height: 22px; }
+.logo em { font-style: normal; color: var(--acc-2); }
+.me { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+.me .av { width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 26px; background: linear-gradient(150deg, #fff, #E8EEF5); box-shadow: 0 0 0 3px rgba(255,255,255,.2); }
+.me b { display: block; font-size: 15px; }
+.me small { display: block; font-size: 12px; color: rgba(255,255,255,.72); line-height: 1.4; }
+.nav { display: grid; gap: 6px; }
+.nav a { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 16px; color: rgba(255,255,255,.88); text-decoration: none; font-weight: 600; font-size: 15px; }
+.nav a:hover { background: rgba(255,255,255,.08); }
+.nav a.on { background: linear-gradient(100deg, var(--acc-2), var(--acc)); color: var(--pill-ink); font-weight: 700; box-shadow: 0 12px 24px -12px var(--acc); }
+.nav a.on svg { color: currentColor; }
+.side-foot { margin-top: auto; display: flex; justify-content: space-around; padding: 10px; border-radius: 18px; background: rgba(0,0,0,.16); backdrop-filter: blur(3px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+.side-foot:not(.mode) { display: none; }
+.side-foot.mode { display: block; padding: 14px 16px; background: rgba(255,255,255,.07); }
+.side-foot.mode b { display: flex; align-items: center; gap: 8px; } .side-foot.mode p { margin: 6px 0 10px; font-size: 12.5px; color: rgba(255,255,255,.72); }
+.side-foot.mode button { background: rgba(255,255,255,.12); padding: 8px 14px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; font-weight: 600; font-size: 13px; }
+.nav .grp { font: 700 11px var(--font); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); padding: 12px 16px 2px; }
+.side .wave { position: absolute; left: 0; right: 0; bottom: 0; height: 170px; display: none; pointer-events: none; z-index: 0; }
+[data-role="admin"] .side .wave { display: block; }
+.side-foot button { position: relative; border: 0; background: none; color: #fff; padding: 6px; border-radius: 10px; }
+.side-foot button:hover { background: rgba(255,255,255,.1); }
+.side-foot i { position: absolute; top: 0; right: 0; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #E5484D; font: 700 10px/16px var(--font); font-style: normal; }
+
+/* ---------- main ---------- */
+.main { padding: 22px 30px 60px; min-width: 0; }
+.top { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.top h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 19px; }
+.top h2 svg { color: var(--acc); width: 22px; height: 22px; }
+.top .sp { flex: 1; }
+.bell { position: relative; width: 44px; height: 44px; border-radius: 14px; border: 0; background: var(--card); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(18,35,26,.06); color: var(--ink); }
+.bell i { position: absolute; top: 6px; right: 6px; min-width: 17px; height: 17px; border-radius: 9px; background: #E5484D; color: #fff; font: 700 10px/17px var(--font); font-style: normal; text-align: center; }
+.who { display: flex; align-items: center; gap: 8px; border: 0; background: none; color: var(--ink); }
+.who { position: relative; }
+.menu { position: absolute; right: 0; top: 52px; z-index: 5; min-width: 190px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 18px 40px rgba(18,35,26,.18); display: none; }
+.who:focus-within .menu, .who.open .menu { display: grid; }
+.menu a { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; color: var(--ink); text-decoration: none; font-weight: 600; }
+.menu a:hover { background: var(--acc-soft); } .menu a.out { color: #C0352B; }
+.who b { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--side-a); color: #fff; font-size: 14px; }
+
+/* hero */
+.hero { position: relative; overflow: hidden; border-radius: 24px; min-height: 260px; padding: 30px 34px; color: var(--hero-ink);
+  background: linear-gradient(100deg, var(--hero-a) 0%, var(--hero-a) 38%, var(--hero-b) 100%); box-shadow: 0 20px 40px -28px rgba(18,35,26,.45); }
+.hero .art { position: absolute; inset: 0; background: var(--banner) var(--banner-pos, 100% 50%) / cover no-repeat; }
+.hero > div:not(.art) { position: relative; max-width: 50%; padding-left: 40px; }
+.hero .date { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; opacity: .85; }
+.hero h1 { margin: 10px 0 6px; font: 800 38px/1.1 var(--font); letter-spacing: -.03em; }
+.hero h1 #first { color: var(--hl); }
+.hero .illus { position: absolute; right: 0; top: 0; height: 100%; width: 62%; display: none; }
+[data-role="admin"] .hero .illus { display: block; }
+[data-role="admin"] .hero { background: radial-gradient(520px 260px at 78% 45%, rgba(255,255,255,.75), transparent 70%), linear-gradient(100deg, var(--hero-a) 0%, var(--hero-a) 40%, var(--hero-b) 100%); }
+.hero .leafwave { position: absolute; left: 0; top: 0; height: 100%; width: 34%; display: none; }
+[data-role="admin"] .hero .leafwave { display: block; }
+.hero p { margin: 0; font-size: 16px; opacity: .9; }
+.swoosh { display: block; margin-top: 10px; width: 160px; height: 10px; color: var(--hl); }
+.chip { position: absolute; top: 16px; right: 18px; z-index: 1; background: rgba(10,20,15,.55); color: #fff; border-radius: 999px; padding: 5px 12px; font: 600 12px var(--font); backdrop-filter: blur(4px); }
+
+/* colour set for icons, quick actions and soft buttons */
+.c-green { --c: #1B9E55; --cs: #E1F5E7; } .c-orange { --c: #E8730C; --cs: #FFEBD6; } .c-violet { --c: #6D4AE0; --cs: #EEE8FD; } .c-blue { --c: #2373DB; --cs: #E2EDFD; }
+.c-red { --c: #D9363E; --cs: #FDE5E6; } .c-teal { --c: #0E9F92; --cs: #DCF4F1; } .c-pink { --c: #D63E8A; --cs: #FCE5F0; } .c-gold { --c: #C68600; --cs: #FFF2D1; }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.stat { display: flex; gap: 14px; align-items: flex-start; background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: 0 6px 20px rgba(18,35,26,.05); }
+.stat .ic { width: 52px; height: 52px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--cs, var(--acc-soft)); color: var(--c, var(--acc)); }
+.stat .ic svg { width: 24px; height: 24px; }
+.stat span { display: block; font-weight: 600; color: var(--body); }
+.stat b { display: block; font: 800 30px/1.15 var(--font); letter-spacing: -.02em; margin: 2px 0 4px; }
+.stat small { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12.5px; }
+.stat small svg { width: 14px; height: 14px; color: var(--c, var(--acc)); }
+.stat { border-top: 3px solid transparent; } .stat[class*="c-"] { border-top-color: var(--c); }
+
+/* admin pieces */
+.glance { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.glance .g { display: flex; flex-direction: column; gap: 10px; padding: 18px 18px; border-right: 1px solid var(--line); }
+.glance .g:last-child { border-right: 0; }
+.glance .ic { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--cs); color: var(--c); }
+.glance span { display: block; font-weight: 600; color: var(--body); font-size: 13.5px; } .glance b { display: block; font: 800 24px/1.2 var(--font); } .glance small { color: var(--muted); font-size: 12px; }
+.ra { list-style: none; margin: 0; padding: 6px 20px 14px; counter-reset: ra; }
+.ra li { counter-increment: ra; display: grid; grid-template-columns: 26px 76px 130px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+.ra li:last-child { border-bottom: 0; } .ra li::before { content: counter(ra) "."; color: var(--muted); } .ra .t { color: var(--muted); } .ra b { font-weight: 700; } .ra em { font-style: normal; color: var(--muted); }
+.pill { background: #EEF2F1; color: var(--body); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
+.scene-card { position: relative; min-height: 190px; border-radius: var(--radius); overflow: hidden; background: url(../../web/public/art/v3/farmer-banner.webp) 100% 60% / cover no-repeat; box-shadow: 0 6px 20px rgba(18,35,26,.05); }
+.scene-card div { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: linear-gradient(transparent, rgba(4,33,31,.78)); color: #fff; }
+.scene-card small { display: block; opacity: .8; }
+
+/* panels */
+.grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.col { display: grid; gap: 16px; }
+.panel { background: var(--card); border-radius: var(--radius); box-shadow: 0 6px 20px rgba(18,35,26,.05); overflow: hidden; }
+.ph { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.ph h3 { margin: 0; font-size: 18px; flex: 1; display: flex; align-items: center; gap: 10px; }
+.ph h3 .dot { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--acc); color: #fff; }
+.ph h3 .dot svg { width: 18px; height: 18px; }
+.ph a { color: var(--acc); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
+.row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row b { font-weight: 700; }
+.row .sub { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+.row .sub svg { width: 14px; height: 14px; }
+.tag { display: inline-block; padding: 5px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.tag.blue { background: #E6F0FD; color: #1D5FC0; } .tag.green { background: #E3F6E8; color: #1B7A43; } .tag.red { background: #FDE8E8; color: #C0352B; }
+.tag.gold { background: #FFF2D6; color: #9A6200; } .tag.orange { background: #FFEBD6; color: #B4560A; } .tag.plain { background: #EEF1EE; color: var(--body); }
+.btn { display: inline-flex; align-items: center; gap: 7px; border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; white-space: nowrap; color: #fff;
+  background: linear-gradient(100deg, var(--acc), var(--acc-3)); box-shadow: 0 10px 20px -12px var(--acc-3); transition: transform .15s, filter .15s; }
+.btn svg { width: 16px; height: 16px; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn.soft { background: var(--cs, var(--acc-soft)); color: var(--c, var(--acc-3)); box-shadow: none; }
+.btn.danger { background: linear-gradient(100deg, #F0605F, #CF2E36); box-shadow: 0 10px 20px -12px #CF2E36; }
+.btn.blue { background: linear-gradient(100deg, #3B8BEB, #1F5FC4); box-shadow: 0 10px 20px -12px #1F5FC4; }
+.btn.violet { background: linear-gradient(100deg, #8A6BF0, #5B3BD0); box-shadow: 0 10px 20px -12px #5B3BD0; }
+.thumb { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 28px; background: var(--acc-soft); }
+.price { font-weight: 700; white-space: nowrap; }
+.tip { margin: 16px 20px; display: flex; gap: 14px; align-items: flex-start; padding: 16px; border-radius: 16px; background: var(--acc-soft); color: var(--body); }
+.tip svg { color: var(--acc); width: 26px; height: 26px; flex: none; }
+.note { padding: 0 20px 16px; color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; font-style: italic; }
+.note svg { width: 14px; height: 14px; }
+.plate { font: 700 12px ui-monospace, monospace; border: 1.5px solid #C77A2A; background: #FFF8EC; border-radius: 6px; padding: 1px 7px; }
+.qa { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 20px 20px; }
+.qa button { display: grid; justify-items: center; gap: 10px; padding: 16px 10px; border: 0; border-radius: 18px; background: var(--cs, var(--acc-soft)); color: var(--ink); font-weight: 700; transition: transform .15s; }
+.qa .qi { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: var(--c, var(--acc)); box-shadow: 0 10px 18px -10px var(--c, var(--acc)); }
+.qa .qi svg { width: 22px; height: 22px; }
+.qa button:hover { transform: translateY(-2px); }
+.tl { list-style: none; margin: 0; padding: 8px 20px 12px; }
+.tl li { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 0 10px 22px; }
+.tl li::before { content: ""; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--acc-soft); }
+.tl li::after { content: ""; position: absolute; left: 0; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: var(--acc); }
+.tl .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--cs, var(--acc-soft)); color: var(--c, var(--acc)); }
+.tl small { display: block; color: var(--muted); }
+.promo { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: var(--radius); background: linear-gradient(100deg, var(--acc-soft), var(--hero-b)); }
+.promo svg { width: 30px; height: 30px; color: var(--acc); }
+.promo div { flex: 1; } .promo small { display: block; color: var(--muted); }
+.promo .go { width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--acc); color: #fff; }
+
+@media (max-width: 1100px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } .hero > div:not(.art) { max-width: 70%; } }
+@media (max-width: 1100px) { .glance { grid-template-columns: repeat(2, minmax(0, 1fr)); } .glance .g:nth-child(2) { border-right: 0; } .glance .g:nth-child(-n+2) { border-bottom: 1px solid var(--line); } }
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; } .side { display: none; } .main { padding: 16px 16px 90px; }
+  .hero { padding: 22px; min-height: 230px; } .hero .art { background-position: 85% 100%; opacity: .55; } .hero > div:not(.art) { padding-left: 0; } .hero > div:not(.art) { max-width: 100%; } .hero h1 { font-size: 28px; }
+  .stats { grid-template-columns: 1fr 1fr; gap: 10px; } .stat { padding: 14px; } .stat .ic { width: 40px; height: 40px; } .stat b { font-size: 24px; }
+  .row { grid-template-columns: minmax(0, 1fr) auto; } .row > :first-child:not(.thumb) { display: none; }
+}
+</style>
+</head>
+<body data-role="farmer">
+<div class="app">
+  <aside class="side">
+    <div class="logo"><span class="mk"><i data-lucide="sprout"></i></span><span>Fresh<em>Nest</em></span></div>
+    <div class="me"><span class="av" id="av"></span><span><b id="meName"></b><small id="meSub"></small></span></div>
+    <nav class="nav" id="nav"></nav>
+    <svg class="wave" viewBox="0 0 264 170" preserveAspectRatio="none" aria-hidden="true"><path d="M0 70C60 40 120 90 180 70S250 40 264 50V170H0Z" fill="#0F5A55" opacity=".55"/><path d="M0 105C70 80 130 120 200 100S250 85 264 92V170H0Z" fill="#12A594" opacity=".45"/><path d="M0 140C80 120 150 150 264 128V170H0Z" fill="#4FD8C4" opacity=".35"/><g transform="translate(206 118)" fill="#4FD8C4" opacity=".85"><path d="M14 30C14 18 4 10 0 6c10 0 18 8 18 20Z"/><path d="M16 30C16 16 26 8 34 4c0 12-8 22-18 26Z"/></g></svg>
+    <div class="side-foot" id="sideFoot"><button aria-label="Notifications"><i-bell></i-bell><i data-lucide="bell"></i><i class="n">2</i></button><button aria-label="Settings"><i data-lucide="settings"></i></button><button aria-label="Sign out"><i data-lucide="log-out"></i></button></div>
+  </aside>
+  <main class="main">
+    <div class="top"><h2 id="title"></h2><span class="sp"></span>
+      <button class="bell" aria-label="Notifications"><i data-lucide="bell"></i><i>2</i></button>
+      <button class="who" aria-label="Account" onclick="this.classList.toggle('open')"><b id="initials"></b><i data-lucide="chevron-down"></i><span class="menu"><a href="#"><i data-lucide="user"></i>Profile</a><a href="#"><i data-lucide="settings"></i>Settings</a><a href="#" class="out"><i data-lucide="log-out"></i>Sign out</a></span></button></div>
+    <section class="hero">
+      <div class="art" aria-hidden="true"></div>
+      <svg class="illus" viewBox="0 0 640 260" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+        <g transform="translate(270 40)"><path d="M70 0 136 24v56c0 52-30 88-66 104C34 168 4 132 4 80V24Z" fill="rgba(255,255,255,.7)" stroke="#0E9F92" stroke-width="4"/>
+          <circle cx="70" cy="70" r="20" fill="none" stroke="#0E9F92" stroke-width="5"/><path d="M36 132c6-22 20-34 34-34s28 12 34 34" fill="none" stroke="#0E9F92" stroke-width="5" stroke-linecap="round"/></g>
+        <g transform="translate(440 52) rotate(-6)"><rect x="0" y="0" width="170" height="112" rx="10" fill="#0B4A4C" stroke="#0E9F92" stroke-width="3"/>
+          <rect x="18" y="62" width="14" height="34" rx="2" fill="#4FE3C8"/><rect x="40" y="44" width="14" height="52" rx="2" fill="#4FE3C8" opacity=".85"/><rect x="62" y="28" width="14" height="68" rx="2" fill="#4FE3C8" opacity=".7"/>
+          <circle cx="126" cy="50" r="24" fill="none" stroke="#4FE3C8" stroke-width="10" stroke-dasharray="100 51"/><path d="M96 84h52M96 94h36" stroke="#4FE3C8" stroke-width="3" opacity=".6"/>
+          <path d="M-14 112h198l10 14H-24Z" fill="#CFEFEA" stroke="#0E9F92" stroke-width="2"/></g>
+      </svg>
+      <svg class="leafwave" viewBox="0 0 380 260" preserveAspectRatio="xMinYMax slice" aria-hidden="true">
+        <g fill="#9ADDD2" opacity=".45"><path d="M40 20c30 10 40 40 30 70-30-10-40-40-30-70Z"/><path d="M20 90c32 2 50 26 48 56-32-2-50-26-48-56Z"/><path d="M70 130c26-16 58-10 72 14-26 16-58 10-72-14Z"/><path d="M48 170c22-20 54-20 70 2-22 20-54 20-70-2Z"/></g>
+        <path d="M0 150C60 160 110 200 170 225S300 252 380 260H0Z" fill="#7FD3C6" opacity=".55"/><path d="M0 190C70 200 130 230 230 248S330 258 380 260H0Z" fill="#12A594" opacity=".55"/>
+      </svg>
+      <span class="chip" id="chip"></span>
+      <div>
+        <span class="date"><i data-lucide="calendar-days"></i>Wednesday, 25 November</span>
+        <h1><span id="hello">Good morning,</span> <span id="first"></span></h1>
+        <p id="line"></p>
+        <svg class="swoosh" viewBox="0 0 160 10" fill="none" aria-hidden="true"><path d="M2 7C40 2 100 1 156 4" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+      </div>
+    </section>
+    <section class="stats" id="stats"></section>
+    <section class="grid"><div class="col" id="left"></div><div class="col" id="right"></div></section>
+  </main>
+</div>
+<div class="switch" role="tablist" aria-label="Preview role">
+  <button data-r="farmer" class="on">Farmer</button><button data-r="dealer">Dealer</button><button data-r="transporter">Transporter</button><button data-r="admin">Admin</button>
+</div>
+
+<script>
+const I = (n) => `<i data-lucide="${n}"></i>`;
+const tag = (c, t) => `<span class="tag ${c}">${t}</span>`;
+const panel = (icon, title, link, body) => `<div class="panel"><div class="ph"><h3><span class="dot">${I(icon)}</span>${title}</h3>${link ? `<a href="#">${link} ${I("arrow-right")}</a>` : ""}</div>${body}</div>`;
+const listRow = (emo, name, place, price) => `<div class="row"><span class="thumb">${emo}</span><div><b>${name}</b><div class="sub">${place}</div></div><span class="price">${price}</span></div>`;
+const QC = ["green", "orange", "blue", "violet"];
+const qa = (items) => `<div class="qa">${items.map(([i, t, c], k) => `<button class="c-${c ?? QC[k % 4]}"><span class="qi">${I(i)}</span>${t}</button>`).join("")}</div>`;
+const tl = (items) => `<ul class="tl">${items.map(([i, t, a, tg], k) => `<li class="c-${["blue", "green", "orange", "violet"][k % 4]}"><span class="ic">${I(i)}</span><span><b>${t}</b><small>${a}</small></span>${tg}</li>`).join("")}</ul>`;
+const B = (icon, text, cls = "") => `<button class="btn ${cls}">${I(icon)}${text}</button>`;
+
+const ROLES = {
+  farmer: {
+    av: "👨🏽‍🌾", name: "Karim Uddin", sub: "Farmer · Bogura Sadar, Bogura", initials: "KU", first: "Karim", title: ["home", "Farmer home"], chip: "Screen F1",
+    line: "Your listings, deals and deliveries in one place.",
+    nav: [["house", "Home"], ["circle-plus", "Create listing"], ["package", "My sales"], ["user", "Profile & reviews"]],
+    stats: [["sprout", "Open listings", "4", ["tag", "1 bidding · 3 own price"], "green"], ["mail", "Offers waiting", "1", ["clock", "answer before they expire"], "orange"], ["handshake", "Active deals", "2", ["key-round", "1 pickup code ready"], "blue"], ["wallet", "Sold this month", "৳69,600", ["trending-up", "3 deals in total"], "violet"]],
+    left: panel("bell-ring", "Needs your attention", "+ New listing",
+      `<div class="row">${tag("gold", "Offer")}<div><b>Kawran Bazar Agro</b> offers 20 mon of Potato at ৳840/mon<div class="sub">${I("clock")}Reply within 7h 40m</div></div>${B("message-square-reply", "Answer")}</div>
+       <div class="row">${tag("green", "Pickup")}<div><b>Brinjal · 600 kg</b> to Hasan Traders<div class="sub">${I("truck")}Truck arrives 26 Nov, 5:00 am · give the code after loading</div></div>${B("key-round", "Show code", "violet")}</div>`)
+      + panel("activity", "Recent activity", "View all", tl([["gavel", "New highest bid on Tomato", "৳26.50/kg · 2 hours ago", tag("blue", "Bidding")], ["handshake", "Deal confirmed with Hasan Traders", "Brinjal 600 kg · 5 hours ago", tag("green", "Confirmed")], ["star", "Joypurhat Fresh gave you 5 stars", "Potato 1,200 kg · 1 day ago", tag("gold", "Review")]])),
+    right: panel("radio", "Live now", "My sales",
+      listRow("🥬", "Kochur loti · 120 kg", "Own price · 2 offers", "৳40.00/kg") + listRow("🥗", "Lal shak · 150 kg", "Own price", "৳26.00/kg") + listRow("🥔", "Potato · 50 mon", "Own price · 1 offer", "৳880/mon") + listRow("🍅", "Tomato · 1,000 kg", "Bidding · ends in 18h", "৳26.50/kg"))
+      + panel("zap", "Quick actions", "", qa([["circle-plus", "New listing"], ["package", "My sales"], ["key-round", "Pickup codes"], ["user", "Profile"]])),
+  },
+  dealer: {
+    av: "🧔🏽", name: "Hasan Traders", sub: "Dealer · Bogura Sadar, Bogura", initials: "HT", first: "Hasan", title: ["store", "Dealer home"], chip: "Screen D1",
+    line: "Find the best fresh produce straight from farmers.",
+    nav: [["layout-grid", "Home"], ["shopping-cart", "Marketplace"], ["package", "My purchases"], ["user", "Profile & reviews"]],
+    stats: [["store", "In the market", "9", ["map-pin", "4 in or next to your upazila"], "orange"], ["gavel", "Leading bids", "1", ["arrow-down", "1 outbid"], "green"], ["handshake", "Active deals", "3", ["truck", "৳79,200 · 1 with transport offers"], "blue"], ["timer", "Counter-offers", "0", ["hourglass", "none waiting"], "violet"]],
+    left: panel("circle-alert", "Needs your attention", "",
+      `<div class="row">${tag("red", "Outbid")}<div><b>Brinjal · 400 kg</b> · highest ৳32.00/kg, yours ৳31.00/kg<div class="sub">${I("clock")}Ends in 12h 38m</div></div>${B("gavel", "Bid again", "danger")}</div>
+       <div class="row">${tag("blue", "Transport")}<div><b>Tomato · 900 kg</b> · 3 transport offers to compare<div class="sub">${I("truck")}Choose before 6 pm today</div></div>${B("arrow-left-right", "Compare", "blue")}</div>`)
+      + panel("activity", "Recent activity", "View all", tl([["truck", "Transport offer from Mintu Pickup", "2 hours ago", tag("gold", "Pending")], ["handshake", "Deal confirmed with Karim Uddin", "3 hours ago", tag("green", "Confirmed")], ["shopping-cart", "New listing near you: Potato 50 mon", "4 hours ago", tag("blue", "Listed")], ["circle-check", "Brinjal delivered, code accepted", "1 day ago", tag("green", "Completed")]])),
+    right: panel("map-pin", "Nearest listings", "Marketplace",
+      listRow("🥬", "Kochur loti · 120 kg", "Bogura Sadar · your upazila", "৳40.00/kg") + listRow("🥔", "Potato · 50 mon", "Bogura Sadar · your upazila", "৳880/mon") + listRow("🍅", "Tomato · 1,000 kg", "Bogura Sadar · your upazila", "৳26.50/kg") + listRow("🥔", "Potato · 733 kg", "Dhupchanchia · your district", "৳24.19/kg"))
+      + panel("zap", "Quick actions", "", qa([["shopping-cart", "Marketplace"], ["gavel", "My bids"], ["truck", "Transport offers"], ["chart-column", "Purchases"]]))
+      + `<div class="promo">${I("handshake")}<div><b>Buy from more farmers</b><small>Widen your area to see nationwide listings</small></div><button class="go" aria-label="Open">${I("arrow-right")}</button></div>`,
+  },
+  transporter: {
+    av: "🚚", name: "Bogura Logistics", sub: "Transport provider · Bogura Sadar, Bogura", initials: "BL", first: "Rafiq", title: ["truck", "Transport desk"], chip: "Screen T1",
+    line: "Manage your trips and transport offers here.",
+    nav: [["house", "Home"], ["search", "Find deals"], ["route", "My trips"], ["car", "My vehicles"], ["user", "Profile & reviews"]],
+    stats: [["navigation", "On the road now", "1", ["map-pin", "FN-1003 · deliver by 4:34 am"], "blue"], ["circle-check", "Confirmed pickups", "1", ["calendar", "next 26 Nov, 5:00 am"], "green"], ["clock", "Offers waiting", "1", ["handshake", "0 new deals to offer on"], "orange"], ["wallet", "Earned this month", "৳3,100", ["trending-up", "1 trip completed"], "violet"]],
+    left: panel("map-pin", "Next trips", "My trips",
+      `<div class="row">${tag("blue", "On the road")}<div><b>Tomato · 900 kg</b> · Gobindaganj → Bogura<div class="sub">${I("calendar")}Bogura-Ta 14-1177 · deliver by 25 Nov, 4:34 am</div></div>${B("key-round", "Enter delivery code")}</div>
+       <div class="row">${tag("green", "Pickup")}<div><b>Brinjal · 600 kg</b> · Bogura Sadar → Bogura<div class="sub">${I("calendar")}Bogura-Ma 11-2245 · pickup 26 Nov, 5:00 am</div></div>${B("map", "Open", "violet")}</div>
+       <div class="row">${tag("plain", "Waiting")}<div><b>Potato · 1,500 kg</b> · Mithapukur → Bogura<div class="sub">${I("hourglass")}Waiting for the dealer · closes in 16h 33m</div></div>${B("send", "Offer", "soft c-blue")}</div>`),
+    right: panel("lightbulb", "Season tip", "",
+      `<div class="tip">${I("snowflake")}<span><b>Winter · Nov–Feb.</b> Normal vehicles are fine and get a cost-saving tag. Plan extra time for morning fog on highways.</span></div><div class="note">${I("info")}Advice only. It never blocks an offer.</div>`)
+      + panel("car", "Your vehicles", "Manage",
+      `<div class="row"><span class="thumb">🚛</span><div><b>Truck 3 t</b> · Normal<div class="sub"><span class="plate">Bogura-Ta 14-0932</span></div></div>${tag("green", "Free")}</div>
+       <div class="row"><span class="thumb">🚛</span><div><b>Truck 3 t</b> · Normal<div class="sub"><span class="plate">Bogura-Ta 14-1177</span></div></div>${tag("blue", "Booked")}</div>
+       <div class="row"><span class="thumb">🚐</span><div><b>Covered van 2 t</b> · Ventilated<div class="sub"><span class="plate">Bogura-Ma 11-2245</span></div></div>${tag("blue", "Booked")}</div>`)
+      + panel("zap", "Quick actions", "", qa([["search", "Find deals"], ["route", "My trips"], ["key-round", "Codes"], ["car", "Vehicles"]])),
+  },
+  admin: {
+    av: "👩🏽‍💼", name: "Nusrat Jahan", sub: "Super Admin · Bogura Sadar, Bogura", initials: "NJ", first: "Nusrat", hello: "Welcome back,", title: ["shield-check", "Admin office"], chip: "Screen A1",
+    line: "Monitor, manage and grow the FreshNest ecosystem.",
+    nav: [["layout-grid", "Overview"], ["-", "Queues"], ["shield-check", "Verification"], ["triangle-alert", "Delivery failures"], ["folder-open", "Cases"], ["users", "Users"], ["-", "Business model"], ["briefcase", "Business"]],
+    mode: true,
+    stats: [["users", "Waiting verification", "0", ["user-check", "0 accounts · 0 vehicles"], "green"], ["triangle-alert", "Delivery failures", "1", ["siren", "1 escalated"], "orange"], ["folder-open", "Open cases", "0", ["file-text", "0 cancel · 0 reports · 0 reviews"], "violet"], ["piggy-bank", "Saved by emergency sales", "3,779 kg", ["leaf", "this month"], "teal"]],
+    left: panel("chart-column", "Platform at a glance", "Business",
+      `<div class="glance">${[["handshake", "Deals completed", "1,170", "last 12 weeks · 61% through bidding", "green"], ["users", "Active users", "388", "farmers, dealers, transporters", "blue"], ["clock", "Delivered on time", "93.1%", "last 3 months", "orange"], ["ban", "Deals cancelled", "4.1%", "last 30 days", "red"]]
+        .map(([i, l, v, s, c]) => `<div class="g c-${c}"><span class="ic">${I(i)}</span><div><span>${l}</span><b>${v}</b><small>${s}</small></div></div>`).join("")}</div>`)
+      + panel("siren", "Needs action now", "",
+      `<div class="row">${tag("red", "Escalated")}<div><b>1 delivery failure waiting</b> · 1 over 30 minutes<div class="sub">${I("clock")}Produce is losing shelf life while it waits</div></div>${B("arrow-right", "Open", "danger")}</div>
+       <div class="row">${tag("blue", "Verify")}<div><b>2 vehicles</b> waiting for document checks<div class="sub">${I("truck")}Bogura Logistics · Cold Line BD</div></div>${B("shield-check", "Review", "blue")}</div>`)
+      + panel("zap", "Recent activity", "Admin log",
+      `<ol class="ra"><li><span class="t">1 h ago</span><b>Nusrat Jahan</b><span>Verified user · <em>Hasan Traders</em></span></li><li><span class="t">10 h ago</span><b>Tanvir Ahmed</b><span>Approved delivery failure · <em>FN-1031</em></span></li><li><span class="t">22 Nov</span><b>Tanvir Ahmed</b><span>Approved delivery failure · <em>FN-1027</em></span></li><li><span class="t">21 Nov</span><b>Mitu Rahman</b><span>Dismissed report · <em>review #88</em></span></li></ol>`),
+    right: `<div class="panel"><div class="ph"><h3><span class="dot">${I("bell")}</span>Automatic alerts</h3><span class="pill">3 or more in 30 days</span></div>
+       <div class="row">${tag("green", "Dealer")}<div><b>Joypurhat Fresh</b> · Joypurhat Sadar, Joypurhat<div class="sub">3 cancellations in 30 days</div></div><span></span></div>
+       <div class="row">${tag("orange", "Transport")}<div><b>Mintu Pickup</b> · Bogura Sadar<div class="sub">3 late deliveries in 30 days</div></div><span></span></div>
+       <div class="note">${I("info")}Alerts only. Nothing happens to the user until an admin acts.</div></div>`
+      + panel("zap", "Quick actions", "", qa([["shield-check", "Verification", "teal"], ["triangle-alert", "Failures", "orange"], ["folder-open", "Cases", "violet"], ["briefcase", "Business", "blue"]]))
+      + `<div class="scene-card"><div><b>64 districts · 495 upazilas</b><small>FreshNest covers all of Bangladesh</small></div></div>`,
+  },
+};
+
+function render(role) {
+  const r = ROLES[role];
+  document.body.dataset.role = role;
+  hello.textContent = r.hello ?? "Good morning,";
+  sideFoot.className = "side-foot" + (r.mode ? " mode" : "");
+  sideFoot.innerHTML = r.mode ? `<b>${I("settings")}Simple admin mode</b><p>One admin, the main tools and the business model.</p><button>Show all admin tools ${I("arrow-right")}</button>` : FOOT;
+  av.textContent = r.av; meName.textContent = r.name; meSub.textContent = r.sub; initials.textContent = r.initials; first.textContent = r.first; line.textContent = r.line; chip.textContent = r.chip;
+  title.innerHTML = I(r.title[0]) + r.title[1];
+  nav.innerHTML = r.nav.map(([i, t], k) => i === "-" ? `<div class="grp">${t}</div>` : `<a href="#" class="${k ? "" : "on"}">${I(i)}${t}</a>`).join("");
+  stats.innerHTML = r.stats.map(([i, l, v, [si, s], c]) => `<div class="stat c-${c}"><span class="ic">${I(i)}</span><div><span>${l}</span><b>${v}</b><small>${I(si)}${s}</small></div></div>`).join("");
+  left.innerHTML = r.left; right.innerHTML = r.right;
+  document.querySelectorAll(".switch button").forEach((b) => b.classList.toggle("on", b.dataset.r === role));
+  if (window.lucide) lucide.createIcons();
+}
+document.querySelectorAll(".switch button").forEach((b) => b.addEventListener("click", () => render(b.dataset.r)));
+document.querySelector(".side-foot i-bell")?.remove();
+const FOOT = sideFoot.innerHTML;
+const start = new URLSearchParams(location.search).get("role");
+render(ROLES[start] ? start : "farmer");
+</script>
+</body>
+</html>

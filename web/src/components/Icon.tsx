@@ -1,6 +1,7 @@
 // Line icons (24px grid, stroke) used by the menu, the home page and cards.
 const P: Record<string, React.ReactNode> = {
   leaf: <><path d="M12 21v-8" /><path d="M12 13C12 8.5 8.6 5.5 3.5 5.5 3.5 10.5 7 13 12 13zM12 10.5c0-4 3-7 8.5-7 0 4.8-3.3 7-8.5 7z" /></>,
+  calendar: <><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3v4M16 3v4" /></>,
   check: <><circle cx="12" cy="12" r="9" /><path d="m8.2 12.2 2.6 2.6 5-5.4" /></>,
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
   gavel: <path d="m14 5 5 5M11 8l5 5M12.5 6.5 7 12l5 5 5.5-5.5M3 21l6-6" />,
