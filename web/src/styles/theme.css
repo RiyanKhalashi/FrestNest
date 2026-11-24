@@ -95,7 +95,10 @@ main { padding: 26px 28px 64px; }
 .wel h1 .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .wel p { color: rgba(255,255,255,.8); font-size: 15px; }
 .wel .code { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.75); }
-.wel .wel-grass { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 78px; color: #B8F28A; pointer-events: none; }
+.wel .wel-edge { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 78px; color: #B8F28A; pointer-events: none; }
+body.dl .wel .wel-edge { color: #F3D9A4; }  /* dealer: warm sacking */
+body.tp .wel .wel-edge { color: #FFD9B0; }  /* transporter: light peach */
+body.ad .wel .wel-edge { color: #A8E6C4; }  /* admin: mint */
 .wel .row { z-index: 1; }
 /* scene variant: painted landscape fills the card, text sits on the light sky */
 .wel.scene { background: var(--card); color: var(--ink); min-height: 270px; padding-bottom: 150px; box-shadow: 0 24px 50px -34px rgba(20,40,25,.45); }
@@ -205,3 +208,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--f
 .unit-pick button b { font-size: 15px; }
 .unit-pick button small { font-size: 12px; color: var(--muted); }
 .unit-pick button.on { border-color: var(--acc); background: var(--acc-soft); box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 14%, transparent); }
+
+/* phones: the role edge shows a wider slice and the screen chip moves to the top-right corner, clear of the motif */
+@media (max-width: 640px) {
+  .wel .wel-edge { height: 60px; }
+  .wel:not(.scene) { padding-bottom: 72px; }
+  .wel:not(.scene) .row { position: static; }
+  .wel:not(.scene) .code { position: absolute; top: 18px; right: 18px; z-index: 1; }
+}

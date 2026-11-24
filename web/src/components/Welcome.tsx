@@ -1,6 +1,6 @@
 "use client";
 import { useSession } from "./Session";
-import { GrassEdge } from "./GrassEdge";
+import { RoleEdge } from "./RoleEdge";
 
 // Painted scenes are ready but switched off (2026-11-25, the user will decide later). To turn them on:
 // { FARMER: "/art/farmer.webp", DEALER: "/art/dealer.webp", TRANSPORTER: "/art/transporter.webp" }
@@ -24,7 +24,7 @@ export function Welcome({ code, line }: { code: string; line: string }) {
         </div>
         <span className="code">Screen {code}</span>
       </div>
-      {!SCENE[user!.role] && <GrassEdge />}
+      {!SCENE[user!.role] && <RoleEdge role={user!.role} />}
     </div>
   );
 }
