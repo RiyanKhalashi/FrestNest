@@ -6,6 +6,7 @@ import "@/styles/admin.css";
 import "./globals.css";
 import "@/styles/theme.css";
 import "@/styles/landing.css";
+import "@/styles/home.css";
 
 // One family for headings and text (premium design, 2026-11-20); mono for codes and number plates
 const sans = Plus_Jakarta_Sans({ variable: "--f-sans", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
