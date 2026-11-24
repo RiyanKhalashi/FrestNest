@@ -51,7 +51,8 @@ async function main() {
     await prisma.user.deleteMany({ where: { id: { in: old } } });
   }
 
-  const ups = await prisma.upazila.findMany({ include: { district: true } });
+  // only the demo area (names like Shibganj or Pirganj also exist in other districts)
+  const ups = await prisma.upazila.findMany({ where: { district: { name: { in: ["Bogura", "Gaibandha", "Joypurhat", "Rangpur", "Sirajganj", "Dhaka"] } } }, include: { district: true } });
   const products = await prisma.product.findMany({ where: { nameEn: { in: Object.keys(PRODUCTS) } } });
   const P = new Map(products.map((p) => [p.nameEn, p]));
   const hash = await bcrypt.hash("freshnest123", 8);

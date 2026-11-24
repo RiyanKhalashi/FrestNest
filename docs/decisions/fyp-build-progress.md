@@ -29,7 +29,7 @@ The user said "start building" on 2026-11-17. The stack follows `docs/decisions/
 
 Gotcha: `prisma migrate dev` refuses in this non-interactive shell when it shows a data-loss warning; use `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script > prisma/migrations/<ts>_<name>/migration.sql` then `prisma migrate deploy` + `prisma generate`. Cloudinary account still not provided (uploads are local).
 
-Known deviations to mention to the user: districts are only the 5 northern + Dhaka; upazila neighbours are seeded only for Bogura (other districts fall back to same-district upazilas); "nearest" uses upazila/district relations, not GPS.
+**All locations (2026-11-25):** `server/prisma/locations.json` holds all 64 districts and 495 upazilas (+ Tejgaon for the demo dealer) with Bangla names and coordinates (source: nuhil/bangladesh-geocode; a few spellings kept/cleaned, e.g. Dhupchanchia, Chapai Nawabganj). seed.ts upserts them and computes neighbours from coordinates (upazilas: within 22 km, 3–6 nearest; districts: within 75 km, 3–6 nearest); Bogura's own upazilas keep the hand-made list. Demo users, companies and history stay in the 6 demo districts. "Nearest" still uses these relations, not live GPS.
 
 **Testing:** a Playwright smoke script using system Chrome is at scratchpad `pw/flow.mjs` (a temporary location; recreate it if it's gone).
 

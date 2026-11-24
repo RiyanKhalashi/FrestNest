@@ -1,18 +1,29 @@
 // Seed: locations, products, admins and demo users from the agreed scenario.
 // Run: npm run seed -w server   (safe to run again; it upserts)
+import { readFileSync } from "node:fs";
 import bcrypt from "bcryptjs";
 import { prisma } from "../src/db.js";
 import type { Role, AdminPermission, StorageNeed } from "../src/generated/prisma/client.js";
 
-const UPAZILAS: Record<string, string[]> = {
-  Bogura: ["Bogura Sadar", "Shibganj", "Sherpur", "Shajahanpur", "Gabtali", "Kahaloo", "Nandigram", "Dhunat", "Sonatala", "Sariakandi", "Adamdighi", "Dhupchanchia"],
-  Gaibandha: ["Gaibandha Sadar", "Gobindaganj", "Palashbari", "Sadullapur", "Saghata", "Sundarganj", "Phulchhari"],
-  Joypurhat: ["Joypurhat Sadar", "Panchbibi", "Akkelpur", "Kalai", "Khetlal"],
-  Rangpur: ["Rangpur Sadar", "Pirganj", "Mithapukur", "Badarganj", "Gangachara", "Kaunia", "Pirgachha", "Taraganj"],
-  Sirajganj: ["Sirajganj Sadar", "Ullapara", "Shahjadpur", "Belkuchi", "Raiganj", "Tarash", "Kazipur", "Chauhali", "Kamarkhanda"],
-  Dhaka: ["Tejgaon"],
+// All 64 districts and their upazilas with coordinates (see "source" in the file).
+type Loc = { name: string; nameBn: string; division: string; lat: number; lon: number; upazilas: [string, string, number, number][] };
+const LOCATIONS: Loc[] = JSON.parse(readFileSync(new URL("./locations.json", import.meta.url), "utf8")).districts;
+/** The original demo area: hand-made neighbours, demo users, history and companies live here. */
+export const DEMO_DISTRICTS = ["Bogura", "Gaibandha", "Joypurhat", "Rangpur", "Sirajganj", "Dhaka"];
+
+const km = (a: number, b: number, c: number, d: number) => {
+  const r = Math.PI / 180, x = Math.sin(((c - a) * r) / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(((d - b) * r) / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(x));
 };
-const DISTRICT_BN: Record<string, string> = { Bogura: "বগুড়া", Gaibandha: "গাইবান্ধা", Joypurhat: "জয়পুরহাট", Rangpur: "রংপুর", Sirajganj: "সিরাজগঞ্জ", Dhaka: "ঢাকা" };
+/** Approximate neighbours from coordinates: everything within `radius` km, but at least `min` and at most `max` nearest. Symmetric. */
+function nearPairs(pts: { id: number; lat: number; lon: number }[], radius: number, min: number, max: number) {
+  const pairs = new Map<number, Set<number>>(pts.map((p) => [p.id, new Set<number>()]));
+  for (const p of pts) {
+    const near = pts.filter((q) => q.id !== p.id).map((q) => ({ id: q.id, d: km(p.lat, p.lon, q.lat, q.lon) })).sort((x, y) => x.d - y.d);
+    near.filter((q, i) => i < min || (q.d <= radius && i < max)).forEach((q) => { pairs.get(p.id)!.add(q.id); pairs.get(q.id)!.add(p.id); });
+  }
+  return pairs;
+}
 
 const PRODUCTS: [string, string, string, number, StorageNeed, boolean][] = [
   ["Potato", "আলু", "Vegetable", 60, "NORMAL", false],
@@ -43,10 +54,13 @@ const USERS: U[] = [
 export const DEMO_PASSWORD = "freshnest123";
 
 async function main() {
-  for (const [d, ups] of Object.entries(UPAZILAS)) {
-    const district = await prisma.district.upsert({ where: { name: d }, update: {}, create: { name: d, nameBn: DISTRICT_BN[d] } });
-    for (const u of ups) {
-      await prisma.upazila.upsert({ where: { districtId_name: { districtId: district.id, name: u } }, update: {}, create: { name: u, districtId: district.id } });
+  const upPts: { id: number; lat: number; lon: number; district: string }[] = [], dPts: { id: number; lat: number; lon: number }[] = [];
+  for (const d of LOCATIONS) {
+    const district = await prisma.district.upsert({ where: { name: d.name }, update: { nameBn: d.nameBn }, create: { name: d.name, nameBn: d.nameBn } });
+    dPts.push({ id: district.id, lat: d.lat, lon: d.lon });
+    for (const [name, nameBn, lat, lon] of d.upazilas) {
+      const u = await prisma.upazila.upsert({ where: { districtId_name: { districtId: district.id, name } }, update: { nameBn }, create: { name, nameBn, districtId: district.id } });
+      upPts.push({ id: u.id, lat, lon, district: d.name });
     }
   }
   for (const [nameEn, nameBn, category, shelfLifeDays, storage, ventilatedForLongTrips] of PRODUCTS) {
@@ -84,6 +98,13 @@ async function main() {
     await prisma.upazila.update({ where: { id: ia }, data: { neighbours: { connect: { id: ib } } } });
     await prisma.upazila.update({ where: { id: ib }, data: { neighbours: { connect: { id: ia } } } });
   }
+  // every other district/upazila: neighbours from coordinates (Bogura's own upazilas keep the hand-made list above)
+  for (const [id, ns] of nearPairs(dPts, 75, 3, 6)) await prisma.district.update({ where: { id }, data: { neighbours: { connect: [...ns].map((n) => ({ id: n })) } } });
+  const inBogura = new Set(upPts.filter((u) => u.district === "Bogura").map((u) => u.id));
+  for (const [id, ns] of nearPairs(upPts, 22, 3, 6)) {
+    const keep = [...ns].filter((n) => !(inBogura.has(id) && inBogura.has(n)));
+    if (keep.length) await prisma.upazila.update({ where: { id }, data: { neighbours: { connect: keep.map((n) => ({ id: n })) } } });
+  }
 
   const defaults: Record<string, unknown> = {
     minBiddingHoursDistrict: 12, minBiddingHoursNationwide: 24, transportOfferWindowHours: 12,
@@ -103,7 +124,7 @@ async function main() {
     await prisma.vehicle.upsert({ where: { regNo }, update: {}, create: { ownerId: owner.id, type, regNo, capacityKg, facility, status: "APPROVED" } });
   }
   // agri companies (business model: monthly upazila report + sponsored announcements)
-  const ups = async (names: string[]) => (await prisma.upazila.findMany({ where: { name: { in: names } }, select: { id: true } })).map((u) => u.id);
+  const ups = async (names: string[]) => (await prisma.upazila.findMany({ where: { name: { in: names }, district: { name: { in: DEMO_DISTRICTS } } }, select: { id: true } })).map((u) => u.id);
   const COS: [string, string, string[], number | null][] = [
     ["GreenSeed Bangladesh", "Seed", ["Bogura Sadar", "Shajahanpur", "Gaibandha Sadar", "Joypurhat Sadar"], null],
     ["Krishi Sar Ltd.", "Fertiliser", ["Bogura Sadar", "Shibganj", "Sherpur", "Shajahanpur", "Gabtali", "Kahaloo", "Nandigram", "Dhunat", "Sonatala", "Sariakandi", "Adamdighi", "Dhupchanchia"], null],
