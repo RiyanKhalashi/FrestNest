@@ -23,3 +23,5 @@ Agreed with the user on 2026-11-20, building the same day. Replaces the earlier 
   farmer mint-cream `#F8FBF4` on `#EAF2E7`, dealer blue-white `#F6F9FC` on `#E7EEF5`,
   transporter warm cream `#FFFAF3` on `#F5EBDF`, admin grey-green `#F7FAF8` on `#E8EEEA`.
 - Landing page background `#F6F9F1`, feature cards warm sand, log-in card `#FCFDF9`. Form inputs stay white.
+
+**Home page account menu (2026-11-25):** a signed-in visitor sees their name + role chip in the top-right with a menu: Open dashboard, Switch account (log out → /login), Log out (stays on home). The "Bangladesh's farm-gate marketplace" pill above the hero heading was removed.

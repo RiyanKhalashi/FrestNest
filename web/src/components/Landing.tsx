@@ -1,8 +1,8 @@
 "use client";
 // Public home page (premium design, docs/decisions/fyp-premium-design.md): every FreshNest feature + the business model.
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { api, HOME, type User } from "@/lib/api";
+import { useEffect, useRef, useState } from "react";
+import { api, HOME, ROLE_LABEL, type User } from "@/lib/api";
 import { Icon, Logo } from "./Icon";
 import { Furrow } from "./AuthFrame";
 
@@ -23,15 +23,49 @@ const ROLES = {
 } as const;
 type RoleKey = keyof typeof ROLES;
 
+// Signed-in visitor: name + role chip with Open dashboard / Switch account / Log out.
+function AccountMenu({ me, onSignedOut }: { me: User; onSignedOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const click = (e: MouseEvent) => { if (!box.current?.contains(e.target as Node)) setOpen(false); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", click); document.addEventListener("keydown", key);
+    return () => { document.removeEventListener("mousedown", click); document.removeEventListener("keydown", key); };
+  }, [open]);
+  async function signOut(to: "/" | "/login") {
+    await api("/auth/logout", { method: "POST" }).catch(() => {});
+    if (to === "/login") window.location.assign("/login"); else { setOpen(false); onSignedOut(); }
+  }
+  return (
+    <div className="lp-acct" ref={box}>
+      <button className="who" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span className="av">{me.name.trim().charAt(0).toUpperCase()}</span>
+        <span className="nm"><b>{me.name}</b><small>{ROLE_LABEL[me.role]}</small></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div className="menu" role="menu">
+          <Link role="menuitem" href={HOME[me.role]}><Icon name="home" size={17} />Open dashboard</Link>
+          <button role="menuitem" onClick={() => signOut("/login")}><Icon name="swap" size={17} />Switch account</button>
+          <button role="menuitem" className="out" onClick={() => signOut("/")}><Icon name="logout" size={17} />Log out</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Landing() {
   const [solid, setSolid] = useState(false);
   const [role, setRole] = useState<RoleKey>("farmer");
-  const [dash, setDash] = useState<string | null>(null);
+  const [me, setMe] = useState<User | null>(null);
+  const dash = me ? HOME[me.role] : null;
 
   useEffect(() => {
     const on = () => setSolid(window.scrollY > 40);
     on(); window.addEventListener("scroll", on, { passive: true });
-    api<{ user: User }>("/auth/me").then((r) => setDash(HOME[r.user.role])).catch(() => {});
+    api<{ user: User }>("/auth/me").then((r) => setMe(r.user)).catch(() => {});
     return () => window.removeEventListener("scroll", on);
   }, []);
   const r = ROLES[role];
@@ -42,14 +76,13 @@ export function Landing() {
         <Logo />
         <nav className="links" aria-label="Sections"><a href="#features">Features</a><a href="#how">How it works</a><a href="#roles">Roles</a><a href="#companies">For companies</a><a href="#about">About</a></nav>
         <span className="sp" />
-        {dash ? <Link className="lp-btn green sm" href={dash}>Open dashboard <Icon name="arrow" size={16} /></Link>
+        {me ? <AccountMenu me={me} onSignedOut={() => setMe(null)} />
           : <><Link className="login" href="/login">Log in</Link><Link className="lp-btn green sm" href="/register">Join free</Link></>}
       </div></header>
 
       <section className="lp-hero">
         <div className="lp-in">
           <div>
-            <span className="lp-pill"><i />Bangladesh&apos;s farm-gate marketplace</span>
             <h1>From the field to the dealer, <span className="g">before it spoils.</span></h1>
             <p className="sub">Farmers sell straight from the field. Dealers bid or make offers, verified transporters carry the load, and if a truck breaks down on the way, the harvest is sold nearby instead of going to waste.</p>
             <div className="ctas"><Link className="lp-btn white" href={dash ?? "/register"}>{dash ? "Open your dashboard" : "Start selling, free"} <Icon name="arrow" /></Link>{!dash && <Link className="lp-btn outline" href="/login">I already have an account</Link>}</div>
