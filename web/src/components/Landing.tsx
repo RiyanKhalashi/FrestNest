@@ -246,7 +246,7 @@ export function Landing() {
 
       <section className="lp-sec" id="about"><div className="lp-in lp-about">
         <div><span className="lp-eyebrow">About</span>
-          <blockquote>A farmer often sells at the farm gate to whoever comes first, and one breakdown on the highway can cost a whole harvest. FreshNest brings dealers and trucks to the field, with proof at every step.</blockquote>
+          <blockquote>A farmer often sells to whoever reaches the field first, and one breakdown on the highway can cost a whole harvest. FreshNest brings dealers and trucks to the field, with proof at every step.</blockquote>
         </div>
         <div className="lp-vals">
           <div><span className="ic"><Icon name="leaf" /></span><span><b>Farmer first</b><span>Free to sell, no verification needed to start.</span></span></div>
@@ -263,7 +263,7 @@ export function Landing() {
 
       <footer className="lp-foot"><div className="lp-in">
         <div className="cols">
-          <div style={{ display: "grid", gap: 14, alignContent: "start" }}><Logo dark /><p style={{ maxWidth: "30ch" }}>The farm-gate marketplace for Bangladesh: fair prices, verified transport, less waste.</p></div>
+          <div style={{ display: "grid", gap: 14, alignContent: "start" }}><Logo dark /><p style={{ maxWidth: "30ch" }}>Fresh produce from the field to the dealer: fair prices, verified transport, less waste.</p></div>
           <div><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#trust">Trust</a></li><li><a href="#about">About</a></li></ul></div>
           <div><h4>For</h4><ul><li><Link href="/register">Farmers</Link></li><li><Link href="/register">Dealers</Link></li><li><Link href="/register">Transporters</Link></li><li><a href="#companies">Agri companies</a></li></ul></div>
           <div><h4>Account</h4><ul><li><Link href="/login">Log in</Link></li><li><Link href="/register">Join free</Link></li></ul></div>

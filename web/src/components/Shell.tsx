@@ -85,7 +85,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
           <button className="menu-btn" aria-label="Menu" aria-expanded={navOpen} aria-controls="side-nav" onClick={() => setNavOpen((o) => !o)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
-          <span className="proto-note">{BRAND_SUB[role]}</span>
+          {BRAND_SUB[role] && <span className="proto-note">{BRAND_SUB[role]}</span>}
           <div className="sp" />
           <Bell initialUnread={unread} />
           <button className="btn ghost sm" onClick={logout}><Icon name="logout" size={15} />Sign out</button>

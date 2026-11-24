@@ -13,7 +13,7 @@ const mono = IBM_Plex_Mono({ variable: "--f-mono", subsets: ["latin"], weight: [
 
 export const metadata: Metadata = {
   title: "FreshNest",
-  description: "Farm-gate marketplace connecting farmers, dealers and transport providers in Bangladesh.",
+  description: "Agricultural marketplace connecting farmers, dealers and transport providers in Bangladesh.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

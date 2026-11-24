@@ -37,5 +37,5 @@ export const NAV: Record<Role, NavItem[]> = {
   ],
 };
 
-export const BRAND_SUB: Record<Role, string> = { FARMER: "Farm-gate market", DEALER: "Farm-gate market", TRANSPORTER: "Transport desk", ADMIN: "Admin office" };
+export const BRAND_SUB: Record<Role, string> = { FARMER: "", DEALER: "", TRANSPORTER: "Transport desk", ADMIN: "Admin office" };
 export const BODY_CLASS: Record<Role, string> = { FARMER: "fm", DEALER: "dl", TRANSPORTER: "tp", ADMIN: "ad" };
