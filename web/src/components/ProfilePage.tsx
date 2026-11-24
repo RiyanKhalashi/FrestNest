@@ -6,6 +6,7 @@ import { DocsPanel, ReportReview } from "./Reporting";
 import { api, ApiError, ROLE_LABEL, type User } from "@/lib/api";
 import { useSession } from "./Session";
 import { PlacePicker } from "./PlacePicker";
+import { AvatarEditor } from "./Avatar";
 
 type Standing = {
   status: string; suspendedUntil: string | null; reason: string | null; warnings90: number;
@@ -81,9 +82,9 @@ export function ProfilePage({ code }: { code: string }) {
           <div className="panel">
             <h3>Your details</h3>
             <div className="pb">
-              <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
-                <div className="avatar" style={{ width: 64, height: 64, fontSize: 28 }}>{u.name[0]}</div>
-                <p className="small muted">{ROLE_LABEL[u.role]} · member since {new Date(u.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}{u.role === "FARMER" ? " · farmers do not need verification" : ""}</p>
+              <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
+                <AvatarEditor user={u} onSaved={setUser} />
+                <p className="small muted" style={{ marginLeft: "auto" }}>{ROLE_LABEL[u.role]} · member since {new Date(u.createdAt).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</p>
               </div>
               <div className="row">
                 <div className="field"><label htmlFor="pn">Full name</label><input id="pn" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></div>

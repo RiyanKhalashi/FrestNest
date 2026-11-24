@@ -87,6 +87,7 @@ model User {
 
   // dealer: shop / business name · transporter: company name
   businessName String?
+  avatarUrl    String?  // profile picture (public, /uploads/avatars)
   // farmer: "Agri partner offers" switch (off by default)
   partnerOffers Boolean @default(false)
 

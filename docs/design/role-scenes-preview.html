@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Role Scenes Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #10231A; --muted: #5D6B63; --line: #DCE3D8; --bg: #F3F5EF; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.55 "Plus Jakarta Sans", system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 16px 80px; }
+  h1 { font-size: 28px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 28px; max-width: 70ch; }
+  section { margin-bottom: 48px; }
+  h2 { font-size: 19px; margin: 0 0 14px; display: flex; gap: 10px; align-items: center; }
+  h2 i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .row { grid-template-columns: 1fr; } .phone { margin: 0 auto; } }
+
+  /* the header as it would sit at the top of a dashboard */
+  .dash { border-radius: 22px; overflow: hidden; background: var(--page); border: 1px solid var(--line); }
+  .hero { position: relative; height: 280px; }
+  .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom;
+    -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent); }
+  .hero .top { position: relative; display: flex; align-items: center; gap: 14px; padding: 22px 26px; }
+  .hero .top .hi small { display: block; color: var(--muted); font-weight: 600; font-size: 13px; }
+  .hero .top .hi b { font-size: 22px; letter-spacing: -.02em; }
+  .logo { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(150deg, var(--acc), #0B2E1F); display: grid; place-items: center; color: #fff; }
+  .sp { flex: 1; }
+  .bell { width: 42px; height: 42px; border-radius: 14px; background: rgba(255,255,255,.75); display: grid; place-items: center; position: relative; }
+  .bell em { position: absolute; top: -5px; right: -5px; background: #D93A2B; color: #fff; font: 700 11px/18px sans-serif; min-width: 18px; padding: 0 4px; border-radius: 9px; font-style: normal; text-align: center; }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0 22px 22px; margin-top: -34px; position: relative; }
+  .card { background: #fff; border-radius: 16px; padding: 14px 16px; box-shadow: 0 6px 20px rgba(16,35,26,.07); }
+  .card small { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+  .card b { display: block; font-size: 20px; }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+
+  .phone { width: 300px; border-radius: 38px; border: 10px solid #111; background: var(--page); overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.15); }
+  .phone .hero { height: 250px; }
+  .phone .hero .top { padding: 34px 16px 0; }
+  .phone .hero .top .hi b { font-size: 17px; }
+  .phone .cards { grid-template-columns: 1fr; padding: 0 14px 18px; margin-top: -28px; }
+  .note { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+  .fm { --page: #EAF2E7; --acc: #157347; } .dl { --page: #E7EEF5; --acc: #2B5C8C; } .tp { --page: #F5EBDF; --acc: #BF5B0E; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Role scenes: preview</h1>
+  <p class="lead">Watercolour-style Bangladeshi scenes for the top of each dashboard. The pictures are WebP images (110–160 KB each, 2400×840), rendered from SVG sources in <code>web/public/art/</code>. The bottom edge fades into each role's page tint, and on phones the picture crops to its centre.</p>
+
+  <section class="fm">
+    <h2><i style="background:#157347"></i>Farmer: village home, paddy fields, river</h2>
+    <div class="row">
+      <div class="dash"><div class="hero"><img src="../../web/public/art/farmer.webp" alt=""><div class="top"><span class="logo">🌱</span><span class="hi"><small>Good morning</small><b>Karim Uddin</b></span><span class="sp"></span><span class="bell">🔔<em>3</em></span></div></div>
+        <div class="cards"><div class="card"><small>Open listings</small><b>4</b></div><div class="card"><small>Bids today</small><b>7</b></div><div class="card"><small>Earned this month</small><b>৳ 48,200</b></div></div></div>
+      <div class="phone"><div class="hero"><img src="../../web/public/art/farmer.webp" alt=""><div class="top"><span class="hi"><small>Good morning</small><b>Karim Uddin</b></span><span class="sp"></span><span class="bell">🔔<em>3</em></span></div></div>
+        <div class="cards"><div class="card"><small>Open listings</small><b>4</b></div></div></div>
+    </div>
+  </section>
+
+  <section class="dl">
+    <h2><i style="background:#2B5C8C"></i>Dealer: haat / arot with stalls, sacks and vegetables</h2>
+    <div class="row">
+      <div class="dash"><div class="hero"><img src="../../web/public/art/dealer.webp" alt=""><div class="top"><span class="logo">🛒</span><span class="hi"><small>Good morning</small><b>Hasan Traders</b></span><span class="sp"></span><span class="bell">🔔<em>5</em></span></div></div>
+        <div class="cards"><div class="card"><small>Lots near you</small><b>12</b></div><div class="card"><small>Leading bids</small><b>3</b></div><div class="card"><small>Bought this month</small><b>6.4 t</b></div></div></div>
+      <div class="phone"><div class="hero"><img src="../../web/public/art/dealer.webp" alt=""><div class="top"><span class="hi"><small>Good morning</small><b>Hasan Traders</b></span><span class="sp"></span><span class="bell">🔔<em>5</em></span></div></div>
+        <div class="cards"><div class="card"><small>Lots near you</small><b>12</b></div></div></div>
+    </div>
+  </section>
+
+  <section class="tp">
+    <h2><i style="background:#BF5B0E"></i>Transporter: decorated truck, highway, river bridge</h2>
+    <div class="row">
+      <div class="dash"><div class="hero"><img src="../../web/public/art/transporter.webp" alt=""><div class="top"><span class="logo">🚚</span><span class="hi"><small>Good morning</small><b>Bogura Logistics</b></span><span class="sp"></span><span class="bell">🔔<em>2</em></span></div></div>
+        <div class="cards"><div class="card"><small>Trip requests</small><b>5</b></div><div class="card"><small>Trips today</small><b>2</b></div><div class="card"><small>Earned this month</small><b>৳ 31,600</b></div></div></div>
+      <div class="phone"><div class="hero"><img src="../../web/public/art/transporter.webp" alt=""><div class="top"><span class="hi"><small>Good morning</small><b>Bogura Logistics</b></span><span class="sp"></span><span class="bell">🔔<em>2</em></span></div></div>
+        <div class="cards"><div class="card"><small>Trip requests</small><b>5</b></div></div></div>
+    </div>
+  </section>
+  <p class="note">Numbers are placeholders. Nothing is wired into the app yet.</p>
+</div>
+</body>
+</html>

@@ -117,3 +117,18 @@ profileRouter.post("/docs", idDoc, async (req, res) => {
   }
   res.status(201).json({ ok: true, complete });
 });
+
+// ---------------------------------------------------------------- profile picture
+import { avatarPhoto } from "../uploads.js";
+const withPlace = { district: { select: { id: true, name: true } }, upazila: { select: { id: true, name: true } } } as const;
+
+profileRouter.post("/avatar", avatarPhoto, async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "Choose a photo (JPG, PNG or WebP, up to 5 MB)." });
+  const user = await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl: await keep(req.file, "avatars") }, include: withPlace });
+  res.json({ user: publicUser(user) });
+});
+
+profileRouter.delete("/avatar", async (req, res) => {
+  const user = await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl: null }, include: withPlace });
+  res.json({ user: publicUser(user) });
+});

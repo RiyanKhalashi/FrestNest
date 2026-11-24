@@ -25,3 +25,5 @@ Agreed with the user on 2026-11-20, building the same day. Replaces the earlier 
 - Landing page background `#F6F9F1`, feature cards warm sand, log-in card `#FCFDF9`. Form inputs stay white.
 
 **Home page account menu (2026-11-25):** a signed-in visitor sees their name + role chip in the top-right with a menu: Open dashboard, Switch account (log out → /login), Log out (stays on home). The "Bangladesh's farm-gate marketplace" pill above the hero heading was removed.
+
+**Role scenes + profile pictures (2026-11-25):** farmer/dealer/transporter Home welcome cards show a painted Bangladeshi scene (village home + paddy + river / haat stalls + vegetables + rickshaw van / decorated truck + highway + river bridge) instead of the dark gradient; admin keeps the dark card. Sources: `docs/design/role-scenes-gen.py` (SVG) rendered at 2400×840 to `web/public/art/*.webp` (110–165 KB). Every user can upload a profile picture on the Profile page (User.avatarUrl, POST/DELETE /api/profile/avatar, public /uploads/avatars, shown in the sidebar card). The "farmers do not need verification" line was removed from the profile page and the home page.

@@ -42,6 +42,14 @@ h1, h2, h3, h4 { letter-spacing: -.02em; }
 .me .av { width: 38px; height: 38px; border-radius: 12px; background: var(--acc); color: #fff; display: grid; place-items: center; font: 800 15px var(--sans); flex: none; }
 .me b { font-size: 14px; display: block; line-height: 1.25; }
 .me small { font-size: 12px; color: var(--muted); display: block; line-height: 1.35; }
+.me .av.has-img { padding: 0; background: var(--card); }
+/* profile picture editor */
+.av-edit { display: flex; gap: 16px; align-items: center; }
+.av-pic { position: relative; border: 0; padding: 0; background: none; cursor: pointer; border-radius: 50%; }
+.av-big { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: var(--acc); color: #fff; font-weight: 800; box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--acc-soft); }
+.av-pic .cam { position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; border-radius: 50%; background: var(--acc); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 3px var(--card); }
+.av-pic:hover .av-big { filter: brightness(.95); }
+.av-act { display: grid; gap: 6px; }
 .side .nav, .tp .side .nav { padding: 0; gap: 3px; }
 .side .nav a, .tp .side .nav a, .ad .side .nav a { display: flex; justify-content: flex-start; gap: 11px; align-items: center; padding: 10px 12px; border-radius: 12px; color: var(--body); font-weight: 600; font-size: 14px; box-shadow: none; }
 .side .nav a svg { color: var(--muted); }
@@ -86,6 +94,17 @@ main { padding: 26px 28px 64px; }
 .wel h1 .g { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .wel p { color: rgba(255,255,255,.8); font-size: 15px; }
 .wel .code { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.75); }
+/* scene variant: painted landscape fills the card, text sits on the light sky */
+.wel.scene { background: var(--card); color: var(--ink); min-height: 270px; padding-bottom: 150px; box-shadow: 0 24px 50px -34px rgba(20,40,25,.45); }
+.wel.scene::before { display: none; }
+.wel.scene .wel-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+.wel.scene::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, rgba(255,255,255,.7) 0%, rgba(255,255,255,.35) 38%, transparent 60%); pointer-events: none; }
+.wel.scene > :not(.wel-art) { z-index: 1; }
+.wel.scene .row { align-items: flex-start; }
+.wel.scene small { color: var(--muted); }
+.wel.scene h1 .g { background: none; color: var(--acc); }
+.wel.scene p { color: var(--body, #33443a); font-weight: 600; }
+.wel.scene .code { background: rgba(255,255,255,.7); border-color: rgba(0,0,0,.08); color: var(--muted); }
 
 /* ---------- KPI strip (.stats) ---------- */
 .stats, .tp .stats, .ad .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; border: 0; border-top: 0; background: none; border-radius: 0; margin-bottom: 20px; }
@@ -166,6 +185,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--f
   .top { padding: 0 16px; }
   .wel { padding: 22px 20px; border-radius: 20px; }
   .wel h1 { font-size: 26px; }
+  .wel.scene { min-height: 230px; padding-bottom: 120px; }
   .head h1 { font-size: 24px; }
   .stats b { font-size: 22px; overflow-wrap: anywhere; }
   .stats div { padding: 14px; }

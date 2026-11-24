@@ -58,6 +58,17 @@ export const idDoc = multer({
 }).single("file");
 export const idUrl = (filename: string) => "/api/files/ids/" + filename;
 
+// Profile pictures (public, like listing photos; the browser shrinks them first)
+fs.mkdirSync(path.join(UPLOAD_DIR, "avatars"), { recursive: true });
+export const avatarPhoto = multer({
+  storage: multer.diskStorage({
+    destination: path.join(UPLOAD_DIR, "avatars"),
+    filename: (_req, file, cb) => cb(null, crypto.randomBytes(12).toString("hex") + EXT[file.mimetype]),
+  }),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype in EXT),
+}).single("photo");
+
 // ---------------------------------------------------------------- storage: local disk or Cloudinary
 // Development: files stay in server/uploads. Production: set CLOUDINARY_URL and files go to Cloudinary
 // (the server's own disk is wiped on every deploy). Private files keep the same /api/files/... address;
@@ -65,12 +76,12 @@ export const idUrl = (filename: string) => "/api/files/ids/" + filename;
 import { v2 as cloudinary } from "cloudinary";
 import type { Response } from "express";
 export const useCloud = !!process.env.CLOUDINARY_URL; // the SDK reads CLOUDINARY_URL itself
-type Kind = "listings" | "docs" | "ids" | "failures";
+type Kind = "listings" | "avatars" | "docs" | "ids" | "failures";
 
 /** Stores an uploaded file and returns the address saved in the database. */
 export async function keep(file: Express.Multer.File, kind: Kind): Promise<string> {
-  const priv = kind !== "listings";
-  const local = priv ? `/api/files/${kind}/${file.filename}` : `/uploads/listings/${file.filename}`;
+  const priv = kind !== "listings" && kind !== "avatars";
+  const local = priv ? `/api/files/${kind}/${file.filename}` : `/uploads/${kind}/${file.filename}`;
   if (!useCloud) return local;
   const r = await cloudinary.uploader.upload(file.path, { folder: "freshnest/" + kind, public_id: file.filename.replace(/\.\w+$/, ""), type: priv ? "authenticated" : "upload", resource_type: "image" });
   fs.rm(file.path, () => {});
@@ -78,7 +89,7 @@ export async function keep(file: Express.Multer.File, kind: Kind): Promise<strin
 }
 
 /** Sends a private file (permission already checked by the caller). */
-export function sendPrivate(res: Response, kind: Exclude<Kind, "listings">, name: string) {
+export function sendPrivate(res: Response, kind: Exclude<Kind, "listings" | "avatars">, name: string) {
   if (!useCloud) return res.sendFile(path.join(UPLOAD_DIR, kind, name));
   const [base, ext] = name.split(".");
   res.redirect(cloudinary.utils.private_download_url(`freshnest/${kind}/${base}`, ext, { type: "authenticated", expires_at: Math.floor(Date.now() / 1000) + 300 }));

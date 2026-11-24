@@ -33,7 +33,8 @@ const WEB_ORIGINS = (process.env.WEB_ORIGIN ?? "").split(",").map((o) => o.trim(
 app.use(cors({ origin: WEB_ORIGINS, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
-app.use("/uploads/listings", express.static(path.join(UPLOAD_DIR, "listings"), { maxAge: "7d", fallthrough: false })); // public listing photos only
+app.use("/uploads/listings", express.static(path.join(UPLOAD_DIR, "listings"), { maxAge: "7d", fallthrough: false })); // public listing photos
+app.use("/uploads/avatars", express.static(path.join(UPLOAD_DIR, "avatars"), { maxAge: "7d", fallthrough: false })); // public profile pictures
 app.use(loadUser);
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));

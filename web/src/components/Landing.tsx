@@ -249,7 +249,7 @@ export function Landing() {
           <blockquote>A farmer often sells to whoever reaches the field first, and one breakdown on the highway can cost a whole harvest. FreshNest brings dealers and trucks to the field, with proof at every step.</blockquote>
         </div>
         <div className="lp-vals">
-          <div><span className="ic"><Icon name="leaf" /></span><span><b>Farmer first</b><span>Free to sell, no verification needed to start.</span></span></div>
+          <div><span className="ic"><Icon name="leaf" /></span><span><b>Farmer first</b><span>Free to sell, start in a minute.</span></span></div>
           <div><span className="ic"><Icon name="shield" /></span><span><b>Verified partners</b><span>Dealers, transporters and vehicles are checked by an admin.</span></span></div>
           <div><span className="ic"><Icon name="life" /></span><span><b>Less waste</b><span>Stuck produce is sold nearby instead of rotting.</span></span></div>
         </div>

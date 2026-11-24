@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, HOME, ROLE_LABEL, type Role, type User } from "@/lib/api";
 import { NAV, BRAND_SUB, BODY_CLASS } from "@/lib/nav";
+import { Avatar } from "./Avatar";
 import { SessionProvider, useSession } from "./Session";
 import { Icon, Logo } from "./Icon";
 import { Bell } from "./Bell";
@@ -61,7 +62,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
       <div className="scrim" onClick={() => setNavOpen(false)} />
       <aside className="side" id="side-nav">
         <Logo href={HOME[role]} />
-        <div className="me"><span className="av">{(user.businessName ?? user.name)[0]}</span><span><b>{user.businessName ?? user.name}</b><small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}{place ? " · " + place : ""}</small></span></div>
+        <div className="me"><Avatar user={user} label={user.businessName ?? user.name} /><span><b>{user.businessName ?? user.name}</b><small>{role === "ADMIN" ? (user.isSuperAdmin ? "Super Admin" : "Admin") : ROLE_LABEL[role]}{place ? " · " + place : ""}</small></span></div>
         <nav className="nav">
           {items.map((i, idx) => {
             const head = i.group && i.group !== items[idx - 1]?.group ? <div className="grp">{i.group}</div> : null;

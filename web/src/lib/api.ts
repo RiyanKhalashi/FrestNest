@@ -10,6 +10,7 @@ export interface User {
   name: string;
   status: Status;
   businessName: string | null;
+  avatarUrl: string | null;
   village: string | null;
   partnerOffers: boolean;
   isSuperAdmin: boolean;
