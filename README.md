@@ -10,7 +10,7 @@ Farm-gate marketplace for Bangladesh: farmers, dealers, transport providers and 
 | API | https://freshnest-api-lls6.onrender.com |
 | Android app (APK) | https://github.com/RiyanKhalashi/FrestNest/releases/latest/download/FreshNest.apk |
 
-Every push to `main` redeploys the website (Vercel) and, once the Render GitHub app is installed, the API (Render). A change in `mobile/` also builds a new APK (GitHub Actions).
+Every push to `main` redeploys the website (Vercel) and the API (Render, when `backend/` changes). A change in `mobile/` also builds a new APK (GitHub Actions).
 
 ## Project structure
 
