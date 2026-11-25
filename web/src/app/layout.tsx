@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import WakeNotice from "@/components/WakeNotice";
 import { Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 import "@/styles/base.css";
 import "@/styles/transporter.css";
@@ -15,12 +16,15 @@ const mono = IBM_Plex_Mono({ variable: "--f-mono", subsets: ["latin"], weight: [
 export const metadata: Metadata = {
   title: "FreshNest",
   description: "Agricultural marketplace connecting farmers, dealers and transport providers in Bangladesh.",
+  icons: { icon: "/icons/icon-192.png", apple: "/icons/apple-touch-icon.png" },
 };
+
+export const viewport: Viewport = { themeColor: "#0B3B24" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>{children}<WakeNotice /></body>
     </html>
   );
 }

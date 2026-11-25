@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FreshNest – no connection</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: linear-gradient(160deg, #1C8A55, #0B3B24 60%); color: #fff; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; text-align: center; }
+  main { padding: 24px; max-width: 340px; }
+  .mk { width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 20px; display: grid; place-items: center; background: rgba(255,255,255,.08); }
+  h1 { font-size: 21px; margin: 0 0 8px; }
+  p { margin: 0 0 4px; color: rgba(255,255,255,.78); }
+  .bn { font-size: 14px; color: rgba(255,255,255,.62); }
+  button { margin-top: 22px; padding: 13px 28px; border: 0; border-radius: 12px; background: #D7EF7F; color: #0B3B24; font: 700 15px inherit; font-family: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <div class="mk"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#D7EF7F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 8.5 8.6 5.5 3.5 5.5 3.5 10.5 7 13 12 13zM12 10.5c0-4 3-7 8.5-7 0 4.8-3.3 7-8.5 7z"/></svg></div>
+  <h1>No internet connection</h1>
+  <p>FreshNest needs the internet. Check your mobile data or Wi-Fi and try again.</p>
+  <p class="bn">ইন্টারনেট সংযোগ নেই। আবার চেষ্টা করুন।</p>
+  <button onclick="location.replace('https://freshnest-bd.vercel.app')">Try again</button>
+</main>
+</body>
+</html>

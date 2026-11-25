@@ -227,3 +227,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--f
 /* phones: the role edge shows a wider slice and the screen chip moves to the top-right corner, clear of the motif */
 @media (max-width: 640px) {
 }
+
+/* Notice while the sleeping online server wakes up (WakeNotice.tsx) */
+.wake-notice { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 1000; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 11px 16px; border-radius: 12px; background: #0B3B24; color: #fff; font: 600 13.5px var(--sans); box-shadow: 0 12px 30px -12px rgba(0,0,0,.45); }
+.wake-dot { width: 9px; height: 9px; border-radius: 50%; background: #D7EF7F; flex: none; animation: wake-pulse 1.1s ease-in-out infinite; }
+@keyframes wake-pulse { 50% { opacity: .3; } }

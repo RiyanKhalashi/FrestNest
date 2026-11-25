@@ -1,0 +1,20 @@
+{
+  "name": "freshnest-mobile",
+  "private": true,
+  "description": "FreshNest Android app: a Capacitor shell that opens the live website, so website changes reach the app without a new APK.",
+  "scripts": {
+    "sync": "cap sync android",
+    "icons": "capacitor-assets generate --android --iconBackgroundColor '#0B3B24' --splashBackgroundColor '#0B3B24'"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/splash-screen": "8.0.2",
+    "@capacitor/status-bar": "8.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "4.0.0",
+    "@capacitor/cli": "8.6.0"
+  }
+}
