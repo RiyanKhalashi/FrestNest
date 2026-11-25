@@ -2,19 +2,19 @@
   "name": "freshnest",
   "private": true,
   "workspaces": [
-    "server",
-    "web"
+    "backend",
+    "frontend"
   ],
   "scripts": {
     "db:start": "./scripts/db.sh start",
     "db:stop": "./scripts/db.sh stop",
-    "dev:server": "npm run dev -w server",
-    "dev:web": "npm run dev -w web",
-    "dev": "npm run db:start; (npm run dev -w server & npm run dev -w web & wait)",
-    "seed": "npm run seed -w server",
-    "typecheck": "npm run typecheck -w server && npx -w web tsc --noEmit",
-    "demo": "npm run demo -w server",
-    "test": "npm run test -w server"
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "dev": "npm run db:start; (npm run dev -w backend & npm run dev -w frontend & wait)",
+    "seed": "npm run seed -w backend",
+    "typecheck": "npm run typecheck -w backend && npx -w frontend tsc --noEmit",
+    "demo": "npm run demo -w backend",
+    "test": "npm run test -w backend"
   },
   "allowScripts": {
     "@prisma/engines@7.10.1": true,

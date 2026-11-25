@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     region: singapore          # closest Render region to Bangladesh
-    rootDir: server
+    rootDir: backend
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm start    # applies database migrations, then starts the server
     healthCheckPath: /api/health

@@ -26,7 +26,7 @@ Agreed on 2026-11-26. Built the same day (M1–M3 code); first signed APK releas
 See [[fyp-build-progress]] and [[fyp-responsive]].
 
 **Build notes (2026-11-26)**
-- M1 (live on Vercel): `web/src/app/manifest.ts`, icons in `web/public/icons/`, theme colour, and `WakeNotice.tsx`. Any API call slower than 4 s shows "Starting the server…" (`slowWatch` in `lib/api.ts`).
+- M1 (live on Vercel): `frontend/src/app/manifest.ts`, icons in `frontend/public/icons/`, theme colour, and `WakeNotice.tsx`. Any API call slower than 4 s shows "Starting the server…" (`slowWatch` in `lib/api.ts`).
 - M2: `mobile/` is a standalone npm project, outside the root workspaces. It uses Capacitor 8.6.0 and contains `capacitor.config.json` (server.url = live site, errorPath = `offline.html`), `www/offline.html` (English and Bangla retry screen), and the generated `android/` folder.
   - Icons come from `mobile/assets/` via `npm run icons`.
   - The manifest adds the CAMERA permission.

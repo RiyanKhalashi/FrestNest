@@ -2,15 +2,49 @@
 
 Farm-gate marketplace for Bangladesh: farmers, dealers, transport providers and admins. University final year project.
 
-## Folders
+## Live
 
-| Folder | What it is |
+| | Address |
 |---|---|
-| `web/` | Website (Next.js + TypeScript). Styles come from the agreed prototype (`web/src/styles`). |
-| `server/` | API (Express + TypeScript + Prisma). Database schema: `server/prisma/schema.prisma`. |
-| `prototype/` | The clickable HTML prototype everything is built from. |
-| `docs/` | Agreed decisions and demo scenarios. |
-| `scripts/db.sh` | Starts and stops the local PostgreSQL database. |
+| Website | https://freshnest-bd.vercel.app |
+| API | https://freshnest-api-lls6.onrender.com |
+| Android app (APK) | https://github.com/RiyanKhalashi/FrestNest/releases/latest/download/FreshNest.apk |
+
+Every push to `main` redeploys the website (Vercel) and the API (Render). A change in `mobile/` also builds a new APK (GitHub Actions).
+
+## Project structure
+
+```
+freshnest/
+├── frontend/                 Website: Next.js + TypeScript (Vercel)
+│   ├── public/               Pictures, app icons
+│   └── src/
+│       ├── app/              Pages, one folder per role: farmer/, dealer/, transporter/, admin/, plus login/ and register/
+│       ├── components/
+│       │   ├── common/       Building blocks: UI (toast, modal), Icon, Avatar, Charts, PlacePicker, Reporting
+│       │   ├── layout/       Shell (sidebar), Session, Bell, Welcome, WakeNotice
+│       │   ├── landing/      Home page, sign-in frame, illustrations
+│       │   ├── marketplace/  Listing form, deal card
+│       │   ├── transport/    Transport parts, delivery failure / emergency sale
+│       │   ├── admin/        Admin tools, analytics, announcements
+│       │   └── account/      Profile page (all roles)
+│       ├── lib/              API client, live updates, formatting, units
+│       └── styles/           CSS (base, theme, per role)
+├── backend/                  API: Express + TypeScript + Prisma (Render)
+│   ├── prisma/               Database schema, migrations, seed + demo data
+│   ├── src/
+│   │   ├── index.ts          Starts the server
+│   │   ├── routes/           HTTP endpoints (auth, listings, deals, transport, …)
+│   │   │   └── admin/        Admin office, delivery failures, analytics
+│   │   ├── services/         Business rules: bidding and transport rules, deals, emergency sale, notifications
+│   │   ├── jobs/             Timed jobs (closes bidding, expires offers, widens emergency sales)
+│   │   └── lib/              Database, sign-in, uploads, real-time (Socket.io)
+│   └── test/                 API rule tests (npm test)
+├── mobile/                   Android app: Capacitor shell that opens the live website
+├── docs/                     Decisions, deployment guide, design previews, clickable prototype
+├── scripts/                  Local database start/stop, production seed
+└── .github/workflows/        Builds the Android APK
+```
 
 ## Run it on this Mac
 
@@ -59,4 +93,4 @@ The sign-in page has one-click buttons for these while developing.
 3. **Transport** (done): vehicles (admin-checked, private registration photo), matching by facility + capacity, small local pickups, one offer per vehicle with booking clash check, season tags (cost-saving / weather risk), dealer confirms, pickup and delivery codes, transporter cancel reopens the deal, cancel requests for admins, reviews.
 4. **Delivery failure + emergency sale** (done): driver reports a stuck vehicle (location, reason, private photo, condition, usable kg, can it move) → admin queue A3 sorted by shelf life, 30-min urgent alert, approve / reject with reason → farmer sets up the emergency sale with suggested price drop and duration (or it starts automatically if they chose that) → dealers told in steps: stuck upazila → district after 1 h → neighbouring districts → highest bid / Buy Now wins → the same vehicle delivers, or a local transporter collects with a handover code.
 5. **Admin office** (done): A1 overview with automatic alerts, A2 verification (documents, re-upload, vehicles), A3 failures, A4 cases (cancellation requests, reports, reviews, locked codes), A5 users (warn / suspend 7 or 30 days / ban, lift), A6 products, farmer suggestions and season calendar, A7 announcements incl. sponsored, A8 analytics on real data (market by upazila + platform) with company report CSV and subscriptions, A9 team, permissions, settings and activity log. Case locks ("Being handled by…", 15 min) and a user-history panel beside every case.
-6. **Online deployment** (code ready): photos and documents go to Cloudinary when `CLOUDINARY_URL` is set, live updates use short socket tickets so the site (Vercel) and API (Render) can be on different domains, photos are shrunk in the browser, `render.yaml` blueprint. **Step-by-step guide: [DEPLOY.md](DEPLOY.md).**
+6. **Online deployment** (code ready): photos and documents go to Cloudinary when `CLOUDINARY_URL` is set, live updates use short socket tickets so the site (Vercel) and API (Render) can be on different domains, photos are shrunk in the browser, `render.yaml` blueprint. **Step-by-step guide: [docs/DEPLOY.md](docs/DEPLOY.md).**

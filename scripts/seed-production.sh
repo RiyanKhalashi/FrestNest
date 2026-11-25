@@ -4,7 +4,7 @@
 # It asks for the Neon connection string; nothing is saved to disk.
 set -e
 export PATH="$HOME/.local/node/bin:$PATH"
-cd "$(dirname "$0")/../server"
+cd "$(dirname "$0")/../backend"
 
 echo "Paste the Neon connection string (it is not shown and not saved), then press Enter:"
 read -rs DB

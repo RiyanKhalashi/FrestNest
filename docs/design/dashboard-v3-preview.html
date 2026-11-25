@@ -15,10 +15,10 @@
   --font: "Plus Jakarta Sans", system-ui, sans-serif;
 }
 /* role themes */
-[data-role="farmer"] { --side-a: #072F18; --side-b: #0D4D29; --side-pos: 100%; --acc: #1E9E57; --acc-3: #11733C; --acc-2: #7BD88F; --acc-soft: #E6F6EA; --page: #F3F8F1; --hero-a: #E9F7E6; --hero-b: #D3EFCB; --hero-ink: #0F3D24; --hl: #1E9E57; --pill-ink: #0B3B20; --banner: url(../../web/public/art/v3/farmer-banner.webp); --sideart: url(../../web/public/art/v3/farmer-side.webp); }
-[data-role="dealer"] { --side-a: #3E1D04; --side-b: #6D3607; --side-pos: 50%; --side-h: calc(264px * 1152 / 928); --side-size: 100% auto; --acc: #E2711D; --acc-3: #B9530A; --acc-2: #F6A04D; --acc-soft: #FDEEDF; --page: #FBF6F0; --hero-a: #FFF1E1; --hero-b: #FBDDBC; --hero-ink: #2E1A0B; --hl: #D9650F; --pill-ink: #fff; --banner: url(../../web/public/art/v3/dealer-banner.webp); --sideart: url(../../web/public/art/v3/dealer-side.webp); }
+[data-role="farmer"] { --side-a: #072F18; --side-b: #0D4D29; --side-pos: 100%; --acc: #1E9E57; --acc-3: #11733C; --acc-2: #7BD88F; --acc-soft: #E6F6EA; --page: #F3F8F1; --hero-a: #E9F7E6; --hero-b: #D3EFCB; --hero-ink: #0F3D24; --hl: #1E9E57; --pill-ink: #0B3B20; --banner: url(../../frontend/public/art/v3/farmer-banner.webp); --sideart: url(../../frontend/public/art/v3/farmer-side.webp); }
+[data-role="dealer"] { --side-a: #3E1D04; --side-b: #6D3607; --side-pos: 50%; --side-h: calc(264px * 1152 / 928); --side-size: 100% auto; --acc: #E2711D; --acc-3: #B9530A; --acc-2: #F6A04D; --acc-soft: #FDEEDF; --page: #FBF6F0; --hero-a: #FFF1E1; --hero-b: #FBDDBC; --hero-ink: #2E1A0B; --hl: #D9650F; --pill-ink: #fff; --banner: url(../../frontend/public/art/v3/dealer-banner.webp); --sideart: url(../../frontend/public/art/v3/dealer-side.webp); }
 [data-role="admin"] { --side-a: #04211F; --side-b: #0A3A3B; --acc: #12A594; --acc-2: #4FD8C4; --acc-3: #0B766B; --acc-soft: #DDF5F2; --page: #F0F5F5; --hero-a: #ECF8F6; --hero-b: #BDEAE2; --hero-ink: #08302E; --hl: #0E8F83; --pill-ink: #fff; --banner: none; --sideart: none; }
-[data-role="transporter"] { --side-a: #011D38; --side-b: #012B52; --side-pos: 87%; --acc: #2B7BE4; --acc-3: #1A55AE; --acc-2: #8FC3FF; --acc-soft: #E6F0FD; --page: #F2F6FB; --hero-a: #DCEEFF; --hero-b: #A7D6FE; --hero-ink: #0B2A55; --hl: #1D66C9; --pill-ink: #fff; --banner: url(../../web/public/art/v3/transporter-banner.webp); --banner-pos: 100% 50%; --sideart: url(../../web/public/art/v3/transporter-side.webp); }
+[data-role="transporter"] { --side-a: #011D38; --side-b: #012B52; --side-pos: 87%; --acc: #2B7BE4; --acc-3: #1A55AE; --acc-2: #8FC3FF; --acc-soft: #E6F0FD; --page: #F2F6FB; --hero-a: #DCEEFF; --hero-b: #A7D6FE; --hero-ink: #0B2A55; --hl: #1D66C9; --pill-ink: #fff; --banner: url(../../frontend/public/art/v3/transporter-banner.webp); --banner-pos: 100% 50%; --sideart: url(../../frontend/public/art/v3/transporter-side.webp); }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -123,7 +123,7 @@ svg.lucide { width: 18px; height: 18px; stroke-width: 2; }
 .ra li { counter-increment: ra; display: grid; grid-template-columns: 26px 76px 130px minmax(0, 1fr); gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
 .ra li:last-child { border-bottom: 0; } .ra li::before { content: counter(ra) "."; color: var(--muted); } .ra .t { color: var(--muted); } .ra b { font-weight: 700; } .ra em { font-style: normal; color: var(--muted); }
 .pill { background: #EEF2F1; color: var(--body); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; }
-.scene-card { position: relative; min-height: 190px; border-radius: var(--radius); overflow: hidden; background: url(../../web/public/art/v3/farmer-banner.webp) 100% 60% / cover no-repeat; box-shadow: 0 6px 20px rgba(18,35,26,.05); }
+.scene-card { position: relative; min-height: 190px; border-radius: var(--radius); overflow: hidden; background: url(../../frontend/public/art/v3/farmer-banner.webp) 100% 60% / cover no-repeat; box-shadow: 0 6px 20px rgba(18,35,26,.05); }
 .scene-card div { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: linear-gradient(transparent, rgba(4,33,31,.78)); color: #fff; }
 .scene-card small { display: block; opacity: .8; }
 

@@ -4,15 +4,15 @@ node_modules/
 .env
 .next/
 dist/
-server/src/generated/
+backend/src/generated/
 .DS_Store
-server/uploads/
-web/.env*.local
+backend/uploads/
+frontend/.env*.local
 # helper files created by `prisma init` for AI assistants
-server/.agents/
-server/.claude/
-server/.windsurf/
-server/skills-lock.json
+backend/.agents/
+backend/.claude/
+backend/.windsurf/
+backend/skills-lock.json
 .dev.log
 .env.deploy
 .vercel
