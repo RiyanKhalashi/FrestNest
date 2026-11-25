@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "FreshNest API: Express + Prisma + Socket.io",
   "main": "index.js",
   "scripts": {
     "test": "tsx test/phase2.test.mts && tsx test/phase3.test.mts && tsx test/phase4.test.mts && tsx test/phase5.test.mts",
