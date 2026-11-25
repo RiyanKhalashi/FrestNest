@@ -33,4 +33,4 @@ Gotcha: `prisma migrate dev` refuses in this non-interactive shell when it shows
 
 **Testing:** a Playwright smoke script using system Chrome is at scratchpad `pw/flow.mjs` (a temporary location; recreate it if it's gone).
 
-**Waiting on the user:** GitHub repo (git not initialised yet; commit only when asked), plus later Cloudinary/Neon/Render/Vercel accounts for uploads and deployment.
+**Waiting on the user:** code is on GitHub (origin RiyanKhalashi/FrestNest, main in sync as of 2026-11-26; commit only when asked). Still needed: Cloudinary/Neon/Render/Vercel accounts for uploads and deployment.
