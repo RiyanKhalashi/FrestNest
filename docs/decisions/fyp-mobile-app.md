@@ -1,11 +1,11 @@
 ---
 name: fyp-mobile-app
-description: Android app agreed 2026-11-26 — Capacitor wrapper that loads the live site (auto-updates), APK built by GitHub Actions; built 2026-11-26, first APK pending secrets + push
+description: Android app agreed 2026-11-26 — Capacitor wrapper that loads the live site (auto-updates), APK built by GitHub Actions; first APK released 2026-11-26 (app-v1.0.1)
 metadata:
   type: project
 ---
 
-Agreed on 2026-11-26. Built the same day (M1–M3 code); the first APK still needs the GitHub secrets and a push.
+Agreed on 2026-11-26. Built the same day (M1–M3 code); first signed APK released as app-v1.0.1 the same day; M4 (phone test) is next.
 
 **Approach:** a Capacitor Android app that loads the live website https://freshnest-bd.vercel.app inside the app (remote `server.url`). Every website change shows up in the app straight away, with no new APK. This replaces the earlier Expo / React Native idea, which would have meant rewriting every screen.
 
