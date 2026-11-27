@@ -361,3 +361,33 @@ html.lang-bn body { line-height: 1.6; }
 html.lang-bn :where(body *) { letter-spacing: normal !important; text-transform: none !important; }
 .hv-top:not(.hv-solid) .lang-sw { color: #fff; }
 .hv-top:not(.hv-solid) .lang-sw button.on { background: #fff; color: #0B3B24; }
+
+/* Responsiveness fixes (2026-11-27) */
+/* tab rows scroll sideways instead of pushing the page wider */
+.tabbar, .tabs, .ad .tabs { overflow-x: auto; scrollbar-width: none; }
+.tabbar::-webkit-scrollbar, .tabs::-webkit-scrollbar { display: none; }
+.tabbar button, .tabs button { flex: none; white-space: nowrap; }
+/* trip cards: long place names wrap instead of widening the card */
+.waybill > * { min-width: 0; }
+.route .end { min-width: 0; overflow-wrap: anywhere; }
+/* doubled class: transporter.css loads later and sets the three-column route */
+@media (max-width: 640px) { .route.route { grid-template-columns: 1fr; gap: 4px; } .route.route .end.to { text-align: left; } .route.route .line { margin: 6px 0; } }
+/* wide tables scroll inside their panel on tablets and phones */
+@media (max-width: 1024px) {
+  table.ledger { display: block; overflow-x: auto; white-space: nowrap; }
+  table.ledger:not(:has(thead)) { white-space: normal; }
+  table.ledger:not(:has(thead)) > tbody { display: table; width: 100%; }
+  table.hm { display: block; overflow-x: auto; }
+}
+@media (max-width: 640px) {
+  /* the admin hero picture is dark: fade it so the greeting stays readable */
+  .ad .hello .art { opacity: .22; }
+  /* short lists without a header row: tag and button on one line, the text below at full width */
+  table.ledger:not(:has(thead)) tr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 10px 12px; border-bottom: 1px solid var(--line-soft); }
+  table.ledger:not(:has(thead)) tr:last-child { border-bottom: 0; }
+  table.ledger:not(:has(thead)) td { display: block; border: 0; padding: 0; width: auto !important; }
+  table.ledger:not(:has(thead)) td:not(:first-child):not(.right) { flex: 1 1 auto; min-width: 0; }
+  table.ledger:not(:has(thead)) td.right { margin-left: auto; }
+}
+/* small phones, home page: the switch shows only the other language, so "Join free" still fits */
+@media (max-width: 480px) { .hv-top .lang-sw button.on { display: none; } .hv-top .lang-sw { margin-right: 8px; } }
