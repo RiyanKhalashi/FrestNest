@@ -390,4 +390,10 @@ html.lang-bn :where(body *) { letter-spacing: normal !important; text-transform:
   table.ledger:not(:has(thead)) td.right { margin-left: auto; }
 }
 /* small phones, home page: the switch shows only the other language, so "Join free" still fits */
-@media (max-width: 480px) { .hv-top .lang-sw button.on { display: none; } .hv-top .lang-sw { margin-right: 8px; } }
+@media (max-width: 480px) {
+  nav.hv-top .hv-in { gap: 8px; }
+  .hv-top .lang-sw button.on { display: none; }
+  .hv-top .lang-sw { margin-right: 0; font-size: 12px; }
+  .hv-top .lang-sw button { padding: 6px 9px; }
+  nav.hv-top .hv-btn.hv-sm { padding: 9px 13px; }
+}
