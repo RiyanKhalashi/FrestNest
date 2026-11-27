@@ -359,8 +359,8 @@ html.i18n-wait body { visibility: hidden; }
 html.lang-bn body { line-height: 1.6; }
 /* letter spacing and capitals break Bangla letters apart */
 html.lang-bn :where(body *) { letter-spacing: normal !important; text-transform: none !important; }
-.hv-top:not(.hv-solid) .lang-sw { color: #fff; }
-.hv-top:not(.hv-solid) .lang-sw button.on { background: #fff; color: #0B3B24; }
+.hv-top .lang-sw { color: #fff; }
+.hv-top .lang-sw button.on { background: #fff; color: #0B3B24; }
 
 /* Responsiveness fixes (2026-11-27) */
 /* tab rows scroll sideways instead of pushing the page wider */
@@ -391,7 +391,7 @@ html.lang-bn :where(body *) { letter-spacing: normal !important; text-transform:
 }
 /* small phones, home page: the switch shows only the other language, so "Join free" still fits */
 @media (max-width: 480px) {
-  nav.hv-top .hv-in { gap: 8px; }
+  nav.hv-top .hv-in.hv-in { gap: 8px; } /* doubled class: home.css loads later */
   .hv-top .lang-sw button.on { display: none; }
   .hv-top .lang-sw { margin-right: 0; font-size: 12px; }
   .hv-top .lang-sw button { padding: 6px 9px; }

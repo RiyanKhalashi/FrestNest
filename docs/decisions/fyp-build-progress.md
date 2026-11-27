@@ -40,3 +40,5 @@ Gotcha: `prisma migrate dev` refuses in this non-interactive shell when it shows
 **Code reorganised (2026-11-26):** `server/`→`backend/` (src/lib, src/services, src/jobs/sweeper.ts, src/routes/admin/{office,failures,analytics}.ts) and `web/`→`frontend/` (components/common|layout|landing|marketplace|transport|admin|account, PascalCase files). `prototype/` and `DEPLOY.md` moved to `docs/`. Vercel rootDirectory = frontend, Render rootDir = backend (both updated through their APIs).
 
 **Bangla language switch (2026-11-27):** English | বাংলা for farmers, dealers and transporters; admin stays English. Details in `docs/decisions/fyp-bangla-language.md`. Not committed or deployed yet.
+
+**Responsiveness check (2026-11-27):** all pages at 360/768/1024/1280 px in English and Bangla; fixes at the end of `frontend/src/styles/base.css`.
