@@ -14,6 +14,8 @@ const update = z.object({
   businessName: z.string().trim().max(100).optional(),
   // farmers only: "Agri partner offers"
   partnerOffers: z.boolean().optional(),
+  // interface language: English or Bangla
+  language: z.enum(["en", "bn"]).optional(),
 });
 
 profileRouter.patch("/", async (req, res) => {

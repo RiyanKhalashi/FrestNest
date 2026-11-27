@@ -21,8 +21,8 @@
   --clay-tint: #fae7df;
   --sky: #3a6679;
   --sky-tint: #e9f0f2;
-  --display: var(--f-sans), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
-  --sans: var(--f-sans), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  --display: var(--f-sans), var(--f-bn), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  --sans: var(--f-sans), var(--f-bn), 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
   --mono: var(--f-mono), 'IBM Plex Mono', Menlo, Consolas, monospace;
 }
 
@@ -342,3 +342,22 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--leaf); outl
   .track div { min-width: 70px; }
   .toast { left: 12px; right: 12px; transform: none; text-align: center; }
 }
+
+/* Language switch (English | বাংলা) and Bangla mode */
+.lang-sw { display: inline-flex; border: 1px solid currentColor; border-radius: 999px; overflow: hidden; font-size: 12.5px; line-height: 1; opacity: .9; flex: none; }
+.lang-sw button { all: unset; cursor: pointer; padding: 6px 10px; font-weight: 600; }
+.lang-sw button[lang="bn"] { font-family: var(--f-bn), var(--sans); }
+.lang-sw button.on { background: var(--brand, #0B3B24); color: #fff; }
+.lang-sw button:focus-visible { outline: 2px solid var(--brand, #0B3B24); outline-offset: -2px; }
+.top .lang-sw { color: var(--muted, #5b6b61); margin-right: 8px; }
+.top .btn { white-space: nowrap; }
+@media (max-width: 480px) { .top .lang-sw { margin-right: 2px; font-size: 11.5px; } .top .lang-sw button { padding: 5px 7px; } }
+.au-right { display: inline-flex; align-items: center; gap: 14px; }
+@media (max-width: 480px) { .au-right { gap: 8px; } .au-right .lang-sw { font-size: 11.5px; } .au-right .lang-sw button { padding: 5px 7px; } .au-home { font-size: 0; } }
+.hv-top .lang-sw { margin-right: 12px; }
+html.i18n-wait body { visibility: hidden; }
+html.lang-bn body { line-height: 1.6; }
+/* letter spacing and capitals break Bangla letters apart */
+html.lang-bn :where(body *) { letter-spacing: normal !important; text-transform: none !important; }
+.hv-top:not(.hv-solid) .lang-sw { color: #fff; }
+.hv-top:not(.hv-solid) .lang-sw button.on { background: #fff; color: #0B3B24; }

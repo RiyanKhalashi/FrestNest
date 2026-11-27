@@ -90,6 +90,8 @@ model User {
   avatarUrl    String?  // profile picture (public, /uploads/avatars)
   // farmer: "Agri partner offers" switch (off by default)
   partnerOffers Boolean @default(false)
+  // interface language chosen by the user: "en" or "bn" (farmers, dealers and transporters can switch; admin pages stay English)
+  language      String  @default("en")
 
   // suspension / ban
   suspendedUntil DateTime?

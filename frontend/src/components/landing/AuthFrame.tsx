@@ -1,6 +1,7 @@
 // Public sign-in / register frame: soft green background with a faint grid and a field line, logo + Home link, centred card.
 import Link from "next/link";
 import { Icon, Logo } from "../common/Icon";
+import { LangSwitch } from "../common/LangSwitch";
 
 export function Furrow({ className }: { className?: string }) {
   return (
@@ -14,7 +15,7 @@ export function AuthFrame({ children, wide }: { children: React.ReactNode; wide?
   return (
     <div className="au">
       <Furrow />
-      <div className="au-top"><Logo /><Link className="au-home" href="/"><Icon name="arrow" size={15} className="flip" />Home</Link></div>
+      <div className="au-top"><Logo /><span className="au-right"><LangSwitch /><Link className="au-home" href="/"><Icon name="arrow" size={15} className="flip" />Home</Link></span></div>
       <div className="au-wrap"><div className={"au-card" + (wide ? " wide" : "")}>
         <div className="au-mk"><Icon name="leaf" size={26} /></div>
         {children}

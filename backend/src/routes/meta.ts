@@ -5,7 +5,7 @@ import { prisma } from "../lib/db.js";
 export const metaRouter = Router();
 
 metaRouter.get("/locations", async (_req, res) => {
-  const districts = await prisma.district.findMany({ orderBy: { name: "asc" }, include: { upazilas: { orderBy: { name: "asc" }, select: { id: true, name: true } } } });
+  const districts = await prisma.district.findMany({ orderBy: { name: "asc" }, include: { upazilas: { orderBy: { name: "asc" }, select: { id: true, name: true, nameBn: true } } } });
   res.json({ districts: districts.map((d) => ({ id: d.id, name: d.name, nameBn: d.nameBn, upazilas: d.upazilas })) });
 });
 

@@ -45,7 +45,7 @@ export function Icon({ name, size = 18, className }: { name: IconName | string; 
 /** FreshNest mark: leaf in a green tile. */
 export function Logo({ dark, href = "/" }: { dark?: boolean; href?: string }) {
   return (
-    <a className={"fn-logo" + (dark ? " on-dark" : "")} href={href}>
+    <a className={"fn-logo" + (dark ? " on-dark" : "")} href={href} data-i18n-skip="">
       <span className="mk"><Icon name="leaf" size={20} /></span>
       <span>Fresh<em>Nest</em></span>
     </a>

@@ -10,6 +10,8 @@ import { Icon, Logo } from "../common/Icon";
 import { Bell } from "./Bell";
 import { ToastProvider } from "../common/UI";
 import { useAdminMode, setAdminMode } from "@/lib/adminMode";
+import { LangSwitch } from "../common/LangSwitch";
+import { getLang, storeLang, hasPendingLang } from "@/lib/i18n/lang";
 
 function canSee(u: User, perm?: string) {
   if (!perm) return true;
@@ -43,6 +45,21 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
     if (!user) router.replace("/login?next=" + encodeURIComponent(path));
     else if (user.role !== role) router.replace(HOME[user.role]);
   }, [loading, user, role, path, router]);
+
+  // Language: a choice made while signed out is copied to the account; otherwise the account's choice is used here too.
+  useEffect(() => {
+    if (!user || user.role === "ADMIN") return;
+    if (hasPendingLang()) {
+      const l = getLang();
+      storeLang(l);
+      if (user.language !== l) api("/profile", { method: "PATCH", body: { language: l } }).catch(() => storeLang(l, true));
+    } else if (user.language !== getLang()) {
+      storeLang(user.language === "bn" ? "bn" : "en");
+      let synced = false;
+      try { synced = sessionStorage.getItem("fn-lang-sync") === "1"; sessionStorage.setItem("fn-lang-sync", "1"); } catch { /* ignore */ }
+      if (!synced) window.location.reload(); // at most once per tab, so it can never loop
+    }
+  }, [user]);
 
   useEffect(() => {
     const c = BODY_CLASS[role];
@@ -95,6 +112,7 @@ function Frame({ role, children }: { role: Role; children: React.ReactNode }) {
           </button>
           {BRAND_SUB[role] && <span className="proto-note">{BRAND_SUB[role]}</span>}
           <div className="sp" />
+          {role !== "ADMIN" && <LangSwitch signedIn />}
           <Bell initialUnread={unread} />
           <button className="btn ghost sm" onClick={logout}><Icon name="logout" size={15} />Sign out</button>
         </header>

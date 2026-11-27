@@ -15,6 +15,7 @@ export interface User {
   partnerOffers: boolean;
   isSuperAdmin: boolean;
   permissions: Permission[];
+  language: "en" | "bn";
   suspendedUntil: string | null;
   statusReason: string | null;
   district: { id: number; name: string } | null;

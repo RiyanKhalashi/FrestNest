@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { api, HOME, ROLE_LABEL, type User } from "@/lib/api";
 import { Icon } from "../common/Icon";
+import { LangSwitch } from "../common/LangSwitch";
 
 // Signed-in visitor: name + role chip with Open dashboard / Switch account / Log out.
 function AccountMenu({ me, onSignedOut }: { me: User; onSignedOut: () => void }) {
@@ -70,9 +71,9 @@ export function Landing() {
     <g fill="#D7EF7F" opacity=".7"><circle cx="262" cy="292" r="3"/><circle cx="276" cy="306" r="2"/><circle cx="160" cy="214" r="2.5"/></g>
   </svg>
   <nav className={"hv-top" + (solid ? " hv-solid" : "")}><div className="hv-in">
-    <Link className="hv-logo" href="/"><span className="hv-mk"><Icon name="leaf" /></span><span>Fresh<em>Nest</em></span></Link>
+    <Link className="hv-logo" href="/" data-i18n-skip=""><span className="hv-mk"><Icon name="leaf" /></span><span>Fresh<em>Nest</em></span></Link>
     <div className="hv-links"><a href="#features">Features</a><a href="#how">How it works</a><a href="#roles">Roles</a><a href="#companies">For companies</a><a href="#about">About</a></div>
-    <span className="hv-sp"></span>{me ? <AccountMenu me={me} onSignedOut={() => setMe(null)} />
+    <span className="hv-sp"></span><LangSwitch signedIn={!!me} className="on-hero" />{me ? <AccountMenu me={me} onSignedOut={() => setMe(null)} />
       : <><Link className="hv-login" href="/login">Log in</Link><Link className="hv-btn hv-green hv-sm" href="/register">Join free</Link></>}
   </div></nav>
   <div className="hv-in hv-hero-in">
@@ -195,7 +196,7 @@ export function Landing() {
 
 <footer><div className="hv-in">
   <div className="hv-cols">
-    <div><Link className="hv-logo" href="/"><span className="hv-mk"><Icon name="leaf" /></span><span>Fresh<em>Nest</em></span></Link><p style={{ "maxWidth": "30ch", "margin": "0" } as React.CSSProperties}>Fresh produce from the field to the dealer: fair prices, verified transport, less waste.</p></div>
+    <div><Link className="hv-logo" href="/" data-i18n-skip=""><span className="hv-mk"><Icon name="leaf" /></span><span>Fresh<em>Nest</em></span></Link><p style={{ "maxWidth": "30ch", "margin": "0" } as React.CSSProperties}>Fresh produce from the field to the dealer: fair prices, verified transport, less waste.</p></div>
     <div><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#companies">For companies</a></li></ul></div>
     <div><h4>For</h4><ul><li><a href="#roles">Farmers</a></li><li><a href="#roles">Dealers</a></li><li><a href="#roles">Transporters</a></li></ul></div>
     <div><h4>Account</h4><ul><li><Link href="/login">Log in</Link></li><li><Link href="/register">Join free</Link></li></ul></div>
