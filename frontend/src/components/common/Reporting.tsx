@@ -65,7 +65,7 @@ export function ReportButton({ dealId, people }: { dealId: string; people: { id:
         <Modal title="Report a problem" onClose={() => setOpen(false)} actions={<button className="btn warn" disabled={f.details.trim().length < 10} onClick={send}>Send report</button>}>
           <div className="field"><label htmlFor="ra">Who</label><select id="ra" value={f.againstId} onChange={(e) => setF({ ...f, againstId: e.target.value })}>{people.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.role})</option>)}</select></div>
           <div className="field"><label htmlFor="rk">What happened</label><select id="rk" value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}>{KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-          <div className="field"><label htmlFor="rd">Details</label><textarea id="rd" rows={3} value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} placeholder="What happened, when, and anything that helps the admin check it" /><FieldErr e={fields.details} /></div>
+          <div className="field"><label htmlFor="rd">Details</label><textarea id="rd" rows={3} value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} placeholder="What happened, when, and anything that helps the admin check it. Bangla or English." /><FieldErr e={fields.details} /></div>
           <p className="small muted">Reports are private. The other person is not told who reported them.</p>
         </Modal>
       )}
@@ -87,7 +87,7 @@ export function ReportReview({ reviewId }: { reviewId: string }) {
       <a href="#" className="small" onClick={(e) => { e.preventDefault(); setOpen(true); }}>Report this review</a>
       {open && (
         <Modal title="Report this review" onClose={() => setOpen(false)} actions={<button className="btn warn" disabled={details.trim().length < 10} onClick={send}>Send</button>}>
-          <div className="field"><label htmlFor="rr">Why is it fake or abusive?</label><textarea id="rr" rows={3} value={details} onChange={(e) => setDetails(e.target.value)} /></div>
+          <div className="field"><label htmlFor="rr">Why is it fake or abusive?</label><textarea id="rr" rows={3} placeholder="You can write in Bangla or English" value={details} onChange={(e) => setDetails(e.target.value)} /></div>
           <p className="small muted">An admin can hide the review. Honest negative reviews stay.</p>
         </Modal>
       )}

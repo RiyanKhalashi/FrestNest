@@ -108,7 +108,7 @@ export function FailureReport({ d, quantityKg, onClose, onDone }: { d: Deal; qua
         <div className="field"><label htmlFor="fr">Reason</label><select id="fr" value={f.reason} onChange={(e) => setF({ ...f, reason: e.target.value })}>{REASONS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
         <div className="field"><label htmlFor="fc">Produce condition</label><select id="fc" value={f.condition} onChange={(e) => setF({ ...f, condition: e.target.value })}>{Object.entries(CONDITION_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
       </div>
-      <div className="field"><label htmlFor="fd">What happened {f.reason === "OTHER" ? "(required)" : <span className="muted" style={{ fontWeight: 400 }}>(optional)</span>}</label><textarea id="fd" rows={2} value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} /><FieldErr e={fields.details} /></div>
+      <div className="field"><label htmlFor="fd">What happened {f.reason === "OTHER" ? "(required)" : <span className="muted" style={{ fontWeight: 400 }}>(optional)</span>}</label><textarea id="fd" rows={2} placeholder="You can write in Bangla or English" value={f.details} onChange={(e) => setF({ ...f, details: e.target.value })} /><FieldErr e={fields.details} /></div>
       <div className="row">
         <div className="field"><label htmlFor="fu">Usable quantity (kg)</label><input id="fu" type="number" min={1} max={quantityKg} value={f.usableKg} onChange={(e) => setF({ ...f, usableKg: e.target.value })} /><FieldErr e={fields.usableKg} /><small>Loaded: {kg(quantityKg)}</small></div>
         <div className="field"><label>Can the vehicle still move?</label>

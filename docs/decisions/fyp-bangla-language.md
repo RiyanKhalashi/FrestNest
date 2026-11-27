@@ -16,6 +16,8 @@ metadata:
 
 **Checked:** an automated walk through every farmer, dealer and transporter page in Bangla (including each listing, deal, tab and the notification list) found no English left except names, codes and user-written text. Server errors appear in Bangla, admin pages stay English, English mode is unchanged, the phone layout fits at 360 px. `npm test` (61 tests) and both type checks pass, and the production build succeeds.
 
+**Writing in Bangla (2026-11-27, user asked):** reviews, report details, delivery-failure details and cancel reasons can be written in Bangla (no server or browser rule blocks it; length limits count Bangla letters normally). Their boxes now say "You can write in Bangla or English" (Bangla in Bangla mode). Tested: a Bangla report was saved and shows correctly on the English admin Cases page (Hind Siliguri font); the test report was deleted again.
+
 **Adding text later:** a new English text on these pages shows in English until its Bangla line is added to `bn.ts`.
 
 **Not done:** not committed or deployed yet (waiting for the user). The report still says the interface is English only (the user asked not to change the report).

@@ -53,7 +53,7 @@ function ReviewForm({ d, t, onDone }: { d: Deal; t: Deal["reviews"]["targets"][n
     <div className="offer" style={{ gridTemplateColumns: "1fr" }}>
       <div><h5>Rate {t.name} <span className="small muted" style={{ fontWeight: 400 }}>({t.role.toLowerCase()})</span></h5>
         <Stars value={stars} onChange={setStars} />
-        <div className="field" style={{ margin: "6px 0 8px" }}><textarea rows={2} placeholder="What went well, what could be better?" value={comment} onChange={(e) => setComment(e.target.value)} aria-label={"Comment for " + t.name} /><FieldErr e={err.comment} /></div>
+        <div className="field" style={{ margin: "6px 0 8px" }}><textarea rows={2} placeholder="What went well, what could be better? Bangla or English." value={comment} onChange={(e) => setComment(e.target.value)} aria-label={"Comment for " + t.name} /><FieldErr e={err.comment} /></div>
         <button className="btn sm" disabled={!stars || comment.trim().length < 5} onClick={send}>Publish review</button></div>
     </div>
   );
@@ -228,7 +228,7 @@ export function DealCard({ d, side, onChange }: { d: Deal; side: "farmer" | "dea
       {cancel && (
         <Modal title={needsAdmin ? `Request to cancel ${d.code}` : `Cancel deal ${d.code}?`} onClose={() => setCancel(false)} actions={<button className="btn warn" onClick={doCancel}>{needsAdmin ? "Send request" : "Cancel deal"}</button>}>
           <p style={{ marginBottom: 10 }}>{needsAdmin ? "Transport is already booked, so an admin must approve the cancellation. Until then the deal and the transport stay as they are." : `No transport is booked yet, so the deal is cancelled immediately. ${side === "farmer" ? "The dealer" : "The farmer"} is told your reason.`}</p>
-          <div className="field"><label htmlFor={"cr-" + d.id}>Reason (required)</label><textarea id={"cr-" + d.id} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+          <div className="field"><label htmlFor={"cr-" + d.id}>Reason (required)</label><textarea id={"cr-" + d.id} rows={3} placeholder="You can write in Bangla or English" value={reason} onChange={(e) => setReason(e.target.value)} /></div>
           {err && <div className="note bad">{err}</div>}
           <p className="small muted">Admins review cancellation reasons. Three or more cancellations in 30 days raise an alert.</p>
         </Modal>

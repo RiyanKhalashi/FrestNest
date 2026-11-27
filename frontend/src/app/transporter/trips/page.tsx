@@ -74,7 +74,7 @@ function Waybill({ t, tab, onDone }: { t: Trip; tab: Tab; onDone: () => void }) 
       {cancel && (
         <Modal title={`Cancel trip ${t.code}?`} onClose={() => setCancel(false)} actions={<button className="btn warn" disabled={reason.trim().length < 5} onClick={doCancel}>Cancel trip</button>}>
           <p style={{ marginBottom: 10 }}>The deal opens again for other transporters and the farmer and dealer are told your reason. Cancellations count towards the 30-day alert admins see.</p>
-          <div className="field"><label htmlFor={"tr-" + t.id}>Reason (required)</label><textarea id={"tr-" + t.id} rows={3} value={reason} onChange={(e) => setReason(e.target.value)} /></div>
+          <div className="field"><label htmlFor={"tr-" + t.id}>Reason (required)</label><textarea id={"tr-" + t.id} rows={3} placeholder="You can write in Bangla or English" value={reason} onChange={(e) => setReason(e.target.value)} /></div>
         </Modal>
       )}
     </div>
