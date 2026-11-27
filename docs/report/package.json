@@ -1,0 +1,19 @@
+{
+  "name": "freshnest-report",
+  "private": true,
+  "description": "Builds the FreshNest project report (Word) and a PDF reading copy from the Markdown chapters",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "node preview.mjs",
+    "diagrams": "node render-diagrams.mjs",
+    "diagrams:make": "node make-diagrams.mjs",
+    "screenshots": "node screenshots.mjs"
+  },
+  "dependencies": {
+    "docx": "9.15.3",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "4.10.38",
+    "playwright-core": "1.49.0"
+  }
+}

@@ -1,0 +1,28 @@
+<mxfile host="FreshNest report">
+<diagram id="Login" name="Login">
+<mxGraphModel dx="1200" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="lu" value="User" style="shape=umlLifeline;participant=umlActor;perimeter=lifelinePerimeter;whiteSpace=nowrap;html=1;container=0;collapsible=0;recursiveResize=0;verticalAlign=top;spacingTop=42;outlineConnect=0;portConstraint=eastwest;size=45;fontSize=12;" vertex="1" parent="1"><mxGeometry x="55" y="20" width="30" height="579" as="geometry"/></mxCell>
+<mxCell id="lweb" value="Web App" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fontSize=12;" vertex="1" parent="1"><mxGeometry x="190" y="20" width="110" height="579" as="geometry"/></mxCell>
+<mxCell id="lsrv" value="Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fontSize=12;" vertex="1" parent="1"><mxGeometry x="365" y="20" width="110" height="579" as="geometry"/></mxCell>
+<mxCell id="ldb" value="Database" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fontSize=12;" vertex="1" parent="1"><mxGeometry x="540" y="20" width="110" height="579" as="geometry"/></mxCell>
+<mxCell id="f0" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=44;height=22;fontSize=11;fillColor=none;" vertex="1" parent="1"><mxGeometry x="0" y="303" width="560" height="256" as="geometry"/></mxCell>
+<mxCell id="s1" value="" style="endArrow=none;dashed=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="0" y="415" as="sourcePoint"/><mxPoint x="560" y="415" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c1" value="Enter phone &amp;amp; password" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="70" y="125" as="sourcePoint"/><mxPoint x="245" y="125" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c2" value="POST /api/auth/login" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="245" y="159" as="sourcePoint"/><mxPoint x="420" y="159" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c3" value="Find user by phone" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="193" as="sourcePoint"/><mxPoint x="595" y="193" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c4" value="User row" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endFill=0;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="595" y="227" as="sourcePoint"/><mxPoint x="420" y="227" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c5" value="Check password (bcrypt)" style="html=1;align=left;spacingLeft=6;verticalAlign=middle;endArrow=block;endFill=1;rounded=0;fontSize=11;labelPosition=right;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="261" as="sourcePoint"/><mxPoint x="420" y="283" as="targetPoint"/><Array as="points"><mxPoint x="450" y="261"/><mxPoint x="450" y="283"/></Array></mxGeometry></mxCell>
+<mxCell id="c6" value="[wrong phone or password]" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="56" y="305" width="220" height="18" as="geometry"/></mxCell>
+<mxCell id="c7" value="401 error" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endFill=0;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="347" as="sourcePoint"/><mxPoint x="245" y="347" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c8" value="Show error" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endFill=0;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="245" y="381" as="sourcePoint"/><mxPoint x="70" y="381" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c9" value="[correct]" style="text;html=1;fontSize=11;align=left;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="6" y="421" width="220" height="18" as="geometry"/></mxCell>
+<mxCell id="c10" value="Sign session token (7 days)" style="html=1;align=left;spacingLeft=6;verticalAlign=middle;endArrow=block;endFill=1;rounded=0;fontSize=11;labelPosition=right;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="443" as="sourcePoint"/><mxPoint x="420" y="465" as="targetPoint"/><Array as="points"><mxPoint x="450" y="443"/><mxPoint x="450" y="465"/></Array></mxGeometry></mxCell>
+<mxCell id="c11" value="200 OK + session cookie" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endFill=0;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="420" y="485" as="sourcePoint"/><mxPoint x="245" y="485" as="targetPoint"/></mxGeometry></mxCell>
+<mxCell id="c12" value="Open role dashboard" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endFill=0;fontSize=11;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="245" y="519" as="sourcePoint"/><mxPoint x="70" y="519" as="targetPoint"/></mxGeometry></mxCell>
+</root>
+</mxGraphModel>
+</diagram>
+</mxfile>

@@ -97,8 +97,10 @@ try {
   await test("suspend 7 days blocks new bids; ban needs the Super Admin to lift", async () => {
     const id = (await prisma.user.findUniqueOrThrow({ where: { phone: "01811000002" } })).id;
     assert.equal((await mitu(`/admin/users/${id}/suspend`, { days: 7, reason: "Three reports in a month" })).status, 200);
-    const l = await prisma.listing.findFirstOrThrow({ where: { status: "OPEN", mode: "BID", scope: "NATION" } });
-    assert.equal((await joyp(`/market/${l.id}/bid`, { pricePerKg: 99 })).status, 403);
+    // its own open nationwide bidding listing, so the test does not depend on the age of the demo data
+    const l = await karim("/listings", { productId: (await prisma.product.findUniqueOrThrow({ where: { nameEn: "Potato" } })).id, category: "Vegetable", quantityKg: 1000, pricePerKg: 20, harvestDate: new Date(Date.now() + 3 * 86400_000).toISOString(), scope: "NATION", mode: "BID", bidEndsAt: new Date(Date.now() + 30 * 3600_000).toISOString() });
+    assert.equal(l.status, 201, JSON.stringify(l.data)); created.push(l.data.listing.id);
+    assert.equal((await joyp(`/market/${l.data.listing.id}/bid`, { pricePerKg: 99 })).status, 403);
     assert.equal((await mitu(`/admin/users/${id}/lift`, {})).status, 200);
     assert.equal((await mitu(`/admin/users/${id}/suspend`, { days: 0, reason: "Fraud confirmed by police" })).status, 200);
     assert.equal((await joyp("/auth/me")).status, 403); // banned accounts are blocked
@@ -180,5 +182,7 @@ try {
   await prisma.notification.deleteMany({ where: { createdAt: { gte: new Date(Date.now() - 10 * 60_000) } } });
   await prisma.caseLock.deleteMany({});
   await prisma.user.deleteMany({ where: { id: { in: cleanupUsers } } });
+  // if the suspension test stopped half-way, the demo dealer would stay suspended
+  await prisma.user.update({ where: { phone: "01811000002" }, data: { status: "ACTIVE", suspendedUntil: null, statusReason: null } });
   await prisma.$disconnect();
 }

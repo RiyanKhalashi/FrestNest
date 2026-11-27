@@ -3,7 +3,8 @@
 import { readFileSync } from "node:fs";
 import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/db.js";
-import type { Role, AdminPermission, StorageNeed } from "../src/generated/prisma/client.js";
+import type { Role, AdminPermission } from "../src/generated/prisma/client.js";
+import { PRODUCTS, MON_PRODUCTS } from "./products.js";
 
 // All 64 districts and their upazilas with coordinates (see "source" in the file).
 type Loc = { name: string; nameBn: string; division: string; lat: number; lon: number; upazilas: [string, string, number, number][] };
@@ -25,16 +26,7 @@ function nearPairs(pts: { id: number; lat: number; lon: number }[], radius: numb
   return pairs;
 }
 
-const PRODUCTS: [string, string, string, number, StorageNeed, boolean][] = [
-  ["Potato", "আলু", "Vegetable", 60, "NORMAL", false],
-  ["Tomato", "টমেটো", "Vegetable", 7, "NORMAL", true],
-  ["Cauliflower", "ফুলকপি", "Vegetable", 6, "VENTILATED", true],
-  ["Brinjal", "বেগুন", "Vegetable", 5, "NORMAL", false],
-  ["Green chili", "কাঁচা মরিচ", "Vegetable", 5, "VENTILATED", true],
-  ["Lal shak", "লাল শাক", "Vegetable", 2, "NORMAL", false],
-  ["Strawberry", "স্ট্রবেরি", "Fruit", 3, "REFRIGERATED", false],
-  ["Mango", "আম", "Fruit", 7, "VENTILATED", false],
-];
+
 
 type U = { phone: string; name: string; role: Role; district: string; upazila: string; village?: string; business?: string; superAdmin?: boolean; perms?: AdminPermission[] };
 const USERS: U[] = [
@@ -67,7 +59,7 @@ async function main() {
     await prisma.product.upsert({ where: { nameEn }, update: {}, create: { nameEn, nameBn, category, shelfLifeDays, storage, ventilatedForLongTrips } });
   }
   // suggested listing unit (docs/decisions/fyp-units.md): staples traded by the mon
-  await prisma.product.updateMany({ where: { nameEn: { in: ["Potato", "Mango"] } }, data: { defaultUnit: "MON" } });
+  await prisma.product.updateMany({ where: { nameEn: { in: MON_PRODUCTS } }, data: { defaultUnit: "MON" } });
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
   for (const u of USERS) {
     const district = await prisma.district.findUniqueOrThrow({ where: { name: u.district } });
