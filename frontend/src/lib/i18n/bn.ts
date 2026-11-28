@@ -167,6 +167,7 @@ export const EXACT: Record<string, string> = {
   "Choose upazila": "উপজেলা বেছে নিন",
   "All districts": "সব জেলা",
   "All upazilas": "সব উপজেলা",
+  "Choose a district first": "আগে একটা জেলা বেছে নিন",
   "All products": "সব পণ্য",
   "Add a district…": "জেলা যোগ করুন…",
   "Only my upazila": "শুধু আমার উপজেলা",
@@ -1509,5 +1510,7 @@ export function makePatterns(p: (s: string) => string): Pattern[] {
     [/^Your account is banned\. Reason: (.+)\.$/, "আপনার অ্যাকাউন্ট নিষিদ্ধ। কারণ: $1।"],
     [/^(.+)\. Repeated problems can lead to suspension\.$/, "$1। বারবার সমস্যা হলে অ্যাকাউন্ট স্থগিত হতে পারে।"],
     [/^Sponsored · (.+): (.+)$/, "স্পন্সরড · $1: $2"],
+    // filter option with a listing count, e.g. "Bogura Sadar (3)"
+    [/^(.+) \((\d+)\)$/, (m) => p(m[1]) + " (" + m[2] + ")"],
   ];
 }

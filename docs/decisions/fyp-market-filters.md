@@ -12,4 +12,4 @@
 
 - Farmer's upazila dropdown stays **disabled** ("Choose a district first") until a district is picked, so it never lists all ~495 upazilas (agreed 2026-11-29).
 
-**Status:** agreed, not built.
+**Status:** built 2026-11-29 (backend `routes/market.ts` options, dealer `market/page.tsx`, Bangla pattern "name (count)" in `bn.ts`). Not deployed yet.

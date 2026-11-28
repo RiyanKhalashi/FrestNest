@@ -36,15 +36,23 @@ marketRouter.get("/", async (req, res) => {
   if (f.sort === "near") views.sort((a, b) => a.near!.rank - b.near!.rank || +new Date(b.createdAt) - +new Date(a.createdAt));
   else if (f.sort === "new") views.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   else views.sort((a, b) => +new Date(a.bidding?.endsAt ?? a.expiresAt) - +new Date(b.bidding?.endsAt ?? b.expiresAt));
-  // filter options = what this dealer can see at all
-  const all = await prisma.listing.findMany({ where: { AND: [visibleTo(me), { status: "OPEN" }] }, select: { product: { select: { id: true, nameEn: true } }, upazila: { select: { id: true, name: true, district: { select: { id: true, name: true } } } } } });
-  const opt = <T extends { id: number }>(xs: T[]) => [...new Map(xs.map((x) => [x.id, x])).values()];
+  // filter options = every active product, all districts and all upazilas, each with the number of
+  // open listings this dealer can see (not narrowed by the other filters); ones with listings first
+  const [visible, products, districts, upazilas] = await Promise.all([
+    prisma.listing.findMany({ where: { AND: [visibleTo(me), { status: "OPEN" }] }, select: { productId: true, upazilaId: true, upazila: { select: { districtId: true } } } }),
+    prisma.product.findMany({ where: { active: true }, select: { id: true, nameEn: true } }),
+    prisma.district.findMany({ select: { id: true, name: true } }),
+    prisma.upazila.findMany({ select: { id: true, name: true, districtId: true } }),
+  ]);
+  const tally = (keys: (number | null)[]) => { const m = new Map<number, number>(); for (const k of keys) if (k !== null) m.set(k, (m.get(k) ?? 0) + 1); return m; };
+  const byProduct = tally(visible.map((l) => l.productId)), byDistrict = tally(visible.map((l) => l.upazila.districtId)), byUpazila = tally(visible.map((l) => l.upazilaId));
+  const ranked = <T extends { name: string; count: number }>(xs: T[]) => xs.sort((a, b) => +(b.count > 0) - +(a.count > 0) || a.name.localeCompare(b.name));
   res.json({
     listings: views,
     options: {
-      products: opt(all.flatMap((l) => (l.product ? [{ id: l.product.id, name: l.product.nameEn }] : []))),
-      districts: opt(all.map((l) => ({ id: l.upazila.district.id, name: l.upazila.district.name }))),
-      upazilas: opt(all.map((l) => ({ id: l.upazila.id, name: l.upazila.name, districtId: l.upazila.district.id }))),
+      products: ranked(products.map((p) => ({ id: p.id, name: p.nameEn, count: byProduct.get(p.id) ?? 0 }))),
+      districts: ranked(districts.map((d) => ({ id: d.id, name: d.name, count: byDistrict.get(d.id) ?? 0 }))),
+      upazilas: ranked(upazilas.map((u) => ({ id: u.id, name: u.name, districtId: u.districtId, count: byUpazila.get(u.id) ?? 0 }))),
     },
   });
 });

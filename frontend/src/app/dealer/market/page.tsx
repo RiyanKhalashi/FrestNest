@@ -10,7 +10,7 @@ import { Empty, FieldErr, Modal, ProductIcon, useToast } from "@/components/comm
 import { useSession } from "@/components/layout/Session";
 import { qty, price as pr, per, UNIT_LABEL, UNIT_KG, toKg, toPerKg, fromKg, fromPerKg, fromPerKgUp } from "@/lib/units";
 
-interface Options { products: { id: number; name: string }[]; districts: { id: number; name: string }[]; upazilas: { id: number; name: string; districtId: number }[] }
+interface Options { products: { id: number; name: string; count: number }[]; districts: { id: number; name: string; count: number }[]; upazilas: { id: number; name: string; districtId: number; count: number }[] }
 
 function tagFor(l: Listing, now: number): [string, string] {
   const b = l.bidding;
@@ -198,16 +198,16 @@ function Market() {
 
   const blocked = user?.status === "ACTIVE" ? null : user?.status === "PENDING" ? "Your account is waiting for admin verification. You can look, but not bid or make offers yet." : "Your account cannot start new deals right now.";
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLSelectElement>) => setF({ ...f, [k]: e.target.value, ...(k === "districtId" ? { upazilaId: "" } : {}) });
-  const ups = opts.upazilas.filter((u) => !f.districtId || u.districtId === +f.districtId);
+  const ups = f.districtId ? opts.upazilas.filter((u) => u.districtId === +f.districtId) : [];
 
   return (
     <>
       <div className="head"><div><h1>Marketplace</h1><p>Produce you can buy: listings in your area, listings that target your area, and nationwide listings.</p></div><span className="code">Screen D2</span></div>
       <div className="panel" style={{ marginBottom: 16 }}>
         <div className="pb" style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12, alignItems: "end" }}>
-          <div className="field" style={{ margin: 0 }}><label htmlFor="fp">Product</label><select id="fp" value={f.productId} onChange={set("productId")}><option value="">All products</option>{opts.products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-          <div className="field" style={{ margin: 0 }}><label htmlFor="fd">Farmer&apos;s district</label><select id="fd" value={f.districtId} onChange={set("districtId")}><option value="">All districts</option>{opts.districts.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
-          <div className="field" style={{ margin: 0 }}><label htmlFor="fu">Farmer&apos;s upazila</label><select id="fu" value={f.upazilaId} onChange={set("upazilaId")}><option value="">All upazilas</option>{ups.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></div>
+          <div className="field" style={{ margin: 0 }}><label htmlFor="fp">Product</label><select id="fp" value={f.productId} onChange={set("productId")}><option value="">All products</option>{opts.products.map((p) => <option key={p.id} value={p.id}>{`${p.name} (${p.count})`}</option>)}</select></div>
+          <div className="field" style={{ margin: 0 }}><label htmlFor="fd">Farmer&apos;s district</label><select id="fd" value={f.districtId} onChange={set("districtId")}><option value="">All districts</option>{opts.districts.map((d) => <option key={d.id} value={d.id}>{`${d.name} (${d.count})`}</option>)}</select></div>
+          <div className="field" style={{ margin: 0 }}><label htmlFor="fu">Farmer&apos;s upazila</label><select id="fu" value={f.upazilaId} onChange={set("upazilaId")} disabled={!f.districtId}><option value="">{f.districtId ? "All upazilas" : "Choose a district first"}</option>{ups.map((u) => <option key={u.id} value={u.id}>{`${u.name} (${u.count})`}</option>)}</select></div>
           <div className="field" style={{ margin: 0 }}><label htmlFor="fm">Selling mode</label><select id="fm" value={f.mode} onChange={set("mode")}><option value="">Any</option><option value="BID">Bidding</option><option value="OWN">Own price</option></select></div>
           <div className="field" style={{ margin: 0 }}><label htmlFor="fh">Harvest</label><select id="fh" value={f.harvest} onChange={set("harvest")}><option value="">Any time</option><option value="done">Already harvested</option><option value="soon">Harvest coming</option></select></div>
           <div className="field" style={{ margin: 0 }}><label htmlFor="fs">Sort</label><select id="fs" value={f.sort} onChange={set("sort")}><option value="near">Nearest first</option><option value="new">Newest first</option><option value="ending">Ending soon</option></select></div>
